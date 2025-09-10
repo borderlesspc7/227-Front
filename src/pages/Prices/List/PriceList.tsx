@@ -1,10 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { FiEdit2, FiTrash2 } from "react-icons/fi";
 import type { UnitPrice } from "../../../types/unitPrice";
 import "./PriceList.css";
-import Button from "../../../components/ui/Button/Button";
+import { unitPriceService } from "../../../services/unitPrice";
+import { useToast } from "../../../hooks/useToast";
 
 interface PriceListProps {
   prices: UnitPrice[];
@@ -13,6 +14,10 @@ interface PriceListProps {
 }
 
 const PriceList: React.FC<PriceListProps> = ({ prices, onEdit, onDelete }) => {
+  const { showSuccess, showError } = useToast();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -20,12 +25,32 @@ const PriceList: React.FC<PriceListProps> = ({ prices, onEdit, onDelete }) => {
     }).format(value);
   };
 
-  const handleDelete = (id: string, codigo: string) => {
+  const handleDelete = async (id: string, codigo: string) => {
     if (
       window.confirm(`Deseja realmente excluir o preço unitário "${codigo}"?`)
     ) {
-      onDelete(id);
+      setDeletingId(id);
+      try {
+        await unitPriceService.deleteUnitPrice(id);
+        onDelete(id);
+        showSuccess(
+          "Preço excluído!",
+          `O preço unitário "${codigo}" foi excluído com sucesso.`
+        );
+      } catch (error) {
+        console.error("Erro ao excluir:", error);
+        showError(
+          "Erro ao excluir",
+          "Não foi possível excluir o preço unitário. Tente novamente."
+        );
+      } finally {
+        setDeletingId(null);
+      }
     }
+  };
+
+  const handleEdit = (price: UnitPrice) => {
+    onEdit(price);
   };
 
   if (prices.length === 0) {
@@ -67,48 +92,83 @@ const PriceList: React.FC<PriceListProps> = ({ prices, onEdit, onDelete }) => {
           </thead>
           <tbody className="price-list__tbody">
             {prices.map((price) => (
-              <tr key={price.id} className="price-list__row">
+              <tr
+                key={price.id}
+                className={`price-list__row ${
+                  hoveredRow === price.id ? "price-list__row--hovered" : ""
+                }`}
+                onMouseEnter={() => setHoveredRow(price.id ?? null)}
+                onMouseLeave={() => setHoveredRow(null)}
+              >
                 <td className="price-list__cell price-list__cell--code">
-                  {price.codigo}
+                  <div className="price-list__code-container">
+                    <span className="price-list__code-badge">
+                      {price.codigo}
+                    </span>
+                  </div>
                 </td>
-                <td className="price-list__cell">{price.tipo}</td>
+                <td className="price-list__cell">
+                  <span className="price-list__type">{price.tipo}</span>
+                </td>
                 <td className="price-list__cell">{price.espessura || "-"}</td>
                 <td className="price-list__cell">{price.estrutura || "-"}</td>
                 <td className="price-list__cell">{price.chapaFace1 || "-"}</td>
                 <td className="price-list__cell">{price.chapaFace2 || "-"}</td>
                 <td className="price-list__cell">{price.isolamento || "-"}</td>
                 <td className="price-list__cell price-list__cell--number">
-                  {price.quantidade}
+                  <span className="price-list__quantity">
+                    {price.quantidade}
+                  </span>
                 </td>
-                <td className="price-list__cell">{price.unidade}</td>
-                <td className="price-list__cell price-list__cell--currency">
-                  {formatCurrency(price.unitMaterial)}
+                <td className="price-list__cell">
+                  <span className="price-list__unit">{price.unidade}</span>
                 </td>
                 <td className="price-list__cell price-list__cell--currency">
-                  {formatCurrency(price.unitMaoObra)}
+                  <span className="price-list__amount">
+                    {formatCurrency(price.unitMaterial)}
+                  </span>
+                </td>
+                <td className="price-list__cell price-list__cell--currency">
+                  <span className="price-list__amount">
+                    {formatCurrency(price.unitMaoObra)}
+                  </span>
                 </td>
                 <td className="price-list__cell price-list__cell--currency price-list__cell--total">
-                  {formatCurrency(price.totalMaterial ?? 0)}
+                  <span className="price-list__total">
+                    {formatCurrency(price.totalMaterial ?? 0)}
+                  </span>
                 </td>
                 <td className="price-list__cell price-list__cell--currency price-list__cell--total">
-                  {formatCurrency(price.totalMaoObra ?? 0)}
+                  <span className="price-list__total">
+                    {formatCurrency(price.totalMaoObra ?? 0)}
+                  </span>
                 </td>
                 <td className="price-list__cell price-list__cell--actions">
                   <div className="price-list__actions">
-                    <Button
-                      onClick={() => onEdit(price)}
+                    <button
+                      onClick={() => handleEdit(price)}
                       className="price-list__action-btn price-list__action-btn--edit"
-                      title="Editar"
+                      title="Editar preço unitário"
+                      disabled={deletingId === price.id}
                     >
-                      <FiEdit2 />
-                    </Button>
-                    <Button
+                      <FiEdit2 size={16} />
+                      <span className="price-list__action-text">Editar</span>
+                    </button>
+                    <button
                       onClick={() => handleDelete(price.id ?? "", price.codigo)}
                       className="price-list__action-btn price-list__action-btn--delete"
-                      title="Excluir"
+                      title="Excluir preço unitário"
+                      disabled={deletingId === price.id}
                     >
-                      <FiTrash2 />
-                    </Button>
+                      {deletingId === price.id ? (
+                        <div className="price-list__loading-spinner"></div>
+                      ) : (
+                        <FiTrash2 size={16} />
+                      )}
+                      <span className="price-list__action-text">
+                        {deletingId === price.id ? "Excluindo..." : "Excluir"}
+                      </span>
+                    </button>
                   </div>
                 </td>
               </tr>

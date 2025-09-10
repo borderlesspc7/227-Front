@@ -1,22 +1,57 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PriceForm from "./Form/PriceForm";
 import PriceList from "./List/PriceList";
 import type { UnitPrice } from "../../types/unitPrice";
+import { unitPriceService } from "../../services/unitPrice";
+import { useToast } from "../../hooks/useToast";
 import "./PricePage.css";
 
 const PricesPage: React.FC = () => {
+  const { showError } = useToast();
   const [prices, setPrices] = useState<UnitPrice[]>([]);
   const [editingPrice, setEditingPrice] = useState<UnitPrice | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleAddPrice = (price: Omit<UnitPrice, "id">) => {
-    const newPrice: UnitPrice = {
-      ...price,
-      id: Date.now().toString(),
+  // Carrega dados do banco na inicialização
+  useEffect(() => {
+    const loadPrices = async () => {
+      try {
+        setLoading(true);
+        const pricesFromDB = await unitPriceService.getUnitPrices();
+        setPrices(pricesFromDB);
+      } catch (err) {
+        const errorMessage = "Erro ao carregar preços unitários";
+        setError(errorMessage);
+        showError(
+          "Erro ao carregar",
+          errorMessage + ". Verifique sua conexão e tente novamente."
+        );
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     };
-    setPrices((prev) => [...prev, newPrice]);
+
+    loadPrices();
+  }, [showError]);
+
+  const handleAddPrice = async (price: UnitPrice) => {
+    // Recarrega lista do banco após adicionar
+    const refreshPrices = async () => {
+      try {
+        const pricesFromDB = await unitPriceService.getUnitPrices();
+        setPrices(pricesFromDB);
+      } catch (err) {
+        console.error("Erro ao recarregar preços:", err);
+      }
+    };
+
+    await unitPriceService.createUnitPrice(price);
+    refreshPrices();
     setShowForm(false);
   };
 
@@ -25,22 +60,36 @@ const PricesPage: React.FC = () => {
     setShowForm(true);
   };
 
-  const handleUpdatePrice = (updatedPrice: Omit<UnitPrice, "id">) => {
-    if (editingPrice) {
-      setPrices((prev) =>
-        prev.map((p) =>
-          p.id === editingPrice.id
-            ? { ...updatedPrice, id: editingPrice.id }
-            : p
-        )
-      );
-      setEditingPrice(null);
-      setShowForm(false);
-    }
+  const handleUpdatePrice = async (updatedPrice: UnitPrice) => {
+    // Recarrega lista do banco após atualizar
+    const refreshPrices = async () => {
+      try {
+        const pricesFromDB = await unitPriceService.getUnitPrices();
+        setPrices(pricesFromDB);
+      } catch (err) {
+        console.error("Erro ao recarregar preços:", err);
+      }
+    };
+
+    refreshPrices();
+    setEditingPrice(null);
+    setShowForm(false);
+    await unitPriceService.updateUnitPrice(updatedPrice.id!, updatedPrice);
   };
 
-  const handleDeletePrice = (id: string) => {
-    setPrices((prev) => prev.filter((p) => p.id !== id));
+  const handleDeletePrice = async (id: string) => {
+    // Recarrega lista do banco após deletar
+    const refreshPrices = async () => {
+      try {
+        const pricesFromDB = await unitPriceService.getUnitPrices();
+        setPrices(pricesFromDB);
+      } catch (err) {
+        console.error("Erro ao recarregar preços:", err);
+      }
+      await unitPriceService.deleteUnitPrice(id);
+    };
+
+    refreshPrices();
   };
 
   const handleCancelForm = () => {
@@ -60,6 +109,18 @@ const PricesPage: React.FC = () => {
           Novo Preço Unitário
         </button>
       </div>
+
+      {loading && (
+        <div className="prices-page__loading">
+          <p>Carregando preços unitários...</p>
+        </div>
+      )}
+
+      {error && (
+        <div className="prices-page__error">
+          <p>Erro: {error}</p>
+        </div>
+      )}
 
       {showForm && (
         <div className="prices-page__form-section">

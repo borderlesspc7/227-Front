@@ -2,6 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import type { UnitPrice } from "../../../types/unitPrice";
+import { masks } from "../../../utils/masks";
+import { unitPriceService } from "../../../services/unitPrice";
+import { useToast } from "../../../hooks/useToast";
 import "./PriceForm.css";
 
 interface PriceFormProps {
@@ -18,6 +21,8 @@ const UNIT_OPTION = [
 ];
 
 const PriceForm: React.FC<PriceFormProps> = ({ price, onSubmit, onCancel }) => {
+  const { showSuccess, showError } = useToast();
+
   const [formData, setFormData] = useState<UnitPrice>({
     codigo: "",
     tipo: "",
@@ -30,6 +35,17 @@ const PriceForm: React.FC<PriceFormProps> = ({ price, onSubmit, onCancel }) => {
     unidade: "m2",
     unitMaterial: 0,
     unitMaoObra: 0,
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const [maskedValues, setMaskedValues] = useState({
+    codigo: "",
+    espessura: "",
+    quantidade: "",
+    unitMaterial: "",
+    unitMaoObra: "",
   });
 
   useEffect(() => {
@@ -47,6 +63,21 @@ const PriceForm: React.FC<PriceFormProps> = ({ price, onSubmit, onCancel }) => {
         unitMaterial: price.unitMaterial,
         unitMaoObra: price.unitMaoObra,
       });
+      setMaskedValues({
+        codigo: price.codigo,
+        espessura: price.espessura,
+        quantidade: price.quantidade.toString(),
+        unitMaterial: masks.currency((price.unitMaterial * 100).toString()),
+        unitMaoObra: masks.currency((price.unitMaoObra * 100).toString()),
+      });
+    } else {
+      setMaskedValues({
+        codigo: "",
+        espessura: "",
+        quantidade: "",
+        unitMaterial: "",
+        unitMaoObra: "",
+      });
     }
   }, [price]);
 
@@ -54,28 +85,76 @@ const PriceForm: React.FC<PriceFormProps> = ({ price, onSubmit, onCancel }) => {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]:
-        name === "quantidade" ||
-        name === "unitMaterial" ||
-        name === "unitMaoObra"
-          ? Number.parseFloat(value) || 0
-          : value,
-    }));
+
+    if (name === "codigo") {
+      const maskedValue = masks.code(value);
+      setMaskedValues((prev) => ({ ...prev, codigo: maskedValue }));
+      setFormData((prev) => ({ ...prev, codigo: maskedValue }));
+    } else if (name === "espessura") {
+      const maskedValue = masks.decimal(value);
+      setMaskedValues((prev) => ({ ...prev, espessura: maskedValue }));
+      setFormData((prev) => ({ ...prev, espessura: maskedValue }));
+    } else if (name === "quantidade") {
+      const maskedValue = masks.quantity(value);
+      const numericValue = masks.removeDecimalMask(maskedValue);
+      setMaskedValues((prev) => ({ ...prev, quantidade: maskedValue }));
+      setFormData((prev) => ({ ...prev, quantidade: numericValue }));
+    } else if (name === "unitMaterial") {
+      const maskedValue = masks.currency(value);
+      const numericValue = masks.removeCurrencyMask(maskedValue);
+      setMaskedValues((prev) => ({ ...prev, unitMaterial: maskedValue }));
+      setFormData((prev) => ({ ...prev, unitMaterial: numericValue }));
+    } else if (name === "unitMaoObra") {
+      const maskedValue = masks.currency(value);
+      const numericValue = masks.removeCurrencyMask(maskedValue);
+      setMaskedValues((prev) => ({ ...prev, unitMaoObra: maskedValue }));
+      setFormData((prev) => ({ ...prev, unitMaoObra: numericValue }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
 
-    const totalMaterial = formData.unitMaterial * formData.quantidade;
-    const totalMaoObra = formData.unitMaoObra * formData.quantidade;
+    try {
+      const totalMaterial = formData.unitMaterial * formData.quantidade;
+      const totalMaoObra = formData.unitMaoObra * formData.quantidade;
 
-    onSubmit({
-      ...formData,
-      totalMaterial,
-      totalMaoObra,
-    });
+      const priceData = {
+        ...formData,
+        totalMaterial,
+        totalMaoObra,
+      };
+
+      if (price) {
+        await unitPriceService.updateUnitPrice(price.id!, priceData);
+        showSuccess(
+          "Preço atualizado!",
+          `O preço unitário "${formData.codigo}" foi atualizado com sucesso.`
+        );
+      } else {
+        await unitPriceService.createUnitPrice(priceData);
+        showSuccess(
+          "Preço cadastrado!",
+          `O preço unitário "${formData.codigo}" foi cadastrado com sucesso.`
+        );
+      }
+
+      onSubmit(priceData);
+    } catch (err) {
+      const errorMessage = "Erro ao salvar preço unitário";
+      setError(errorMessage);
+      showError(
+        "Erro ao salvar",
+        errorMessage + ". Tente novamente ou verifique os dados."
+      );
+      console.error("Erro ao salvar preço:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -99,7 +178,7 @@ const PriceForm: React.FC<PriceFormProps> = ({ price, onSubmit, onCancel }) => {
               <input
                 type="text"
                 name="codigo"
-                value={formData.codigo}
+                value={maskedValues.codigo}
                 onChange={handleInputChange}
                 className="price-form__input"
                 required
@@ -126,9 +205,10 @@ const PriceForm: React.FC<PriceFormProps> = ({ price, onSubmit, onCancel }) => {
               <input
                 type="text"
                 name="espessura"
-                value={formData.espessura}
+                value={maskedValues.espessura}
                 onChange={handleInputChange}
                 className="price-form__input"
+                placeholder="Ex: 0.5 ou 1,2"
               />
             </label>
           </div>
@@ -189,13 +269,12 @@ const PriceForm: React.FC<PriceFormProps> = ({ price, onSubmit, onCancel }) => {
             <label className="price-form__label">
               Quantidade *
               <input
-                type="number"
+                type="text"
                 name="quantidade"
-                value={formData.quantidade}
+                value={maskedValues.quantidade}
                 onChange={handleInputChange}
                 className="price-form__input"
-                min="0"
-                step="0.01"
+                placeholder="Ex: 10 ou 10,5"
                 required
               />
             </label>
@@ -224,13 +303,12 @@ const PriceForm: React.FC<PriceFormProps> = ({ price, onSubmit, onCancel }) => {
             <label className="price-form__label">
               Unit. Material (R$) *
               <input
-                type="number"
+                type="text"
                 name="unitMaterial"
-                value={formData.unitMaterial}
+                value={maskedValues.unitMaterial}
                 onChange={handleInputChange}
                 className="price-form__input"
-                min="0"
-                step="0.01"
+                placeholder="R$ 0,00"
                 required
               />
             </label>
@@ -240,13 +318,12 @@ const PriceForm: React.FC<PriceFormProps> = ({ price, onSubmit, onCancel }) => {
             <label className="price-form__label">
               Unit. Mão de Obra (R$) *
               <input
-                type="number"
+                type="text"
                 name="unitMaoObra"
-                value={formData.unitMaoObra}
+                value={maskedValues.unitMaoObra}
                 onChange={handleInputChange}
                 className="price-form__input"
-                min="0"
-                step="0.01"
+                placeholder="R$ 0,00"
                 required
               />
             </label>
@@ -276,11 +353,16 @@ const PriceForm: React.FC<PriceFormProps> = ({ price, onSubmit, onCancel }) => {
           >
             Cancelar
           </button>
-          <button type="submit" className="price-form__submit-btn">
-            {price ? "Atualizar" : "Cadastrar"}
+          <button
+            type="submit"
+            className="price-form__submit-btn"
+            disabled={loading}
+          >
+            {loading ? "Salvando..." : price ? "Atualizar" : "Cadastrar"}
           </button>
         </div>
       </form>
+      {error && <p className="price-form__error">{error}</p>}
     </div>
   );
 };
