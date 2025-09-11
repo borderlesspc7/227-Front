@@ -6,6 +6,7 @@ import { AdminLayout } from "../components/Layout/AdminLayout/AdminLayout";
 import { RegisterPage } from "../pages/RegisterPage/RegisterPage";
 import { ContractsPage } from "../pages/Contracts/ContractsPage";
 import PricesPage from "../pages/Prices/PricePage";
+import AdditiveRequestPage from "../pages/AdditiveRequest/AdditiveRequestPage";
 
 export default function AppRoutes() {
   return (
@@ -22,9 +23,14 @@ export default function AppRoutes() {
           }
         >
           <Route index element={<RegisterPage />} />
+          <Route path={paths.adminRegisterUser} element={<RegisterPage />} />
           <Route path="register-user" element={<RegisterPage />} />
-          <Route path="contracts" element={<ContractsPage />} />
-          <Route path="prices" element={<PricesPage />} />
+          <Route path={paths.adminContracts} element={<ContractsPage />} />
+          <Route path={paths.adminPrices} element={<PricesPage />} />
+          <Route
+            path={paths.adminAdditiveRequests}
+            element={<AdditiveRequestPage />}
+          />
           {/* Outras rotas admin: contratos, preços, etc */}
         </Route>
       </Routes>

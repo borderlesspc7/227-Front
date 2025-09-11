@@ -3,7 +3,8 @@
 import type React from "react";
 import "./Sidebar.css";
 import { NavLink } from "react-router-dom";
-import { FiUser, FiFileText, FiDollarSign } from "react-icons/fi";
+import { FiUser, FiFileText, FiDollarSign, FiPlusCircle } from "react-icons/fi";
+import { paths } from "../../../routes/paths";
 
 interface SidebarProps {
   className?: string;
@@ -27,6 +28,11 @@ const menuItems = [
     label: "Cadastro de Preços Unitários",
     icon: FiDollarSign,
     path: "/admin/prices",
+  },
+  {
+    path: paths.adminAdditiveRequests,
+    label: "Solicitações de Aditivos",
+    icon: FiPlusCircle,
   },
 ];
 
