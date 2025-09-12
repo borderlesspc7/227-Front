@@ -1,23 +1,47 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import AdditiveRequestForm from "../AdditiveRequest/Form/AdditiveRequestForm";
 import AdditiveRequestList from "../AdditiveRequest/List/AdditiveRequestList";
-import type { AdditiveRequest } from "../../types/additiveRequest";
+import AdditiveRequestView from "../AdditiveRequest/View/AdditiveRequestView";
+import Modal from "../../components/ui/Modal/Modal";
+import ConfirmModal from "../../components/ui/ConfirmModal/ConfirmModal";
+import type {
+  AdditiveRequest,
+  AdditiveRequestFormData,
+} from "../../types/additiveRequest";
 import { additiveRequestService } from "../../services/additiveRequestService";
 import { useToast } from "../../hooks/useToast";
+import { AuthContext } from "../../contexts/authContext";
 import "./AdditiveRequestPage.css";
 import { PlusIcon } from "lucide-react";
 
 const AdditiveRequestPage: React.FC = () => {
   const { showError } = useToast();
+  const { user } = useContext(AuthContext) || {};
 
   const [requests, setRequests] = useState<AdditiveRequest[]>([]);
   const [editingRequest, setEditingRequest] = useState<AdditiveRequest | null>(
     null
   );
+  const [viewingRequest, setViewingRequest] = useState<AdditiveRequest | null>(
+    null
+  );
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    loading: boolean;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: () => {},
+    loading: false,
+  });
 
   useEffect(() => {
     const loadRequests = async () => {
@@ -41,19 +65,27 @@ const AdditiveRequestPage: React.FC = () => {
     loadRequests();
   }, [showError]);
 
-  const handleAddRequest = (_request: Omit<AdditiveRequest, "id">) => {
-    const refreshRequests = async () => {
-      try {
-        const requestsFromDB =
-          await additiveRequestService.getAdditiveRequests();
-        setRequests(requestsFromDB);
-      } catch (err) {
-        console.error("Erro ao recarregar solicitações:", err);
-      }
-    };
-
-    refreshRequests();
-    setShowForm(false);
+  const handleAddRequest = async (requestData: AdditiveRequestFormData) => {
+    try {
+      await additiveRequestService.createAdditiveRequest(
+        requestData,
+        user?.uid
+      );
+      const refreshRequests = async () => {
+        try {
+          const requestsFromDB =
+            await additiveRequestService.getAdditiveRequests();
+          setRequests(requestsFromDB);
+        } catch (err) {
+          console.error("Erro ao recarregar solicitações:", err);
+        }
+      };
+      refreshRequests();
+      setShowForm(false);
+    } catch (error) {
+      console.error("Erro ao adicionar solicitação:", error);
+      showError("Erro ao adicionar solicitação");
+    }
   };
 
   const handleEditRequest = (request: AdditiveRequest) => {
@@ -61,9 +93,52 @@ const AdditiveRequestPage: React.FC = () => {
     setShowForm(true);
   };
 
-  const handleUpdateRequest = (
-    _updatedRequest: Omit<AdditiveRequest, "id">
+  const handleViewRequest = (request: AdditiveRequest) => {
+    setViewingRequest(request);
+  };
+
+  const handleCloseViewModal = () => {
+    setViewingRequest(null);
+  };
+
+  const showConfirmModal = (
+    title: string,
+    message: string,
+    onConfirm: () => void
   ) => {
+    setConfirmModal({
+      isOpen: true,
+      title,
+      message,
+      onConfirm,
+      loading: false,
+    });
+  };
+
+  const closeConfirmModal = () => {
+    if (!confirmModal.loading) {
+      setConfirmModal({
+        isOpen: false,
+        title: "",
+        message: "",
+        onConfirm: () => {},
+        loading: false,
+      });
+    }
+  };
+
+  const executeWithLoading = async (action: () => Promise<void>) => {
+    setConfirmModal((prev) => ({ ...prev, loading: true }));
+    try {
+      await action();
+      closeConfirmModal();
+    } catch (error) {
+      console.error("Erro na operação:", error);
+      setConfirmModal((prev) => ({ ...prev, loading: false }));
+    }
+  };
+
+  const handleUpdateRequest = (_updatedRequest: AdditiveRequestFormData) => {
     const refreshRequests = async () => {
       try {
         const requestsFromDB =
@@ -79,18 +154,21 @@ const AdditiveRequestPage: React.FC = () => {
     setShowForm(false);
   };
 
-  const handleDeleteRequest = (_id: string) => {
-    const refreshRequests = async () => {
-      try {
-        const requestsFromDB =
-          await additiveRequestService.getAdditiveRequests();
-        setRequests(requestsFromDB);
-      } catch (err) {
-        console.error("Erro ao recarregar solicitações:", err);
-      }
-    };
+  const handleDeleteRequest = (id: string) => {
+    const request = requests.find((r) => r.id === id);
+    const protocolo = request?.protocolo || "esta solicitação";
 
-    refreshRequests();
+    showConfirmModal(
+      "Confirmar Exclusão",
+      `Tem certeza que deseja excluir a solicitação ${protocolo}? Esta ação não pode ser desfeita.`,
+      () =>
+        executeWithLoading(async () => {
+          await additiveRequestService.deleteAdditiveRequest(id);
+          const requestsFromDB =
+            await additiveRequestService.getAdditiveRequests();
+          setRequests(requestsFromDB);
+        })
+    );
   };
 
   const handleCancelForm = () => {
@@ -143,13 +221,35 @@ const AdditiveRequestPage: React.FC = () => {
           error={error}
           onEdit={handleEditRequest}
           onDelete={handleDeleteRequest}
-          onView={(request) => {
-            // Implementar visualização se necessário
-            console.log("Visualizar solicitação:", request);
-          }}
+          onView={handleViewRequest}
           onAddNew={() => setShowForm(true)}
         />
       </div>
+
+      {/* Modal de visualização */}
+      {viewingRequest && (
+        <Modal
+          isOpen={!!viewingRequest}
+          onClose={handleCloseViewModal}
+          title={`Solicitação ${viewingRequest.protocolo}`}
+          size="extra-large"
+        >
+          <AdditiveRequestView request={viewingRequest} />
+        </Modal>
+      )}
+
+      {/* Modal de confirmação */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={closeConfirmModal}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmText="Confirmar"
+        cancelText="Cancelar"
+        type="danger"
+        loading={confirmModal.loading}
+      />
     </div>
   );
 };

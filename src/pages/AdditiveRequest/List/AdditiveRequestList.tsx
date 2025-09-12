@@ -12,6 +12,7 @@ import {
 } from "react-icons/fi";
 import { type AdditiveRequest } from "../../../types/additiveRequest";
 import { useToast } from "../../../hooks/useToast";
+import ConfirmModal from "../../../components/ui/ConfirmModal/ConfirmModal";
 import "./AdditiveRequestList.css";
 
 interface AdditiveRequestListProps {
@@ -39,6 +40,19 @@ const AdditiveRequestList: React.FC<AdditiveRequestListProps> = ({
   const [statusFilter, setStatusFilter] = useState<string>("todos");
   const [priorityFilter, setPriorityFilter] = useState<string>("todos");
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    loading: boolean;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: () => {},
+    loading: false,
+  });
 
   // Opções de filtro
   const statusOptions = [
@@ -116,21 +130,40 @@ const AdditiveRequestList: React.FC<AdditiveRequestListProps> = ({
   };
 
   // Função para deletar solicitação
-  const handleDelete = async (id: string, protocolo: string) => {
-    const confirmed = window.confirm(
-      "Tem certeza que deseja excluir a solicitação " +
-        protocolo +
-        "? Esta ação não pode ser desfeita."
-    );
+  const handleDelete = (id: string, protocolo: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Confirmar Exclusão",
+      message: `Tem certeza que deseja excluir a solicitação ${protocolo}? Esta ação não pode ser desfeita.`,
+      onConfirm: () => {
+        setConfirmModal((prev) => ({ ...prev, loading: true }));
+        try {
+          onDelete(id);
+          showSuccess("Sucesso", "Solicitação excluída com sucesso!");
+          setConfirmModal((prev) => ({
+            ...prev,
+            isOpen: false,
+            loading: false,
+          }));
+        } catch (error) {
+          showError("Erro", "Erro ao excluir solicitação. Tente novamente.");
+          console.error(error);
+          setConfirmModal((prev) => ({ ...prev, loading: false }));
+        }
+      },
+      loading: false,
+    });
+  };
 
-    if (confirmed) {
-      try {
-        onDelete(id);
-        showSuccess("Sucesso", "Solicitação excluída com sucesso!");
-      } catch (error) {
-        showError("Erro", "Erro ao excluir solicitação. Tente novamente.");
-        console.error(error);
-      }
+  const closeConfirmModal = () => {
+    if (!confirmModal.loading) {
+      setConfirmModal({
+        isOpen: false,
+        title: "",
+        message: "",
+        onConfirm: () => {},
+        loading: false,
+      });
     }
   };
 
@@ -385,6 +418,19 @@ const AdditiveRequestList: React.FC<AdditiveRequestListProps> = ({
           </div>
         ))}
       </div>
+
+      {/* Modal de confirmação */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={closeConfirmModal}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        type="danger"
+        loading={confirmModal.loading}
+      />
     </div>
   );
 };

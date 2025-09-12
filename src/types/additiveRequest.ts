@@ -12,6 +12,7 @@ export interface AdditiveRequest {
 
   evidencias: Evidence[];
 
+  // Informações de auditoria
   createdBy: string;
   createdAt: Date;
   updatedAt: Date;

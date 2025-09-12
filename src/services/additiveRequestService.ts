@@ -16,7 +16,25 @@ import {
   orderBy,
   where,
   serverTimestamp,
+  Timestamp,
 } from "firebase/firestore";
+
+// Função para converter dados do Firebase para o formato esperado
+const convertFirestoreData = (data: any): AdditiveRequest => {
+  return {
+    ...data,
+    createdAt: data.createdAt?.toDate?.() || data.createdAt || new Date(),
+    updatedAt: data.updatedAt?.toDate?.() || data.updatedAt || new Date(),
+    approvedAt: data.approvedAt?.toDate?.() || data.approvedAt,
+    rejectedAt: data.rejectedAt?.toDate?.() || data.rejectedAt,
+    evidencias:
+      data.evidencias?.map((evidence: any) => ({
+        ...evidence,
+        uploadedAt:
+          evidence.uploadedAt?.toDate?.() || evidence.uploadedAt || new Date(),
+      })) || [],
+  };
+};
 
 export const additiveRequestService = {
   generateProtocol: async (): Promise<string> => {
@@ -34,7 +52,8 @@ export const additiveRequestService = {
   },
 
   createAdditiveRequest: async (
-    requestData: AdditiveRequestFormData
+    requestData: AdditiveRequestFormData,
+    userId?: string
   ): Promise<AdditiveRequest> => {
     try {
       const protocolo = await additiveRequestService.generateProtocol();
@@ -51,7 +70,7 @@ export const additiveRequestService = {
         valorTotal: item.quantidade * item.precoUnitario,
       }));
 
-      const newRequest: AdditiveRequest = {
+      const newRequest = {
         protocolo,
         contratoId: requestData.contratoId,
         descricao: requestData.descricao,
@@ -61,9 +80,9 @@ export const additiveRequestService = {
         itens,
         valorTotal,
         evidencias: [],
-        createdBy: "curent-user-id",
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdBy: userId || "anonymous-user",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       };
 
       const docRef = await addDoc(requestsRef, newRequest);
@@ -95,10 +114,12 @@ export const additiveRequestService = {
       const q = query(requestsRef, orderBy("createdAt", "desc"));
       const snapshot = await getDocs(q);
 
-      return snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as AdditiveRequest[];
+      return snapshot.docs.map((doc) =>
+        convertFirestoreData({
+          id: doc.id,
+          ...doc.data(),
+        })
+      );
     } catch (error) {
       console.error("Error getting additive requests:", error);
       throw error;
@@ -114,7 +135,10 @@ export const additiveRequestService = {
       const snapshot = await getDoc(requestRef);
 
       if (snapshot.exists()) {
-        return { id: snapshot.id, ...snapshot.data() } as AdditiveRequest;
+        return convertFirestoreData({
+          id: snapshot.id,
+          ...snapshot.data(),
+        });
       }
       return null;
     } catch (error) {

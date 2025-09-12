@@ -9,11 +9,12 @@ import { additiveRequestService } from "../../../services/additiveRequestService
 import { contractService } from "../../../services/contractService";
 import { useToast } from "../../../hooks/useToast";
 import { masks } from "../../../utils/masks";
+import ConfirmModal from "../../../components/ui/ConfirmModal/ConfirmModal";
 import "./AdditiveRequestForm.css";
 
 interface AdditiveRequestFormProps {
   request?: AdditiveRequest | null;
-  onSubmit: (request: Omit<AdditiveRequest, "id">) => void;
+  onSubmit: (request: AdditiveRequestFormData) => void;
   onCancel: () => void;
 }
 
@@ -49,11 +50,29 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
     evidencias: [],
   });
 
-  const [contracts, setContracts] = useState<any[]>([]);
+  const [generatedProtocol, setGeneratedProtocol] = useState<string>("");
+  const [showProtocol, setShowProtocol] = useState(false);
+
+  const [contracts, setContracts] = useState<
+    Array<{ id: string; numeroContrato: string; cliente: string; obra: string }>
+  >([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const [maskedValues, setMaskedValues] = useState<Record<string, any>>({});
+  const [maskedValues, setMaskedValues] = useState<Record<string, string>>({});
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    loading: boolean;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: () => {},
+    loading: false,
+  });
 
   useEffect(() => {
     const loadContracts = async () => {
@@ -172,10 +191,34 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
   };
 
   const removeItem = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      itens: prev.itens.filter((_, i) => i !== index),
-    }));
+    const item = formData.itens[index];
+    const itemDescription = item?.descricao || `item ${index + 1}`;
+
+    setConfirmModal({
+      isOpen: true,
+      title: "Confirmar Remoção",
+      message: `Tem certeza que deseja remover o item "${itemDescription}"?`,
+      onConfirm: () => {
+        setFormData((prev) => ({
+          ...prev,
+          itens: prev.itens.filter((_, i) => i !== index),
+        }));
+        setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+      },
+      loading: false,
+    });
+  };
+
+  const closeConfirmModal = () => {
+    if (!confirmModal.loading) {
+      setConfirmModal({
+        isOpen: false,
+        title: "",
+        message: "",
+        onConfirm: () => {},
+        loading: false,
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -204,14 +247,17 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
         );
       } else {
         // Criar
-        await additiveRequestService.createAdditiveRequest(requestData);
+        const createdRequest =
+          await additiveRequestService.createAdditiveRequest(requestData);
+        setGeneratedProtocol(createdRequest.protocolo);
+        setShowProtocol(true);
         showSuccess(
           "Solicitação criada!",
-          "A solicitação de aditivo foi criada com sucesso."
+          `Solicitação criada com sucesso! Protocolo: ${createdRequest.protocolo}`
         );
       }
 
-      onSubmit(requestData as any);
+      onSubmit(requestData);
     } catch (err) {
       const errorMessage = "Erro ao salvar solicitação";
       setError(errorMessage);
@@ -220,6 +266,58 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
         errorMessage + ". Tente novamente ou verifique os dados."
       );
       console.error("Erro ao salvar solicitação:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmitForApproval = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const requestData = {
+        ...formData,
+        itens: formData.itens.map((item) => ({
+          ...item,
+          valorTotal: item.quantidade * item.precoUnitario,
+        })),
+      };
+
+      if (request) {
+        // Atualizar e enviar para aprovação
+        await additiveRequestService.updateAdditiveRequest(
+          request.id!,
+          requestData
+        );
+        await additiveRequestService.submitForApproval(request.id!);
+        showSuccess(
+          "Enviado para aprovação!",
+          "A solicitação foi enviada para aprovação com sucesso."
+        );
+      } else {
+        // Criar e enviar para aprovação
+        const createdRequest =
+          await additiveRequestService.createAdditiveRequest(requestData);
+        await additiveRequestService.submitForApproval(createdRequest.id!);
+        setGeneratedProtocol(createdRequest.protocolo);
+        setShowProtocol(true);
+        showSuccess(
+          "Enviado para aprovação!",
+          `Solicitação enviada para aprovação! Protocolo: ${createdRequest.protocolo}`
+        );
+      }
+
+      onSubmit(requestData);
+    } catch (err) {
+      const errorMessage = "Erro ao enviar para aprovação";
+      setError(errorMessage);
+      showError(
+        "Erro ao enviar",
+        errorMessage + ". Tente novamente ou verifique os dados."
+      );
+      console.error("Erro ao enviar para aprovação:", err);
     } finally {
       setLoading(false);
     }
@@ -243,6 +341,17 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
             ? "Atualize as informações da solicitação"
             : "Preencha as informações para criar uma nova solicitação de aditivo"}
         </p>
+
+        {showProtocol && generatedProtocol && (
+          <div className="additive-request-form__protocol-display">
+            <span className="additive-request-form__protocol-label">
+              Protocolo Gerado:
+            </span>
+            <span className="additive-request-form__protocol-value">
+              {generatedProtocol}
+            </span>
+          </div>
+        )}
       </div>
 
       <form onSubmit={handleSubmit} className="additive-request-form__form">
@@ -438,7 +547,7 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
                   </label>
                 </div>
 
-                <div className="additive-request-form__field">
+                <div className="">
                   <button
                     type="button"
                     onClick={() => removeItem(index)}
@@ -482,21 +591,50 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
           >
             Cancelar
           </button>
-          <button
-            type="submit"
-            className="additive-request-form__submit-btn"
-            disabled={loading}
-          >
-            {loading
-              ? "Salvando..."
-              : request
-              ? "Atualizar"
-              : "Criar Solicitação"}
-          </button>
+
+          <div className="additive-request-form__action-buttons">
+            <button
+              type="button"
+              onClick={handleSubmitForApproval}
+              className="additive-request-form__submit-for-approval-btn"
+              disabled={loading}
+            >
+              {loading
+                ? "Enviando..."
+                : request
+                ? "Atualizar e Enviar para Aprovação"
+                : "Criar e Enviar para Aprovação"}
+            </button>
+
+            <button
+              type="submit"
+              className="additive-request-form__submit-btn"
+              disabled={loading}
+            >
+              {loading
+                ? "Salvando..."
+                : request
+                ? "Salvar Rascunho"
+                : "Salvar como Rascunho"}
+            </button>
+          </div>
         </div>
       </form>
 
       {error && <p className="additive-request-form__error">{error}</p>}
+
+      {/* Modal de confirmação para remover itens */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={closeConfirmModal}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmText="Remover"
+        cancelText="Cancelar"
+        type="warning"
+        loading={confirmModal.loading}
+      />
     </div>
   );
 };
