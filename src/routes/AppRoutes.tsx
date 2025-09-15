@@ -7,6 +7,7 @@ import { RegisterPage } from "../pages/RegisterPage/RegisterPage";
 import { ContractsPage } from "../pages/Contracts/ContractsPage";
 import PricesPage from "../pages/Prices/PricePage";
 import AdditiveRequestPage from "../pages/AdditiveRequest/AdditiveRequestPage";
+import DashboardPage from "../pages/Dashboard/DashboardPage";
 
 export default function AppRoutes() {
   return (
@@ -22,7 +23,8 @@ export default function AppRoutes() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<RegisterPage />} />
+          <Route index element={<DashboardPage />} />
+          <Route path="dashboard" element={<DashboardPage />} />
           <Route path={paths.adminRegisterUser} element={<RegisterPage />} />
           <Route path="register-user" element={<RegisterPage />} />
           <Route path={paths.adminContracts} element={<ContractsPage />} />

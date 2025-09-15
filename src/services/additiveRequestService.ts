@@ -16,7 +16,6 @@ import {
   orderBy,
   where,
   serverTimestamp,
-  Timestamp,
 } from "firebase/firestore";
 
 // Função para converter dados do Firebase para o formato esperado

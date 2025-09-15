@@ -3,7 +3,13 @@
 import type React from "react";
 import "./Sidebar.css";
 import { NavLink } from "react-router-dom";
-import { FiUser, FiFileText, FiDollarSign, FiPlusCircle } from "react-icons/fi";
+import {
+  FiUser,
+  FiFileText,
+  FiDollarSign,
+  FiPlusCircle,
+  FiBarChart,
+} from "react-icons/fi";
 import { paths } from "../../../routes/paths";
 
 interface SidebarProps {
@@ -11,6 +17,12 @@ interface SidebarProps {
 }
 
 const menuItems = [
+  {
+    id: "dashboard",
+    label: "Dashboard Gerencial",
+    icon: FiBarChart,
+    path: "/admin/dashboard",
+  },
   {
     id: "register-user",
     label: "Cadastrar Usuário",
@@ -30,6 +42,7 @@ const menuItems = [
     path: "/admin/prices",
   },
   {
+    id: "additive-requests",
     path: paths.adminAdditiveRequests,
     label: "Solicitações de Aditivos",
     icon: FiPlusCircle,
