@@ -10,13 +10,14 @@ import type {
   AdditiveRequestFormData,
 } from "../../types/additiveRequest";
 import { additiveRequestService } from "../../services/additiveRequestService";
+import { workflowService } from "../../services/workflowService";
 import { useToast } from "../../hooks/useToast";
 import { AuthContext } from "../../contexts/authContext";
 import "./AdditiveRequestPage.css";
 import { PlusIcon } from "lucide-react";
 
 const AdditiveRequestPage: React.FC = () => {
-  const { showError } = useToast();
+  const { showError, showSuccess } = useToast();
   const { user } = useContext(AuthContext) || {};
 
   const [requests, setRequests] = useState<AdditiveRequest[]>([]);
@@ -176,6 +177,45 @@ const AdditiveRequestPage: React.FC = () => {
     setShowForm(false);
   };
 
+  const handleSubmitForApproval = async (request: AdditiveRequest) => {
+    if (!request.id) {
+      showError("Erro", "ID da solicitação não encontrado");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Inicializar workflow se necessário
+      try {
+        await workflowService.setupDefaultWorkflow();
+      } catch {
+        // Continuar mesmo se a configuração falhar
+      }
+
+      // Enviar para aprovação
+      await additiveRequestService.submitForApproval(request.id);
+
+      // Recarregar a lista para mostrar o status atualizado
+      const updatedRequests =
+        await additiveRequestService.getAdditiveRequests();
+      setRequests(updatedRequests);
+
+      showSuccess(
+        "Enviado para aprovação!",
+        `A solicitação ${request.protocolo} foi enviada para aprovação.`
+      );
+    } catch (error) {
+      console.error("Erro ao enviar para aprovação:", error);
+      showError(
+        "Erro ao enviar",
+        "Erro ao enviar solicitação para aprovação. Tente novamente."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="additive-request-page">
       <div className="additive-request-page__header">
@@ -223,6 +263,7 @@ const AdditiveRequestPage: React.FC = () => {
           onDelete={handleDeleteRequest}
           onView={handleViewRequest}
           onAddNew={() => setShowForm(true)}
+          onSubmitForApproval={handleSubmitForApproval}
         />
       </div>
 

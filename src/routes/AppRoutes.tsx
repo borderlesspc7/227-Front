@@ -8,6 +8,7 @@ import { ContractsPage } from "../pages/Contracts/ContractsPage";
 import PricesPage from "../pages/Prices/PricePage";
 import AdditiveRequestPage from "../pages/AdditiveRequest/AdditiveRequestPage";
 import DashboardPage from "../pages/Dashboard/DashboardPage";
+import ApprovalsPage from "../pages/Approvals/ApprovalsPage";
 
 export default function AppRoutes() {
   return (
@@ -33,6 +34,7 @@ export default function AppRoutes() {
             path={paths.adminAdditiveRequests}
             element={<AdditiveRequestPage />}
           />
+          <Route path={paths.adminApprovals} element={<ApprovalsPage />} />
           {/* Outras rotas admin: contratos, preços, etc */}
         </Route>
       </Routes>

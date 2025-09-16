@@ -1,0 +1,345 @@
+/* src/pages/Approvals/components/ApprovalCard/ApprovalCard.css */
+.approval-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.approval-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.approval-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  border-radius: 16px 16px 0 0;
+}
+
+.approval-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24px 24px 16px 24px;
+  border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+}
+
+.approval-card__title-section {
+  flex: 1;
+  margin-right: 16px;
+}
+
+.approval-card__title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.approval-card__protocol {
+  font-family: "Courier New", monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+  padding: 4px 12px;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.approval-card__status {
+  flex-shrink: 0;
+}
+
+.approval-card__status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.approval-card__content {
+  padding: 20px 24px;
+}
+
+.approval-card__info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.approval-card__info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.approval-card__info-icon {
+  width: 20px;
+  height: 20px;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.approval-card__info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.approval-card__info-label {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.approval-card__info-value {
+  font-size: 14px;
+  color: #1f2937;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.approval-card__priority {
+  font-weight: 700;
+}
+
+.approval-card__justification {
+  margin-bottom: 20px;
+}
+
+.approval-card__justification-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.approval-card__justification-text {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.5;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.approval-card__items {
+  margin-bottom: 20px;
+}
+
+.approval-card__items-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.approval-card__items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.approval-card__item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(249, 250, 251, 0.8);
+  border-radius: 8px;
+  border: 1px solid rgba(229, 231, 235, 0.5);
+  font-size: 13px;
+}
+
+.approval-card__item-desc {
+  flex: 1;
+  color: #374151;
+  font-weight: 500;
+  margin-right: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.approval-card__item-qty {
+  color: #6b7280;
+  font-weight: 600;
+  margin-right: 12px;
+  white-space: nowrap;
+}
+
+.approval-card__item-price {
+  color: #10b981;
+  font-weight: 700;
+  font-family: "Courier New", monospace;
+  white-space: nowrap;
+}
+
+.approval-card__item-more {
+  text-align: center;
+  color: #6b7280;
+  font-size: 12px;
+  font-style: italic;
+  padding: 8px;
+}
+
+.approval-card__actions {
+  display: flex;
+  gap: 8px;
+  padding: 16px 24px 24px 24px;
+  border-top: 1px solid rgba(229, 231, 235, 0.5);
+  flex-wrap: wrap;
+}
+
+.approval-card__action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+  min-width: 100px;
+  justify-content: center;
+}
+
+.approval-card__action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.approval-card__action-btn--view {
+  background: rgba(107, 114, 128, 0.1);
+  color: #374151;
+  border: 1px solid rgba(107, 114, 128, 0.2);
+}
+
+.approval-card__action-btn--view:hover:not(:disabled) {
+  background: rgba(107, 114, 128, 0.2);
+  transform: translateY(-1px);
+}
+
+.approval-card__action-btn--approve {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.approval-card__action-btn--approve:hover:not(:disabled) {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.approval-card__action-btn--reject {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.approval-card__action-btn--reject:hover:not(:disabled) {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+.approval-card__action-btn--return {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.approval-card__action-btn--return:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .approval-card__header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .approval-card__title-section {
+    margin-right: 0;
+  }
+
+  .approval-card__info-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .approval-card__actions {
+    flex-direction: column;
+  }
+
+  .approval-card__action-btn {
+    flex: none;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .approval-card__content {
+    padding: 16px 20px;
+  }
+
+  .approval-card__actions {
+    padding: 12px 20px 20px 20px;
+  }
+
+  .approval-card__item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .approval-card__item-desc {
+    margin-right: 0;
+    white-space: normal;
+  }
+
+  .approval-card__item-qty,
+  .approval-card__item-price {
+    margin-right: 0;
+  }
+}

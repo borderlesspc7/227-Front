@@ -1,5 +1,7 @@
 import React from "react";
 import type { AdditiveRequest } from "../../../types/additiveRequest";
+import type { Department } from "../../../types/approvalWorkflow";
+import ApprovalWorkflow from "../../Approval/ApprovalWorkflow/ApprovalWorkflow";
 import "./AdditiveRequestView.css";
 
 interface AdditiveRequestViewProps {
@@ -22,7 +24,7 @@ const AdditiveRequestView: React.FC<AdditiveRequestViewProps> = ({
     } else {
       // Se for um objeto com toDate (Firebase Timestamp)
       if (date && typeof date === "object" && "toDate" in date) {
-        dateObj = (date as any).toDate();
+        dateObj = (date as { toDate: () => Date }).toDate();
       } else {
         return "N/A";
       }
@@ -243,6 +245,51 @@ const AdditiveRequestView: React.FC<AdditiveRequestViewProps> = ({
           </span>
         </div>
       </div>
+
+      {/* Workflow de Aprovação */}
+      {request.workflowStatus && request.isWorkflowActive && (
+        <div className="additive-request-view__section">
+          <h3 className="additive-request-view__section-title">
+            Status de Aprovação
+          </h3>
+          <ApprovalWorkflow
+            workflowStatus={request.workflowStatus}
+            steps={[
+              {
+                id: "engenharia-step",
+                name: "Aprovação Engenharia",
+                department: "engenharia" as Department,
+                order: 1,
+                isRequired: true,
+                approvers: [],
+                description: "Análise técnica e viabilidade do projeto",
+                estimatedDays: 2,
+              },
+              {
+                id: "suprimentos-step",
+                name: "Aprovação Suprimentos",
+                department: "suprimentos" as Department,
+                order: 2,
+                isRequired: true,
+                approvers: [],
+                description: "Análise de custos e disponibilidade de materiais",
+                estimatedDays: 1,
+              },
+              {
+                id: "diretoria-step",
+                name: "Aprovação Diretoria",
+                department: "diretoria" as Department,
+                order: 3,
+                isRequired: true,
+                approvers: [],
+                description: "Aprovação final e liberação de recursos",
+                estimatedDays: 1,
+              },
+            ]}
+            canTakeAction={false}
+          />
+        </div>
+      )}
 
       {/* Informações de auditoria */}
       <div className="additive-request-view__section">

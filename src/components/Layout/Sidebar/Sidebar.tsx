@@ -9,6 +9,7 @@ import {
   FiDollarSign,
   FiPlusCircle,
   FiBarChart,
+  FiCheck,
 } from "react-icons/fi";
 import { paths } from "../../../routes/paths";
 
@@ -22,6 +23,12 @@ const menuItems = [
     label: "Dashboard Gerencial",
     icon: FiBarChart,
     path: "/admin/dashboard",
+  },
+  {
+    id: "approvals",
+    label: "Aprovações",
+    icon: FiCheck,
+    path: "/admin/approvals",
   },
   {
     id: "register-user",

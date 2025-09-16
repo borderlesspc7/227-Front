@@ -9,6 +9,7 @@ import {
   FiCalendar,
   FiDollarSign,
   FiFileText,
+  FiSend,
 } from "react-icons/fi";
 import { type AdditiveRequest } from "../../../types/additiveRequest";
 import { useToast } from "../../../hooks/useToast";
@@ -23,6 +24,7 @@ interface AdditiveRequestListProps {
   onDelete: (id: string) => void;
   onView: (request: AdditiveRequest) => void;
   onAddNew: () => void;
+  onSubmitForApproval: (request: AdditiveRequest) => void;
 }
 
 const AdditiveRequestList: React.FC<AdditiveRequestListProps> = ({
@@ -33,6 +35,7 @@ const AdditiveRequestList: React.FC<AdditiveRequestListProps> = ({
   onDelete,
   onView,
   onAddNew,
+  onSubmitForApproval,
 }) => {
   const { showSuccess, showError } = useToast();
 
@@ -397,23 +400,38 @@ const AdditiveRequestList: React.FC<AdditiveRequestListProps> = ({
                 Ver
               </button>
 
-              <button
-                className="additive-request-list__card-button additive-request-list__card-button--edit"
-                onClick={() => onEdit(request)}
-                title="Editar solicitação"
-              >
-                <FiEdit />
-                Editar
-              </button>
+              {request.status === "rascunho" && (
+                <>
+                  <button
+                    className="additive-request-list__card-button additive-request-list__card-button--edit"
+                    onClick={() => onEdit(request)}
+                    title="Editar solicitação"
+                  >
+                    <FiEdit />
+                    Editar
+                  </button>
 
-              <button
-                className="additive-request-list__card-button additive-request-list__card-button--delete"
-                onClick={() => handleDelete(request.id!, request.protocolo!)}
-                title="Excluir solicitação"
-              >
-                <FiTrash2 />
-                Excluir
-              </button>
+                  <button
+                    className="additive-request-list__card-button additive-request-list__card-button--submit"
+                    onClick={() => onSubmitForApproval(request)}
+                    title="Enviar para aprovação"
+                  >
+                    <FiSend />
+                    Enviar
+                  </button>
+
+                  <button
+                    className="additive-request-list__card-button additive-request-list__card-button--delete"
+                    onClick={() =>
+                      handleDelete(request.id!, request.protocolo!)
+                    }
+                    title="Excluir solicitação"
+                  >
+                    <FiTrash2 />
+                    Excluir
+                  </button>
+                </>
+              )}
             </div>
           </div>
         ))}

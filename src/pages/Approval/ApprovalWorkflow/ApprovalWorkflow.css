@@ -1,0 +1,318 @@
+/* src/components/ApprovalWorkflow/ApprovalWorkflow.css */
+.approval-workflow {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.approval-workflow__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.approval-workflow__title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.approval-workflow__status-badge {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.approval-workflow__status-badge--completed {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.approval-workflow__status-badge--rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.approval-workflow__status-badge--returned {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.approval-workflow__status-badge--pending {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.approval-workflow__steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.approval-workflow__step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.approval-workflow__step-content {
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.approval-workflow__step-content:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+.approval-workflow__step-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.approval-workflow__step-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.approval-workflow__step-icon--completed {
+  color: #10b981;
+  background: #d1fae5;
+}
+
+.approval-workflow__step-icon--current {
+  color: #3b82f6;
+  background: #dbeafe;
+  animation: pulse 2s infinite;
+}
+
+.approval-workflow__step-icon--rejected {
+  color: #ef4444;
+  background: #fee2e2;
+}
+
+.approval-workflow__step-icon--pending {
+  color: #6b7280;
+  background: #f3f4f6;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.approval-workflow__step-info {
+  flex: 1;
+}
+
+.approval-workflow__step-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.approval-workflow__step-description {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+}
+
+.approval-workflow__step-meta {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.approval-workflow__step-department {
+  background: #3b82f6;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.approval-workflow__step-time {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.approval-workflow__step-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.approval-workflow__action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.approval-workflow__action-btn--approve {
+  background: #10b981;
+  color: white;
+}
+
+.approval-workflow__action-btn--approve:hover {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.approval-workflow__action-btn--reject {
+  background: #ef4444;
+  color: white;
+}
+
+.approval-workflow__action-btn--reject:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.approval-workflow__action-btn--return {
+  background: #f59e0b;
+  color: white;
+}
+
+.approval-workflow__action-btn--return:hover {
+  background: #d97706;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.approval-workflow__connector {
+  width: 4px;
+  height: 32px;
+  margin: 0 auto;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.approval-workflow__history {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 2px solid #f3f4f6;
+}
+
+.approval-workflow__history-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 16px 0;
+}
+
+.approval-workflow__actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.approval-workflow__action-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.approval-workflow__action-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.approval-workflow__action-type {
+  font-weight: 600;
+  color: #374151;
+}
+
+.approval-workflow__action-time {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.approval-workflow__action-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.approval-workflow__action-user {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.approval-workflow__action-comments {
+  font-size: 14px;
+  color: #374151;
+  margin: 0;
+  font-style: italic;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .approval-workflow {
+    padding: 16px;
+  }
+
+  .approval-workflow__header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .approval-workflow__step-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .approval-workflow__step-actions {
+    flex-direction: column;
+  }
+
+  .approval-workflow__action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

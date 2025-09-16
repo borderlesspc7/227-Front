@@ -1,3 +1,5 @@
+import type { WorkflowStatus } from "./approvalWorkflow";
+
 export interface AdditiveRequest {
   id?: string;
   protocolo: string;
@@ -21,6 +23,14 @@ export interface AdditiveRequest {
   rejectedBy?: string;
   rejectedAt?: Date;
   rejectionReason?: string;
+
+  workflowStatus?: WorkflowStatus;
+  currentApprovalStep?: string;
+  approvalConfigId?: string;
+  pdfUrl?: string;
+  isWorkflowActive: boolean;
+  workflowStartedAt?: Date;
+  workflowCompletedAt?: Date;
 }
 
 export interface AdditiveItem {

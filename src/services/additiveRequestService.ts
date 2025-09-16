@@ -2,7 +2,10 @@ import type {
   AdditiveRequest,
   AdditiveRequestFormData,
   UpdateAdditiveRequestData,
+  AdditiveItem,
+  Evidence,
 } from "../types/additiveRequest";
+import type { WorkflowStatus } from "../types/approvalWorkflow";
 import { db } from "../lib/firebaseconfig";
 import {
   collection,
@@ -19,19 +22,59 @@ import {
 } from "firebase/firestore";
 
 // Função para converter dados do Firebase para o formato esperado
-const convertFirestoreData = (data: any): AdditiveRequest => {
+const convertFirestoreData = (
+  data: Record<string, unknown>
+): AdditiveRequest => {
+  const convertTimestamp = (timestamp: unknown): Date => {
+    if (timestamp && typeof timestamp === "object" && "toDate" in timestamp) {
+      return (timestamp as { toDate: () => Date }).toDate();
+    }
+    if (timestamp instanceof Date) {
+      return timestamp;
+    }
+    return new Date();
+  };
+
   return {
-    ...data,
-    createdAt: data.createdAt?.toDate?.() || data.createdAt || new Date(),
-    updatedAt: data.updatedAt?.toDate?.() || data.updatedAt || new Date(),
-    approvedAt: data.approvedAt?.toDate?.() || data.approvedAt,
-    rejectedAt: data.rejectedAt?.toDate?.() || data.rejectedAt,
-    evidencias:
-      data.evidencias?.map((evidence: any) => ({
-        ...evidence,
-        uploadedAt:
-          evidence.uploadedAt?.toDate?.() || evidence.uploadedAt || new Date(),
-      })) || [],
+    id: data.id as string,
+    protocolo: data.protocolo as string,
+    contratoId: data.contratoId as string,
+    descricao: data.descricao as string,
+    justificativa: data.justificativa as string,
+    status: data.status as
+      | "rascunho"
+      | "pendente"
+      | "aprovado"
+      | "rejeitado"
+      | "cancelado",
+    prioridade: data.prioridade as "baixa" | "media" | "alta" | "urgente",
+    itens: data.itens as AdditiveItem[],
+    valorTotal: data.valorTotal as number,
+    evidencias: Array.isArray(data.evidencias)
+      ? (data.evidencias.map((evidence: Record<string, unknown>) => ({
+          ...evidence,
+          uploadedAt: convertTimestamp(evidence.uploadedAt),
+        })) as Evidence[])
+      : [],
+    createdBy: data.createdBy as string,
+    createdAt: convertTimestamp(data.createdAt),
+    updatedAt: convertTimestamp(data.updatedAt),
+    approvedBy: data.approvedBy as string | undefined,
+    approvedAt: data.approvedAt ? convertTimestamp(data.approvedAt) : undefined,
+    rejectedBy: data.rejectedBy as string | undefined,
+    rejectedAt: data.rejectedAt ? convertTimestamp(data.rejectedAt) : undefined,
+    rejectionReason: data.rejectionReason as string | undefined,
+    workflowStatus: data.workflowStatus as WorkflowStatus | undefined,
+    currentApprovalStep: data.currentApprovalStep as string | undefined,
+    approvalConfigId: data.approvalConfigId as string | undefined,
+    pdfUrl: data.pdfUrl as string | undefined,
+    isWorkflowActive: data.isWorkflowActive as boolean,
+    workflowStartedAt: data.workflowStartedAt
+      ? convertTimestamp(data.workflowStartedAt)
+      : undefined,
+    workflowCompletedAt: data.workflowCompletedAt
+      ? convertTimestamp(data.workflowCompletedAt)
+      : undefined,
   };
 };
 
@@ -82,6 +125,7 @@ export const additiveRequestService = {
         createdBy: userId || "anonymous-user",
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
+        isWorkflowActive: false,
       };
 
       const docRef = await addDoc(requestsRef, newRequest);
@@ -99,6 +143,7 @@ export const additiveRequestService = {
         createdBy: newRequest.createdBy,
         createdAt: new Date(),
         updatedAt: new Date(),
+        isWorkflowActive: newRequest.isWorkflowActive,
       };
       return createdRequest;
     } catch (error) {
@@ -165,11 +210,11 @@ export const additiveRequestService = {
   // Submeter para aprovação
   submitForApproval: async (id: string): Promise<void> => {
     try {
-      const requestRef = doc(db, "additiveRequests", id);
-      await updateDoc(requestRef, {
-        status: "pendente",
-        updatedAt: serverTimestamp(),
-      });
+      // Importar o workflowService dinamicamente para evitar dependência circular
+      const { workflowService } = await import("./workflowService");
+
+      // Iniciar o workflow de aprovação
+      await workflowService.startWorkflow(id);
     } catch (error) {
       console.error("Error submitting for approval:", error);
       throw error;
