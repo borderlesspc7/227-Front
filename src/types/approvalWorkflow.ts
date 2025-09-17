@@ -33,7 +33,6 @@ export interface WorkflowStatus {
   isReturned: boolean;
   actions: ApprovalAction[];
   startedAt: Date;
-  completedAt?: Date;
   totalSteps: number;
 }
 
@@ -50,18 +49,23 @@ export interface ApprovalConfig {
 export interface ApprovalNotification {
   id: string;
   requestId: string;
+  requestProtocol: string; // Protocolo da solicitação para exibição
   userId: string;
   type:
     | "new_request"
     | "approval_required"
     | "approved"
     | "rejected"
-    | "returned";
+    | "returned"
+    | "request_submitted";
   title: string;
   message: string;
   isRead: boolean;
   createdAt: Date;
   actionUrl?: string; // Link para a página de aprovação
+  priority: "low" | "medium" | "high" | "urgent";
+  department?: string; // Departamento responsável
+  senderName?: string; // Nome de quem gerou a notificação
 }
 
 export interface ApprovalStats {

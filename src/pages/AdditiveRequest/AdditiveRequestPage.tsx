@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import AdditiveRequestForm from "../AdditiveRequest/Form/AdditiveRequestForm";
 import AdditiveRequestList from "../AdditiveRequest/List/AdditiveRequestList";
 import AdditiveRequestView from "../AdditiveRequest/View/AdditiveRequestView";
@@ -12,13 +12,11 @@ import type {
 import { additiveRequestService } from "../../services/additiveRequestService";
 import { workflowService } from "../../services/workflowService";
 import { useToast } from "../../hooks/useToast";
-import { AuthContext } from "../../contexts/authContext";
 import "./AdditiveRequestPage.css";
 import { PlusIcon } from "lucide-react";
 
 const AdditiveRequestPage: React.FC = () => {
   const { showError, showSuccess } = useToast();
-  const { user } = useContext(AuthContext) || {};
 
   const [requests, setRequests] = useState<AdditiveRequest[]>([]);
   const [editingRequest, setEditingRequest] = useState<AdditiveRequest | null>(
@@ -66,26 +64,18 @@ const AdditiveRequestPage: React.FC = () => {
     loadRequests();
   }, [showError]);
 
-  const handleAddRequest = async (requestData: AdditiveRequestFormData) => {
+  const handleFormSubmit = async (_requestData: AdditiveRequestFormData) => {
+    // Esta função só atualiza a lista, não cria solicitação
+    await refreshRequestsList();
+    setShowForm(false);
+  };
+
+  const refreshRequestsList = async () => {
     try {
-      await additiveRequestService.createAdditiveRequest(
-        requestData,
-        user?.uid
-      );
-      const refreshRequests = async () => {
-        try {
-          const requestsFromDB =
-            await additiveRequestService.getAdditiveRequests();
-          setRequests(requestsFromDB);
-        } catch (err) {
-          console.error("Erro ao recarregar solicitações:", err);
-        }
-      };
-      refreshRequests();
-      setShowForm(false);
-    } catch (error) {
-      console.error("Erro ao adicionar solicitação:", error);
-      showError("Erro ao adicionar solicitação");
+      const requestsFromDB = await additiveRequestService.getAdditiveRequests();
+      setRequests(requestsFromDB);
+    } catch (err) {
+      console.error("Erro ao recarregar solicitações:", err);
     }
   };
 
@@ -248,7 +238,7 @@ const AdditiveRequestPage: React.FC = () => {
         <div className="additive-request-page__form-section">
           <AdditiveRequestForm
             request={editingRequest}
-            onSubmit={editingRequest ? handleUpdateRequest : handleAddRequest}
+            onSubmit={editingRequest ? handleUpdateRequest : handleFormSubmit}
             onCancel={handleCancelForm}
           />
         </div>

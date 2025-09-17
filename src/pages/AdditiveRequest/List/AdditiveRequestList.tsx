@@ -400,6 +400,15 @@ const AdditiveRequestList: React.FC<AdditiveRequestListProps> = ({
                 Ver
               </button>
 
+              <button
+                className="additive-request-list__card-button additive-request-list__card-button--delete"
+                onClick={() => handleDelete(request.id!, request.protocolo!)}
+                title="Excluir solicitação"
+              >
+                <FiTrash2 />
+                Excluir
+              </button>
+
               {request.status === "rascunho" && (
                 <>
                   <button

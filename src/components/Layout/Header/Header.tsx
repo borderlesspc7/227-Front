@@ -5,6 +5,7 @@ import { FiLogOut, FiUser } from "react-icons/fi";
 import "./Header.css";
 import { useAuth } from "../../../hooks/useAuth";
 import type { User } from "../../../types/auth";
+import NotificationBell from "../../ui/NotificationBell/NotificationBell";
 
 interface HeaderProps {
   user: User;
@@ -52,15 +53,18 @@ export const Header: React.FC<HeaderProps> = ({ user, className = "" }) => {
           </div>
         </div>
 
-        <button
-          className="header__logout-btn"
-          onClick={handleLogout}
-          type="button"
-          title="Sair do sistema"
-        >
-          <FiLogOut className="header__logout-icon" />
-          <span className="header__logout-text">Sair</span>
-        </button>
+        <div className="header__actions">
+          <NotificationBell />
+          <button
+            className="header__logout-btn"
+            onClick={handleLogout}
+            type="button"
+            title="Sair do sistema"
+          >
+            <FiLogOut className="header__logout-icon" />
+            <span className="header__logout-text">Sair</span>
+          </button>
+        </div>
       </div>
     </header>
   );

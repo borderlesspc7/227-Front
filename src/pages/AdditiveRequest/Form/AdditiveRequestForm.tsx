@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import type {
   AdditiveRequest,
   AdditiveRequestFormData,
@@ -10,6 +10,7 @@ import { contractService } from "../../../services/contractService";
 import { useToast } from "../../../hooks/useToast";
 import { masks } from "../../../utils/masks";
 import ConfirmModal from "../../../components/ui/ConfirmModal/ConfirmModal";
+import { AuthContext } from "../../../contexts/authContext";
 import "./AdditiveRequestForm.css";
 
 interface AdditiveRequestFormProps {
@@ -40,6 +41,7 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
   onCancel,
 }) => {
   const { showSuccess, showError } = useToast();
+  const { user } = useContext(AuthContext) || {};
 
   const [formData, setFormData] = useState<AdditiveRequestFormData>({
     contratoId: "",
@@ -248,7 +250,10 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
       } else {
         // Criar
         const createdRequest =
-          await additiveRequestService.createAdditiveRequest(requestData);
+          await additiveRequestService.createAdditiveRequest(
+            requestData,
+            user?.uid
+          );
         setGeneratedProtocol(createdRequest.protocolo);
         setShowProtocol(true);
         showSuccess(
@@ -299,7 +304,10 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
       } else {
         // Criar e enviar para aprovação
         const createdRequest =
-          await additiveRequestService.createAdditiveRequest(requestData);
+          await additiveRequestService.createAdditiveRequest(
+            requestData,
+            user?.uid
+          );
         await additiveRequestService.submitForApproval(createdRequest.id!);
         setGeneratedProtocol(createdRequest.protocolo);
         setShowProtocol(true);

@@ -129,6 +129,23 @@ export const workflowService = {
       });
 
       await batch.commit();
+
+      // Enviar notificações após sucesso
+      try {
+        const { notificationService } = await import("./notificationService");
+        const requestDoc = await getDoc(requestRef);
+
+        if (requestDoc.exists()) {
+          const request = { id: requestId, ...requestDoc.data() };
+          await notificationService.notifyRequestSubmitted(
+            request as AdditiveRequest,
+            "Sistema"
+          );
+        }
+      } catch (notificationError) {
+        console.error("Erro ao enviar notificações:", notificationError);
+        // Não falhar o workflow por erro de notificação
+      }
     } catch (error) {
       console.error("Erro ao iniciar workflow:", error);
       throw error;
@@ -201,14 +218,12 @@ export const workflowService = {
         currentStep: nextStep?.id || workflowStatus.currentStep,
         isCompleted: !nextStep, // Se não há próxima etapa, está completo
         actions: [...workflowStatus.actions, action],
-        completedAt: !nextStep ? new Date() : undefined,
       };
 
       // Salvar atualizações
       batch.update(workflowRef, {
         ...updatedWorkflowStatus,
         startedAt: updatedWorkflowStatus.startedAt,
-        completedAt: updatedWorkflowStatus.completedAt,
         actions: updatedWorkflowStatus.actions.map((action) => ({
           ...action,
           timestamp: action.timestamp,
@@ -221,7 +236,6 @@ export const workflowService = {
         workflowStatus: {
           ...updatedWorkflowStatus,
           startedAt: updatedWorkflowStatus.startedAt,
-          completedAt: updatedWorkflowStatus.completedAt,
           actions: updatedWorkflowStatus.actions.map((action) => ({
             ...action,
             timestamp: action.timestamp,
@@ -236,6 +250,10 @@ export const workflowService = {
         updateData.approvedBy = approverName;
         updateData.approvedAt = serverTimestamp();
         updateData.workflowCompletedAt = serverTimestamp();
+        updateData.isWorkflowActive = false;
+      } else {
+        // Se não está completo, manter como pendente mas atualizar etapa
+        updateData.status = ApprovalStatus.PENDING;
       }
 
       batch.update(requestRef, updateData);
@@ -289,14 +307,12 @@ export const workflowService = {
         isRejected: true,
         isCompleted: true,
         actions: [...workflowStatus.actions, action],
-        completedAt: new Date(),
       };
 
       // Salvar atualizações
       batch.update(workflowRef, {
         ...updatedWorkflowStatus,
         startedAt: updatedWorkflowStatus.startedAt,
-        completedAt: updatedWorkflowStatus.completedAt,
         actions: updatedWorkflowStatus.actions.map((action) => ({
           ...action,
           timestamp: action.timestamp,
@@ -313,7 +329,6 @@ export const workflowService = {
         workflowStatus: {
           ...updatedWorkflowStatus,
           startedAt: updatedWorkflowStatus.startedAt,
-          completedAt: updatedWorkflowStatus.completedAt,
           actions: updatedWorkflowStatus.actions.map((action) => ({
             ...action,
             timestamp: action.timestamp,
@@ -365,12 +380,74 @@ export const workflowService = {
         throw new Error("Etapa atual não encontrada");
       }
 
-      const previousStep = config.steps.find(
-        (step: ApprovalStep) => step.order === currentStep.order - 1
-      );
+      // Encontrar a etapa anterior (ordem menor)
+      const previousStep = config.steps
+        .filter((step: ApprovalStep) => step.order < currentStep.order)
+        .sort((a: ApprovalStep, b: ApprovalStep) => b.order - a.order)[0];
 
       if (!previousStep) {
-        throw new Error("Não há etapa anterior para devolver");
+        // Se não há etapa anterior, devolver para a primeira etapa
+        const firstStep = config.steps
+          .filter((step: ApprovalStep) => step.isRequired)
+          .sort((a: ApprovalStep, b: ApprovalStep) => a.order - b.order)[0];
+
+        if (!firstStep) {
+          throw new Error("Não há etapa anterior para devolver");
+        }
+
+        // Usar a primeira etapa como etapa anterior
+        const action: ApprovalAction = {
+          id: `action-${Date.now()}`,
+          requestId,
+          stepId,
+          action: "return",
+          approverId,
+          approverName,
+          comments: formData.comments,
+          timestamp: new Date(),
+          attachments: formData.attachments?.map((file) =>
+            URL.createObjectURL(file)
+          ),
+          nextStepId: firstStep.id,
+        };
+
+        // Atualizar status do workflow
+        const updatedWorkflowStatus: WorkflowStatus = {
+          ...workflowStatus,
+          currentStep: firstStep.id,
+          isReturned: true,
+          isCompleted: false,
+          isRejected: false,
+          actions: [...workflowStatus.actions, action],
+        };
+
+        // Salvar atualizações
+        const batch = writeBatch(db);
+        batch.update(workflowRef, {
+          ...updatedWorkflowStatus,
+          startedAt: updatedWorkflowStatus.startedAt,
+          actions: updatedWorkflowStatus.actions.map((action) => ({
+            ...action,
+            timestamp: action.timestamp,
+          })),
+        });
+
+        const requestRef = doc(db, "additiveRequests", requestId);
+        batch.update(requestRef, {
+          workflowStatus: {
+            ...updatedWorkflowStatus,
+            startedAt: updatedWorkflowStatus.startedAt,
+            actions: updatedWorkflowStatus.actions.map((action) => ({
+              ...action,
+              timestamp: action.timestamp,
+            })),
+          },
+          currentApprovalStep: firstStep.id,
+          updatedAt: serverTimestamp(),
+        });
+
+        await batch.commit();
+        return;
       }
 
       // Criar ação de devolução
@@ -394,6 +471,8 @@ export const workflowService = {
         ...workflowStatus,
         currentStep: previousStep.id,
         isReturned: true,
+        isCompleted: false,
+        isRejected: false,
         actions: [...workflowStatus.actions, action],
       };
 
@@ -401,7 +480,6 @@ export const workflowService = {
       batch.update(workflowRef, {
         ...updatedWorkflowStatus,
         startedAt: updatedWorkflowStatus.startedAt,
-        completedAt: updatedWorkflowStatus.completedAt,
         actions: updatedWorkflowStatus.actions.map((action) => ({
           ...action,
           timestamp: action.timestamp,
@@ -415,7 +493,6 @@ export const workflowService = {
         workflowStatus: {
           ...updatedWorkflowStatus,
           startedAt: updatedWorkflowStatus.startedAt,
-          completedAt: updatedWorkflowStatus.completedAt,
           actions: updatedWorkflowStatus.actions.map((action) => ({
             ...action,
             timestamp: action.timestamp,
@@ -475,8 +552,9 @@ export const workflowService = {
       const config = configDoc.data() as ApprovalConfig;
 
       return requests.filter((request) => {
-        // Verificar se tem etapa atual
-        if (!request.currentApprovalStep) return false;
+        // Verificar se tem etapa atual e workflow ativo
+        if (!request.currentApprovalStep || !request.isWorkflowActive)
+          return false;
 
         // Verificar se a etapa atual pertence ao departamento
         const currentStep = config.steps.find(
@@ -534,6 +612,7 @@ export const workflowService = {
         requestsRef,
         where("status", "==", ApprovalStatus.PENDING),
         where("currentApprovalStep", "==", currentStep.id),
+        where("isWorkflowActive", "==", true),
         orderBy("createdAt", "desc")
       );
 
