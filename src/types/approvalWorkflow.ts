@@ -61,7 +61,9 @@ export interface ApprovalNotification {
   title: string;
   message: string;
   isRead: boolean;
+  isDismissed?: boolean; // Se a notificação foi removida pelo usuário
   createdAt: Date;
+  dismissedAt?: Date; // Quando foi removida
   actionUrl?: string; // Link para a página de aprovação
   priority: "low" | "medium" | "high" | "urgent";
   department?: string; // Departamento responsável

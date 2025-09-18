@@ -6,7 +6,13 @@ export interface AdditiveRequest {
   contratoId: string;
   descricao: string;
   justificativa: string;
-  status: "rascunho" | "pendente" | "aprovado" | "rejeitado" | "cancelado";
+  status:
+    | "rascunho"
+    | "pendente"
+    | "aprovado"
+    | "rejeitado"
+    | "devolvido"
+    | "cancelado";
   prioridade: "baixa" | "media" | "alta" | "urgente";
 
   itens: AdditiveItem[];
@@ -66,6 +72,15 @@ export interface UpdateAdditiveRequestData {
   justificativa?: string;
   prioridade?: "baixa" | "media" | "alta" | "urgente";
   itens?: Omit<AdditiveItem, "id" | "valorTotal">[];
-  status?: "rascunho" | "pendente" | "aprovado" | "rejeitado" | "cancelado";
+  status?:
+    | "rascunho"
+    | "pendente"
+    | "aprovado"
+    | "rejeitado"
+    | "devolvido"
+    | "cancelado";
   rejectionReason?: string;
+  currentApprovalStep?: string | null;
+  isWorkflowActive?: boolean;
+  workflowStatus?: WorkflowStatus | null;
 }

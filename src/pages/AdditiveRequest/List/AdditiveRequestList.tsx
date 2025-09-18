@@ -25,6 +25,7 @@ interface AdditiveRequestListProps {
   onView: (request: AdditiveRequest) => void;
   onAddNew: () => void;
   onSubmitForApproval: (request: AdditiveRequest) => void;
+  onResubmit: (request: AdditiveRequest) => void;
 }
 
 const AdditiveRequestList: React.FC<AdditiveRequestListProps> = ({
@@ -36,6 +37,7 @@ const AdditiveRequestList: React.FC<AdditiveRequestListProps> = ({
   onView,
   onAddNew,
   onSubmitForApproval,
+  onResubmit,
 }) => {
   const { showSuccess, showError } = useToast();
 
@@ -64,6 +66,7 @@ const AdditiveRequestList: React.FC<AdditiveRequestListProps> = ({
     { value: "pendente", label: "Pendente" },
     { value: "aprovado", label: "Aprovado" },
     { value: "rejeitado", label: "Rejeitado" },
+    { value: "devolvido", label: "Devolvido" },
   ];
 
   const priorityOptions = [
@@ -128,6 +131,7 @@ const AdditiveRequestList: React.FC<AdditiveRequestListProps> = ({
       pendente: "Pendente",
       aprovado: "Aprovado",
       rejeitado: "Rejeitado",
+      devolvido: "Devolvido",
     };
     return statusTexts[status as keyof typeof statusTexts] || status;
   };
@@ -409,7 +413,8 @@ const AdditiveRequestList: React.FC<AdditiveRequestListProps> = ({
                 Excluir
               </button>
 
-              {request.status === "rascunho" && (
+              {(request.status === "rascunho" ||
+                request.status === "devolvido") && (
                 <>
                   <button
                     className="additive-request-list__card-button additive-request-list__card-button--edit"
@@ -420,25 +425,27 @@ const AdditiveRequestList: React.FC<AdditiveRequestListProps> = ({
                     Editar
                   </button>
 
-                  <button
-                    className="additive-request-list__card-button additive-request-list__card-button--submit"
-                    onClick={() => onSubmitForApproval(request)}
-                    title="Enviar para aprovação"
-                  >
-                    <FiSend />
-                    Enviar
-                  </button>
+                  {request.status === "rascunho" && (
+                    <button
+                      className="additive-request-list__card-button additive-request-list__card-button--submit"
+                      onClick={() => onSubmitForApproval(request)}
+                      title="Enviar para aprovação"
+                    >
+                      <FiSend />
+                      Enviar
+                    </button>
+                  )}
 
-                  <button
-                    className="additive-request-list__card-button additive-request-list__card-button--delete"
-                    onClick={() =>
-                      handleDelete(request.id!, request.protocolo!)
-                    }
-                    title="Excluir solicitação"
-                  >
-                    <FiTrash2 />
-                    Excluir
-                  </button>
+                  {request.status === "devolvido" && (
+                    <button
+                      className="additive-request-list__card-button additive-request-list__card-button--resubmit"
+                      onClick={() => onResubmit(request)}
+                      title="Reenviar para aprovação"
+                    >
+                      <FiSend />
+                      Reenviar
+                    </button>
+                  )}
                 </>
               )}
             </div>

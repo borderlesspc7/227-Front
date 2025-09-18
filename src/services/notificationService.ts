@@ -225,6 +225,7 @@ export const notificationService = {
         id: doc.id,
         ...doc.data(),
         createdAt: doc.data().createdAt?.toDate() || new Date(),
+        dismissedAt: doc.data().dismissedAt?.toDate() || undefined,
       })) as ApprovalNotification[];
     } catch (error) {
       console.error("Erro ao obter notificações:", error);
@@ -288,6 +289,21 @@ export const notificationService = {
       await Promise.all(updatePromises);
     } catch (error) {
       console.error("Erro ao marcar todas as notificações como lidas:", error);
+      throw error;
+    }
+  },
+
+  // Remover notificação (dismiss)
+  dismissNotification: async (notificationId: string): Promise<void> => {
+    try {
+      const notificationRef = doc(db, "notifications", notificationId);
+      await updateDoc(notificationRef, {
+        isRead: true,
+        isDismissed: true,
+        dismissedAt: serverTimestamp(),
+      });
+    } catch (error) {
+      console.error("Erro ao remover notificação:", error);
       throw error;
     }
   },

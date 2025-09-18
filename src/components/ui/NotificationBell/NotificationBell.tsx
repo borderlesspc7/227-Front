@@ -24,9 +24,13 @@ const NotificationBell: React.FC = () => {
         user.uid
       );
 
-      setNotifications(userNotifications);
+      // Filtrar notificações que não foram removidas pelo usuário
+      const visibleNotifications = userNotifications.filter(
+        (n) => !n.isDismissed
+      );
+      setNotifications(visibleNotifications);
 
-      const unread = userNotifications.filter((n) => !n.isRead).length;
+      const unread = visibleNotifications.filter((n) => !n.isRead).length;
       setUnreadCount(unread);
     } catch (error) {
       console.error("Erro ao carregar notificações:", error);
@@ -65,6 +69,21 @@ const NotificationBell: React.FC = () => {
       setUnreadCount(0);
     } catch (error) {
       console.error("Erro ao marcar todas como lidas:", error);
+    }
+  };
+
+  const handleDismissNotification = async (
+    notificationId: string,
+    event: React.MouseEvent
+  ) => {
+    event.stopPropagation(); // Previne que clique no X dispare o clique da notificação
+
+    try {
+      await notificationService.dismissNotification(notificationId);
+      setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error("Erro ao remover notificação:", error);
     }
   };
 
@@ -162,9 +181,21 @@ const NotificationBell: React.FC = () => {
                       {getTypeIcon(notification.type)}
                       {getPriorityIcon(notification.priority)}
                     </div>
-                    <span className="notification-bell__item-time">
-                      {formatDateTime(notification.createdAt)}
-                    </span>
+                    <div className="notification-bell__item-actions">
+                      <span className="notification-bell__item-time">
+                        {formatDateTime(notification.createdAt)}
+                      </span>
+                      <button
+                        className="notification-bell__dismiss-btn"
+                        onClick={(e) =>
+                          handleDismissNotification(notification.id, e)
+                        }
+                        title="Remover notificação"
+                        aria-label="Remover notificação"
+                      >
+                        <FiX />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="notification-bell__item-content">

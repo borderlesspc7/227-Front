@@ -283,6 +283,12 @@
   border: 1px solid #f5c6cb;
 }
 
+.additive-request-list__card-status--devolvido {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
 /* ===== INFORMAÇÕES DO CARTÃO ===== */
 .additive-request-list__card-info {
   margin-bottom: 1rem;
@@ -452,6 +458,16 @@
 .additive-request-list__card-button--submit:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.additive-request-list__card-button--resubmit {
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+  color: #212529;
+}
+
+.additive-request-list__card-button--resubmit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
 }
 
 .additive-request-list__card-button--view {

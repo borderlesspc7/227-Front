@@ -176,17 +176,18 @@ const AdditiveRequestPage: React.FC = () => {
     try {
       setLoading(true);
 
-      // Inicializar workflow se necessário
       try {
         await workflowService.setupDefaultWorkflow();
       } catch {
-        // Continuar mesmo se a configuração falhar
+        console.error("Erro ao configurar workflow:", error);
+        showError(
+          "Erro ao configurar workflow",
+          "Erro ao configurar workflow. Tente novamente."
+        );
       }
 
-      // Enviar para aprovação
       await additiveRequestService.submitForApproval(request.id);
 
-      // Recarregar a lista para mostrar o status atualizado
       const updatedRequests =
         await additiveRequestService.getAdditiveRequests();
       setRequests(updatedRequests);
@@ -200,6 +201,50 @@ const AdditiveRequestPage: React.FC = () => {
       showError(
         "Erro ao enviar",
         "Erro ao enviar solicitação para aprovação. Tente novamente."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResubmit = async (request: AdditiveRequest) => {
+    if (!request.id) {
+      showError("Erro", "ID da solicitação não encontrado");
+      return;
+    }
+    try {
+      setLoading(true);
+      try {
+        await workflowService.setupDefaultWorkflow();
+      } catch {
+        console.error("Erro ao configurar workflow:", error);
+        showError(
+          "Erro ao configurar workflow",
+          "Erro ao configurar workflow. Tente novamente."
+        );
+      }
+
+      await additiveRequestService.updateAdditiveRequest(request.id, {
+        status: "rascunho",
+        currentApprovalStep: null,
+        isWorkflowActive: false,
+        workflowStatus: null,
+      });
+
+      await additiveRequestService.submitForApproval(request.id);
+
+      const updateRequests = await additiveRequestService.getAdditiveRequests();
+      setRequests(updateRequests);
+
+      showSuccess(
+        "Solicitação reenviada!",
+        `A solicitação ${request.protocolo} foi reenviada para aprovação.`
+      );
+    } catch (error) {
+      console.error("Erro ao resetar solicitação:", error);
+      showError(
+        "Erro ao resetar",
+        "Erro ao resetar solicitação. Tente novamente."
       );
     } finally {
       setLoading(false);
@@ -254,6 +299,7 @@ const AdditiveRequestPage: React.FC = () => {
           onView={handleViewRequest}
           onAddNew={() => setShowForm(true)}
           onSubmitForApproval={handleSubmitForApproval}
+          onResubmit={handleResubmit}
         />
       </div>
 

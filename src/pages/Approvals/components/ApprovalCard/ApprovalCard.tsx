@@ -81,6 +81,8 @@ const ApprovalCard: React.FC<ApprovalCardProps> = ({
         return "#10b981";
       case "rejeitado":
         return "#ef4444";
+      case "devolvido":
+        return "#f59e0b";
       case "cancelado":
         return "#6b7280";
       default:
@@ -98,6 +100,8 @@ const ApprovalCard: React.FC<ApprovalCardProps> = ({
         return "Aprovado";
       case "rejeitado":
         return "Rejeitado";
+      case "devolvido":
+        return "Devolvido";
       case "cancelado":
         return "Cancelado";
       default:

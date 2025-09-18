@@ -46,6 +46,7 @@ const convertFirestoreData = (
       | "pendente"
       | "aprovado"
       | "rejeitado"
+      | "devolvido"
       | "cancelado",
     prioridade: data.prioridade as "baixa" | "media" | "alta" | "urgente",
     itens: data.itens as AdditiveItem[],

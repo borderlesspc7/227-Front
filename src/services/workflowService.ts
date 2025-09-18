@@ -136,7 +136,10 @@ export const workflowService = {
         const requestDoc = await getDoc(requestRef);
 
         if (requestDoc.exists()) {
-          const request = { id: requestId, ...requestDoc.data() };
+          const request = {
+            id: requestId,
+            ...requestDoc.data(),
+          } as AdditiveRequest;
           await notificationService.notifyRequestSubmitted(
             request as AdditiveRequest,
             "Sistema"
@@ -245,20 +248,53 @@ export const workflowService = {
         updatedAt: serverTimestamp(),
       };
 
-      if (updatedWorkflowStatus.isCompleted) {
-        updateData.status = ApprovalStatus.APPROVED;
-        updateData.approvedBy = approverName;
-        updateData.approvedAt = serverTimestamp();
-        updateData.workflowCompletedAt = serverTimestamp();
-        updateData.isWorkflowActive = false;
-      } else {
-        // Se não está completo, manter como pendente mas atualizar etapa
-        updateData.status = ApprovalStatus.PENDING;
-      }
+      updateData.status = ApprovalStatus.APPROVED;
+      updateData.approvedBy = approverName;
+      updateData.approvedAt = serverTimestamp();
+      updateData.workflowCompletedAt = serverTimestamp();
+      updateData.isWorkflowActive = false;
 
       batch.update(requestRef, updateData);
 
       await batch.commit();
+
+      // Enviar notificações após sucesso
+      try {
+        const { notificationService } = await import("./notificationService");
+        const requestDoc = await getDoc(requestRef);
+
+        if (requestDoc.exists()) {
+          const request = {
+            id: requestId,
+            ...requestDoc.data(),
+          } as AdditiveRequest;
+
+          if (updatedWorkflowStatus.isCompleted) {
+            // Solicitação totalmente aprovada - notificar criador
+            await notificationService.notifyStatusChange(
+              requestId,
+              request.protocolo,
+              "approved",
+              request.createdBy,
+              approverName,
+              formData.comments
+            );
+          } else if (nextStep) {
+            // Notificar próximo aprovador
+            // Para teste, vamos notificar o mesmo usuário (em produção, buscar aprovadores do próximo step)
+            await notificationService.notifyNextApprover(
+              requestId,
+              request.protocolo,
+              nextStep.id,
+              request.createdBy, // Em produção, usar nextStep.approvers
+              approverName
+            );
+          }
+        }
+      } catch (notificationError) {
+        console.error("Erro ao enviar notificações:", notificationError);
+        // Não falhar o workflow por erro de notificação
+      }
     } catch (error) {
       console.error("Erro ao aprovar etapa:", error);
       throw error;
@@ -340,6 +376,32 @@ export const workflowService = {
       });
 
       await batch.commit();
+
+      // Enviar notificações após sucesso
+      try {
+        const { notificationService } = await import("./notificationService");
+        const requestDoc = await getDoc(requestRef);
+
+        if (requestDoc.exists()) {
+          const request = {
+            id: requestId,
+            ...requestDoc.data(),
+          } as AdditiveRequest;
+
+          // Notificar criador da solicitação sobre a rejeição
+          await notificationService.notifyStatusChange(
+            requestId,
+            request.protocolo,
+            "rejected",
+            request.createdBy,
+            approverName,
+            formData.comments
+          );
+        }
+      } catch (notificationError) {
+        console.error("Erro ao enviar notificações:", notificationError);
+        // Não falhar o workflow por erro de notificação
+      }
     } catch (error) {
       console.error("Erro ao rejeitar solicitação:", error);
       throw error;
@@ -434,6 +496,7 @@ export const workflowService = {
 
         const requestRef = doc(db, "additiveRequests", requestId);
         batch.update(requestRef, {
+          status: ApprovalStatus.RETURNED,
           workflowStatus: {
             ...updatedWorkflowStatus,
             startedAt: updatedWorkflowStatus.startedAt,
@@ -447,6 +510,33 @@ export const workflowService = {
         });
 
         await batch.commit();
+
+        // Enviar notificações após sucesso
+        try {
+          const { notificationService } = await import("./notificationService");
+          const requestDoc = await getDoc(requestRef);
+
+          if (requestDoc.exists()) {
+            const request = {
+              id: requestId,
+              ...requestDoc.data(),
+            } as AdditiveRequest;
+
+            // Notificar criador da solicitação sobre a devolução
+            await notificationService.notifyStatusChange(
+              requestId,
+              request.protocolo,
+              "returned",
+              request.createdBy,
+              approverName,
+              formData.comments
+            );
+          }
+        } catch (notificationError) {
+          console.error("Erro ao enviar notificações:", notificationError);
+          // Não falhar o workflow por erro de notificação
+        }
+
         return;
       }
 
@@ -489,7 +579,7 @@ export const workflowService = {
       // Atualizar solicitação
       const requestRef = doc(db, "additiveRequests", requestId);
       batch.update(requestRef, {
-        status: ApprovalStatus.PENDING,
+        status: ApprovalStatus.RETURNED,
         workflowStatus: {
           ...updatedWorkflowStatus,
           startedAt: updatedWorkflowStatus.startedAt,
@@ -503,6 +593,32 @@ export const workflowService = {
       });
 
       await batch.commit();
+
+      // Enviar notificações após sucesso
+      try {
+        const { notificationService } = await import("./notificationService");
+        const requestDoc = await getDoc(requestRef);
+
+        if (requestDoc.exists()) {
+          const request = {
+            id: requestId,
+            ...requestDoc.data(),
+          } as AdditiveRequest;
+
+          // Notificar criador da solicitação sobre a devolução
+          await notificationService.notifyStatusChange(
+            requestId,
+            request.protocolo,
+            "returned",
+            request.createdBy,
+            approverName,
+            formData.comments
+          );
+        }
+      } catch (notificationError) {
+        console.error("Erro ao enviar notificações:", notificationError);
+        // Não falhar o workflow por erro de notificação
+      }
     } catch (error) {
       console.error("Erro ao devolver para etapa anterior:", error);
       throw error;
