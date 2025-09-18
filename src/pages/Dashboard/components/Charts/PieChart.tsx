@@ -29,7 +29,7 @@ const PieChart: React.FC<PieChartProps> = ({ data }) => {
   const normalizedRadius = radius - strokeWidth * 0.5;
   const circumference = normalizedRadius * 2 * Math.PI;
 
-  const segments = data.map((item, index) => {
+  const segments = data.map((item) => {
     const percentage = (item.value / total) * 100;
     const strokeDasharray = `${
       (percentage / 100) * circumference

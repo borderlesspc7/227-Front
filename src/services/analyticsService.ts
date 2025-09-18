@@ -259,13 +259,10 @@ class AnalyticsService {
     const monthlyTrends = this.calculateMonthlyTrends(requests);
 
     // Distribuição por prioridade
-    const priorityDistribution = this.calculateDistribution(
-      requests,
-      "prioridade"
-    );
+    const priorityDistribution = this.calculatePriorityDistribution(requests);
 
     // Distribuição por status
-    const statusDistribution = this.calculateDistribution(requests, "status");
+    const statusDistribution = this.calculateStatusDistribution(requests);
 
     // Estatísticas por criador
     const creatorStats = this.calculateCreatorStats(requests);
@@ -358,23 +355,40 @@ class AnalyticsService {
   }
 
   /**
-   * Calcular distribuição por campo
+   * Calcular distribuição por prioridade
    */
-  private calculateDistribution(
-    requests: AdditiveRequest[],
-    field: keyof AdditiveRequest
-  ) {
+  private calculatePriorityDistribution(requests: AdditiveRequest[]) {
     const distribution = new Map<string, number>();
 
     requests.forEach((request) => {
-      const value = String(request[field]);
+      const value = String(request.prioridade);
       distribution.set(value, (distribution.get(value) || 0) + 1);
     });
 
     const total = requests.length;
 
     return Array.from(distribution.entries()).map(([key, count]) => ({
-      [field === "prioridade" ? "priority" : "status"]: key,
+      priority: key,
+      count,
+      percentage: total > 0 ? (count / total) * 100 : 0,
+    }));
+  }
+
+  /**
+   * Calcular distribuição por status
+   */
+  private calculateStatusDistribution(requests: AdditiveRequest[]) {
+    const distribution = new Map<string, number>();
+
+    requests.forEach((request) => {
+      const value = String(request.status);
+      distribution.set(value, (distribution.get(value) || 0) + 1);
+    });
+
+    const total = requests.length;
+
+    return Array.from(distribution.entries()).map(([key, count]) => ({
+      status: key,
       count,
       percentage: total > 0 ? (count / total) * 100 : 0,
     }));

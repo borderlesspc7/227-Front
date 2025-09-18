@@ -235,7 +235,7 @@ export const workflowService = {
 
       // Atualizar solicitação
       const requestRef = doc(db, "additiveRequests", requestId);
-      const updateData: Record<string, unknown> = {
+      const updateData = {
         workflowStatus: {
           ...updatedWorkflowStatus,
           startedAt: updatedWorkflowStatus.startedAt,
@@ -245,14 +245,13 @@ export const workflowService = {
           })),
         },
         currentApprovalStep: nextStep?.id || null,
+        status: ApprovalStatus.APPROVED,
+        approvedBy: approverName,
+        approvedAt: serverTimestamp(),
+        workflowCompletedAt: serverTimestamp(),
+        isWorkflowActive: false,
         updatedAt: serverTimestamp(),
       };
-
-      updateData.status = ApprovalStatus.APPROVED;
-      updateData.approvedBy = approverName;
-      updateData.approvedAt = serverTimestamp();
-      updateData.workflowCompletedAt = serverTimestamp();
-      updateData.isWorkflowActive = false;
 
       batch.update(requestRef, updateData);
 
