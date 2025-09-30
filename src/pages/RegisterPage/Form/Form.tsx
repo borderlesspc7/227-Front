@@ -1,12 +1,14 @@
 "use client";
 
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import InputField from "../../../components/ui/InputField/InputField";
 import { SelectField } from "../../../components/ui/SelectField/SelectField";
 import { Button } from "../../../components/ui/Button/Button";
 import type { RegisterCredentials, UserRole } from "../../../types/auth";
 import { useAuth } from "../../../hooks/useAuth";
+import { optionsService } from "../../../services/optionsService";
+import { userService } from "../../../services/userService";
 
 type FormData = {
   displayName: string;
@@ -19,15 +21,16 @@ type FormData = {
 
 type FormErrors = Partial<Record<keyof FormData, string>>;
 
-const userRoleOptions = [
-  { value: "admin", label: "Administrador" },
-  { value: "solicitante", label: "Solicitante de OSAs" },
-  { value: "engenheiro", label: "Engenheiro Aprovador" },
-  { value: "suprimento", label: "Suprimentos" },
-  { value: "diretor", label: "Diretor/Financeiro" },
-];
+// Opções serão carregadas do Firestore
 
-export const UserRegisterForm: React.FC = () => {
+interface UserRegisterFormProps {
+  onUserSaved?: (user: any) => void;
+  onCancel?: () => void;
+  isSubmitting?: boolean;
+  user?: any; // Para edição
+}
+
+export const UserRegisterForm: React.FC<UserRegisterFormProps> = ({ onUserSaved, onCancel, isSubmitting = false, user }) => {
   const { registerForAdmin } = useAuth();
   const [formData, setFormData] = useState<FormData>({
     displayName: "",
@@ -39,7 +42,33 @@ export const UserRegisterForm: React.FC = () => {
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [userRoleOptions, setUserRoleOptions] = useState<Array<{ value: string; label: string }>>([]);
+
+  useEffect(() => {
+    const loadUserRoleOptions = async () => {
+      try {
+        const options = await optionsService.getUserRoleOptions();
+        setUserRoleOptions(options.map(opt => ({ value: opt.value, label: opt.label })));
+      } catch (error) {
+        console.error("Erro ao carregar opções de role:", error);
+      }
+    };
+    loadUserRoleOptions();
+  }, []);
+
+  // Carregar dados do usuário quando estiver editando
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        displayName: user.displayName || "",
+        email: user.email || "",
+        password: "", // Não mostrar senha atual
+        role: user.role || "",
+        cpf: user.cpf || "",
+        phone: user.phone || "",
+      });
+    }
+  }, [user]);
 
   const formatCPF = (value: string) => {
     // Remove all non-numeric characters
@@ -77,9 +106,15 @@ export const UserRegisterForm: React.FC = () => {
     }
 
     // Password validation
-    if (!formData.password) {
-      newErrors.password = "Senha é obrigatória";
-    } else if (formData.password.length < 6) {
+    if (!user) {
+      // Para novos usuários, senha é obrigatória
+      if (!formData.password) {
+        newErrors.password = "Senha é obrigatória";
+      } else if (formData.password.length < 6) {
+        newErrors.password = "Senha deve ter pelo menos 6 caracteres";
+      }
+    } else if (formData.password && formData.password.length < 6) {
+      // Para edição, se forneceu senha, deve ter pelo menos 6 caracteres
       newErrors.password = "Senha deve ter pelo menos 6 caracteres";
     }
 
@@ -123,32 +158,55 @@ export const UserRegisterForm: React.FC = () => {
 
     if (!validateForm()) return;
 
-    setIsSubmitting(true);
-
     try {
-      const payload: RegisterCredentials = {
-        displayName: formData.displayName,
-        email: formData.email,
-        password: formData.password,
-        cpf: formData.cpf,
-        phone: formData.phone,
-        role: formData.role as UserRole,
-      };
+      if (user) {
+        // Edição de usuário existente
+        const updateData: any = {
+          displayName: formData.displayName,
+          email: formData.email,
+          cpf: formData.cpf,
+          phone: formData.phone,
+          role: formData.role as UserRole,
+        };
 
-      await registerForAdmin(payload);
+        // Só atualiza senha se foi fornecida
+        if (formData.password) {
+          updateData.password = formData.password;
+        }
 
-      setFormData({
-        displayName: "",
-        email: "",
-        password: "",
-        role: "",
-        cpf: "",
-        phone: "",
-      });
+        await userService.updateUser(user.id, updateData);
+
+        if (onUserSaved) {
+          onUserSaved({ ...user, ...updateData });
+        }
+      } else {
+        // Criação de novo usuário
+        const payload: RegisterCredentials = {
+          displayName: formData.displayName,
+          email: formData.email,
+          password: formData.password,
+          cpf: formData.cpf,
+          phone: formData.phone,
+          role: formData.role as UserRole,
+        };
+
+        const newUser = await registerForAdmin(payload);
+
+        setFormData({
+          displayName: "",
+          email: "",
+          password: "",
+          role: "",
+          cpf: "",
+          phone: "",
+        });
+
+        if (onUserSaved) {
+          onUserSaved(newUser);
+        }
+      }
     } catch (error) {
-      console.error("Erro ao registrar usuário:", error);
-    } finally {
-      setIsSubmitting(false);
+      console.error("Erro ao salvar usuário:", error);
     }
   };
 
@@ -186,13 +244,13 @@ export const UserRegisterForm: React.FC = () => {
           />
 
           <InputField
-            label="Senha"
+            label={user ? "Senha (deixe em branco para manter a atual)" : "Senha *"}
             type="password"
             value={formData.password}
             onChange={handleInputChange("password")}
-            placeholder="Digite a senha"
+            placeholder={user ? "Digite uma nova senha (opcional)" : "Digite a senha"}
             error={errors.password}
-            required
+            required={!user}
           />
 
           <InputField
@@ -231,8 +289,20 @@ export const UserRegisterForm: React.FC = () => {
             disabled={isSubmitting}
             className="user-register-form__submit-btn"
           >
-            {isSubmitting ? "Cadastrando..." : "Cadastrar Usuário"}
+            {isSubmitting ? (user ? "Atualizando..." : "Cadastrando...") : (user ? "Atualizar Usuário" : "Cadastrar Usuário")}
           </Button>
+
+          {onCancel && (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={onCancel}
+              disabled={isSubmitting}
+              className="user-register-form__cancel-btn"
+            >
+              Cancelar
+            </Button>
+          )}
         </div>
       </form>
     </div>

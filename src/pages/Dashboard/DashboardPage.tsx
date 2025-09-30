@@ -13,6 +13,7 @@ import { type AdditiveRequest } from "../../types/additiveRequest";
 import { type Contract } from "../../types/contracts";
 import { additiveRequestService } from "../../services/additiveRequestService";
 import { contractService } from "../../services/contractService";
+import { trendsService } from "../../services/trendsService";
 import { useToast } from "../../hooks/useToast";
 import KPICard from "./components/KPICard/KPICard";
 import FilterSection from "./components/FilterSection/FilterSection";
@@ -37,6 +38,7 @@ const DashboardPage: React.FC = () => {
   // Estados
   const [requests, setRequests] = useState<AdditiveRequest[]>([]);
   const [contracts, setContracts] = useState<Contract[]>([]);
+  const [trends, setTrends] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<DashboardFilters>({
     dateRange: {
@@ -54,13 +56,15 @@ const DashboardPage: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [requestsData, contractsData] = await Promise.all([
+      const [requestsData, contractsData, trendsData] = await Promise.all([
         additiveRequestService.getAdditiveRequests(),
         contractService.getContracts(),
+        trendsService.calculateTrends(),
       ]);
 
       setRequests(requestsData);
       setContracts(contractsData);
+      setTrends(trendsData);
     } catch (error) {
       console.error("Erro ao carregar dados do dashboard:", error);
       showError("Erro", "Erro ao carregar dados do dashboard");
@@ -284,8 +288,8 @@ const DashboardPage: React.FC = () => {
           title="Total de OSAs"
           value={kpis.total.toString()}
           icon={<FiFileText />}
-          trend="+12%"
-          trendType="positive"
+          trend={trends?.totalRequests?.trend || "0%"}
+          trendType={trends?.totalRequests?.trendType || "neutral"}
           color="blue"
         />
 
@@ -293,8 +297,8 @@ const DashboardPage: React.FC = () => {
           title="Taxa de Aprovação"
           value={`${kpis.percentualAprovacao.toFixed(1)}%`}
           icon={<FiCheckCircle />}
-          trend="+5.2%"
-          trendType="positive"
+          trend={trends?.approvalRate?.trend || "0%"}
+          trendType={trends?.approvalRate?.trendType || "neutral"}
           color="green"
         />
 
@@ -302,8 +306,8 @@ const DashboardPage: React.FC = () => {
           title="Valor Total"
           value={formatCurrency(kpis.valorTotal)}
           icon={<FiDollarSign />}
-          trend="+18.7%"
-          trendType="positive"
+          trend={trends?.totalValue?.trend || "0%"}
+          trendType={trends?.totalValue?.trendType || "neutral"}
           color="purple"
         />
 
@@ -311,8 +315,8 @@ const DashboardPage: React.FC = () => {
           title="Valor Aprovado"
           value={formatCurrency(kpis.valorAprovado)}
           icon={<FiTrendingUp />}
-          trend="+22.1%"
-          trendType="positive"
+          trend={trends?.approvedValue?.trend || "0%"}
+          trendType={trends?.approvedValue?.trendType || "neutral"}
           color="green"
         />
 
@@ -320,8 +324,8 @@ const DashboardPage: React.FC = () => {
           title="Pendentes"
           value={kpis.pendentes.toString()}
           icon={<FiClock />}
-          trend="-3.4%"
-          trendType="negative"
+          trend={trends?.pendingRequests?.trend || "0%"}
+          trendType={trends?.pendingRequests?.trendType || "neutral"}
           color="orange"
         />
 
@@ -329,8 +333,8 @@ const DashboardPage: React.FC = () => {
           title="Rejeitados"
           value={kpis.rejeitados.toString()}
           icon={<FiXCircle />}
-          trend="-8.1%"
-          trendType="negative"
+          trend={trends?.rejectedRequests?.trend || "0%"}
+          trendType={trends?.rejectedRequests?.trendType || "neutral"}
           color="red"
         />
       </div>

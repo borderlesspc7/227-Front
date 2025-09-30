@@ -2,20 +2,23 @@
 
 import React, { useState } from "react";
 import "./List.css";
-import type { Contract, UpdateContractData } from "../../../types/contracts";
+import type { Contract } from "../../../types/contracts";
+import { Button } from "../../../components/ui/Button/Button";
+import { FiPlus } from "react-icons/fi";
 
 interface ListProps {
   contracts: Contract[];
-  onContractUpdated: (contract: Contract) => Promise<void>;
   onContractDeleted: (contractId: string) => Promise<void>;
+  onContractEdit: (contract: Contract) => void;
+  onNewContract: () => void;
 }
 
 export const List: React.FC<ListProps> = ({
   contracts,
-  onContractUpdated,
   onContractDeleted,
+  onContractEdit,
+  onNewContract,
 }) => {
-  const [editingContract, setEditingContract] = useState<Contract | null>(null);
   const [deletingContractId, setDeletingContractId] = useState<string | null>(
     null
   );
@@ -23,7 +26,6 @@ export const List: React.FC<ListProps> = ({
   const [contractToDelete, setContractToDelete] = useState<Contract | null>(
     null
   );
-  const [editFormData, setEditFormData] = useState<UpdateContractData>({});
 
   const formatCurrency = (value: number): string => {
     return value.toLocaleString("pt-BR", {
@@ -62,43 +64,6 @@ export const List: React.FC<ListProps> = ({
     }
   };
 
-  const handleEdit = (contract: Contract) => {
-    setEditingContract(contract);
-    setEditFormData({
-      cliente: contract.cliente,
-      obra: contract.obra,
-      numeroContrato: contract.numeroContrato,
-      vigenciaInicio: contract.vigenciaInicio,
-      vigenciaFim: contract.vigenciaFim,
-      valor: contract.valor,
-      status: contract.status,
-    });
-  };
-
-  const handleEditCancel = () => {
-    setEditingContract(null);
-    setEditFormData({});
-  };
-
-  const handleEditSave = async () => {
-    if (!editingContract) return;
-
-    try {
-      const updatedContract: Contract = {
-        ...editingContract,
-        ...editFormData,
-        valor: Number(editFormData.valor) || editingContract.valor,
-      };
-
-      await onContractUpdated(updatedContract);
-      setEditingContract(null);
-      setEditFormData({});
-    } catch (error) {
-      console.error("Erro ao atualizar contrato:", error);
-      alert("Erro ao atualizar contrato. Tente novamente.");
-    }
-  };
-
   const handleDelete = async (contractId: string) => {
     setDeletingContractId(contractId);
     try {
@@ -125,16 +90,6 @@ export const List: React.FC<ListProps> = ({
     if (!contractToDelete) return;
     await handleDelete(contractToDelete.id);
     closeDeleteModal();
-  };
-
-  const handleEditInputChange = (
-    field: keyof UpdateContractData,
-    value: string | number
-  ) => {
-    setEditFormData((prev) => ({
-      ...prev,
-      [field]: field === "valor" ? Number(value) : value,
-    }));
   };
 
   if (contracts.length === 0) {
@@ -173,11 +128,21 @@ export const List: React.FC<ListProps> = ({
   return (
     <div className="contract-list">
       <div className="contract-list__header">
-        <h3 className="contract-list__title">Contratos Cadastrados</h3>
-        <p className="contract-list__subtitle">
-          {contracts.length} contrato{contracts.length !== 1 ? "s" : ""}{" "}
-          registrado{contracts.length !== 1 ? "s" : ""}
-        </p>
+        <div className="contract-list__header-content">
+          <h3 className="contract-list__title">Contratos Cadastrados</h3>
+          <p className="contract-list__subtitle">
+            {contracts.length} contrato{contracts.length !== 1 ? "s" : ""}{" "}
+            registrado{contracts.length !== 1 ? "s" : ""}
+          </p>
+        </div>
+        <Button
+          variant="primary"
+          onClick={onNewContract}
+          className="contract-list__add-button"
+        >
+          <FiPlus className="contract-list__add-icon" />
+          Novo Contrato
+        </Button>
       </div>
 
       {/* Desktop Table View */}
@@ -245,7 +210,7 @@ export const List: React.FC<ListProps> = ({
                     <div className="contract-list__crud-actions">
                       <button
                         type="button"
-                        onClick={() => handleEdit(contract)}
+                        onClick={() => onContractEdit(contract)}
                         className="contract-list__action-btn contract-list__action-btn--edit"
                         title="Editar contrato"
                       >
@@ -337,7 +302,7 @@ export const List: React.FC<ListProps> = ({
               </button>
               <button
                 type="button"
-                onClick={() => handleEdit(contract)}
+                onClick={() => onContractEdit(contract)}
                 className="contract-list__card-btn contract-list__card-btn--edit"
               >
                 Editar
@@ -357,112 +322,7 @@ export const List: React.FC<ListProps> = ({
         ))}
       </div>
 
-      {/* Edit Modal */}
-      {editingContract && (
-        <div className="contract-list__edit-modal">
-          <div className="contract-list__edit-modal-content">
-            <h3>Editar Contrato</h3>
-            <div className="contract-list__edit-form">
-              <div className="contract-list__edit-row">
-                <label>Cliente:</label>
-                <input
-                  type="text"
-                  value={editFormData.cliente || ""}
-                  onChange={(e) =>
-                    handleEditInputChange("cliente", e.target.value)
-                  }
-                />
-              </div>
-              <div className="contract-list__edit-row">
-                <label>Obra:</label>
-                <input
-                  type="text"
-                  value={editFormData.obra || ""}
-                  onChange={(e) =>
-                    handleEditInputChange("obra", e.target.value)
-                  }
-                />
-              </div>
-              <div className="contract-list__edit-row">
-                <label>Nº Contrato:</label>
-                <input
-                  type="text"
-                  value={editFormData.numeroContrato || ""}
-                  onChange={(e) =>
-                    handleEditInputChange("numeroContrato", e.target.value)
-                  }
-                />
-              </div>
-              <div className="contract-list__edit-row">
-                <label>Vigência Início:</label>
-                <input
-                  type="date"
-                  value={editFormData.vigenciaInicio || ""}
-                  onChange={(e) =>
-                    handleEditInputChange("vigenciaInicio", e.target.value)
-                  }
-                />
-              </div>
-              <div className="contract-list__edit-row">
-                <label>Vigência Fim:</label>
-                <input
-                  type="date"
-                  value={editFormData.vigenciaFim || ""}
-                  onChange={(e) =>
-                    handleEditInputChange("vigenciaFim", e.target.value)
-                  }
-                />
-              </div>
-              <div className="contract-list__edit-row">
-                <label>Valor:</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={editFormData.valor || ""}
-                  onChange={(e) =>
-                    handleEditInputChange(
-                      "valor",
-                      parseFloat(e.target.value) || 0
-                    )
-                  }
-                />
-              </div>
-              <div className="contract-list__edit-row">
-                <label>Status:</label>
-                <select
-                  value={editFormData.status || "ativo"}
-                  onChange={(e) =>
-                    handleEditInputChange(
-                      "status",
-                      e.target.value as "ativo" | "inativo" | "pendente"
-                    )
-                  }
-                >
-                  <option value="ativo">Ativo</option>
-                  <option value="inativo">Inativo</option>
-                  <option value="pendente">Pendente</option>
-                </select>
-              </div>
-            </div>
-            <div className="contract-list__edit-actions">
-              <button
-                onClick={handleEditSave}
-                className="contract-list__edit-save"
-              >
-                Salvar
-              </button>
-              <button
-                onClick={handleEditCancel}
-                className="contract-list__edit-cancel"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirm Modal */}
+      {/* Delete Confirmation Modal */}
       {deleteModalOpen && contractToDelete && (
         <div className="contract-list__delete-modal">
           <div className="contract-list__delete-modal-content">

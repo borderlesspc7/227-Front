@@ -11,6 +11,7 @@ interface PriceFormProps {
   price?: UnitPrice | null;
   onSubmit: (price: Omit<UnitPrice, "id">) => void;
   onCancel: () => void;
+  isSubmitting?: boolean;
 }
 
 const UNIT_OPTION = [
@@ -20,7 +21,7 @@ const UNIT_OPTION = [
   { value: "peça", label: "peça" },
 ];
 
-const PriceForm: React.FC<PriceFormProps> = ({ price, onSubmit, onCancel }) => {
+const PriceForm: React.FC<PriceFormProps> = ({ price, onSubmit, onCancel, isSubmitting = false }) => {
   const { showSuccess, showError } = useToast();
 
   const [formData, setFormData] = useState<UnitPrice>({
@@ -350,15 +351,16 @@ const PriceForm: React.FC<PriceFormProps> = ({ price, onSubmit, onCancel }) => {
             type="button"
             onClick={onCancel}
             className="price-form__cancel-btn"
+            disabled={loading || isSubmitting}
           >
             Cancelar
           </button>
           <button
             type="submit"
             className="price-form__submit-btn"
-            disabled={loading}
+            disabled={loading || isSubmitting}
           >
-            {loading ? "Salvando..." : price ? "Atualizar" : "Cadastrar"}
+            {loading || isSubmitting ? "Salvando..." : price ? "Atualizar" : "Cadastrar"}
           </button>
         </div>
       </form>

@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from "react";
 import "./ContractsPage.css";
 import type { Contract } from "../../types/contracts";
-import Form from "./Form/Form";
 import List from "./List/List";
+import ContractModal from "../../components/ui/ContractModal/ContractModal";
 import { contractService } from "../../services/contractService";
 import { useAuth } from "../../hooks/useAuth";
 
@@ -13,6 +13,8 @@ export const ContractsPage: React.FC = () => {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingContract, setEditingContract] = useState<Contract | null>(null);
 
   useEffect(() => {
     if (!user) {
@@ -34,24 +36,23 @@ export const ContractsPage: React.FC = () => {
 
   const handleContractSaved = (newContract: Contract) => {
     console.log("Contrato salvo:", newContract);
-    // setContracts((prevContracts) => [newContract, ...prevContracts]);
+    setIsModalOpen(false);
+    setEditingContract(null);
   };
 
-  const handleContractUpdated = async (updatedContract: Contract) => {
-    try {
-      await contractService.updateContract(updatedContract.id, {
-        cliente: updatedContract.cliente,
-        obra: updatedContract.obra,
-        numeroContrato: updatedContract.numeroContrato,
-        vigenciaInicio: updatedContract.vigenciaInicio,
-        vigenciaFim: updatedContract.vigenciaFim,
-        valor: updatedContract.valor,
-        status: updatedContract.status,
-      });
-    } catch (error) {
-      console.error("Erro ao atualizar contrato:", error);
-      throw error;
-    }
+  const handleEditContract = (contract: Contract) => {
+    setEditingContract(contract);
+    setIsModalOpen(true);
+  };
+
+  const handleNewContract = () => {
+    setEditingContract(null);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingContract(null);
   };
 
   const handleContractDeleted = async (contractId: string) => {
@@ -103,15 +104,22 @@ export const ContractsPage: React.FC = () => {
       <div className="contracts-page__main">
         <main className="contracts-page__content">
           <div className="contracts-page__container">
-            <Form onContractSaved={handleContractSaved} />
             <List
               contracts={contracts}
-              onContractUpdated={handleContractUpdated}
               onContractDeleted={handleContractDeleted}
+              onContractEdit={handleEditContract}
+              onNewContract={handleNewContract}
             />
           </div>
         </main>
       </div>
+
+      <ContractModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onContractSaved={handleContractSaved}
+        contract={editingContract}
+      />
     </div>
   );
 };

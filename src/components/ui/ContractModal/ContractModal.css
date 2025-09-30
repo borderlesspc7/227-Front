@@ -1,0 +1,40 @@
+/* ContractModal.css */
+.contract-modal {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.contract-modal__header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.contract-modal__title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+}
+
+.contract-modal__subtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.contract-modal__content {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .contract-modal {
+    max-width: 95%;
+  }
+  
+  .contract-modal__title {
+    font-size: 1.25rem;
+  }
+}

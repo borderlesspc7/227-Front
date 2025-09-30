@@ -6,6 +6,12 @@ export default function getFirebaseErrorMessage(error: any): string {
   const errorCode = error?.code || "";
 
   switch (errorCode) {
+    case "auth/email-already-in-use":
+      return "Este email já está em uso. Tente fazer login ou use outro email.";
+
+    case "auth/invalid-credential":
+      return "Email ou senha incorretos. Verifique suas credenciais.";
+
     case "auth/user-not-found":
       return "Usuário não encontrado. Verifique seu email.";
 

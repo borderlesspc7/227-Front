@@ -7,6 +7,7 @@ import type {
 } from "../../../types/additiveRequest";
 import { additiveRequestService } from "../../../services/additiveRequestService";
 import { contractService } from "../../../services/contractService";
+import { optionsService } from "../../../services/optionsService";
 import { useToast } from "../../../hooks/useToast";
 import { masks } from "../../../utils/masks";
 import ConfirmModal from "../../../components/ui/ConfirmModal/ConfirmModal";
@@ -19,21 +20,7 @@ interface AdditiveRequestFormProps {
   onCancel: () => void;
 }
 
-const PRIORITY_OPTIONS = [
-  { value: "baixa", label: "Baixa" },
-  { value: "media", label: "Média" },
-  { value: "alta", label: "Alta" },
-  { value: "urgente", label: "Urgente" },
-];
-
-const UNIT_OPTIONS = [
-  { value: "m2", label: "m²" },
-  { value: "m1", label: "m" },
-  { value: "unid", label: "unid" },
-  { value: "peça", label: "peça" },
-  { value: "kg", label: "kg" },
-  { value: "ton", label: "ton" },
-];
+// Opções serão carregadas do Firestore
 
 const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
   request,
@@ -58,6 +45,8 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
   const [contracts, setContracts] = useState<
     Array<{ id: string; numeroContrato: string; cliente: string; obra: string }>
   >([]);
+  const [priorityOptions, setPriorityOptions] = useState<Array<{ value: string; label: string }>>([]);
+  const [unitOptions, setUnitOptions] = useState<Array<{ value: string; label: string }>>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -72,20 +61,27 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
     isOpen: false,
     title: "",
     message: "",
-    onConfirm: () => {},
+    onConfirm: () => { },
     loading: false,
   });
 
   useEffect(() => {
-    const loadContracts = async () => {
+    const loadData = async () => {
       try {
-        const contractsFromDB = await contractService.getContracts();
+        const [contractsFromDB, priorityOpts, unitOpts] = await Promise.all([
+          contractService.getContracts(),
+          optionsService.getPriorityOptions(),
+          optionsService.getUnitOptions(),
+        ]);
+
         setContracts(contractsFromDB);
+        setPriorityOptions(priorityOpts.map(opt => ({ value: opt.value, label: opt.label })));
+        setUnitOptions(unitOpts.map(opt => ({ value: opt.value, label: opt.label })));
       } catch (error) {
         console.error(error);
       }
     };
-    loadContracts();
+    loadData();
   }, []);
 
   useEffect(() => {
@@ -217,7 +213,7 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
         isOpen: false,
         title: "",
         message: "",
-        onConfirm: () => {},
+        onConfirm: () => { },
         loading: false,
       });
     }
@@ -396,7 +392,7 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
                 className="additive-request-form__select"
                 required
               >
-                {PRIORITY_OPTIONS.map((option) => (
+                {priorityOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
@@ -508,7 +504,7 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
                       className="additive-request-form__select"
                       required
                     >
-                      {UNIT_OPTIONS.map((option) => (
+                      {unitOptions.map((option) => (
                         <option key={option.value} value={option.value}>
                           {option.label}
                         </option>
@@ -610,8 +606,8 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
               {loading
                 ? "Enviando..."
                 : request
-                ? "Atualizar e Enviar para Aprovação"
-                : "Criar e Enviar para Aprovação"}
+                  ? "Atualizar e Enviar para Aprovação"
+                  : "Criar e Enviar para Aprovação"}
             </button>
 
             <button
@@ -622,8 +618,8 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
               {loading
                 ? "Salvando..."
                 : request
-                ? "Salvar Rascunho"
-                : "Salvar como Rascunho"}
+                  ? "Salvar Rascunho"
+                  : "Salvar como Rascunho"}
             </button>
           </div>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Form.css";
 import InputField from "../../../components/ui/InputField/InputField";
 import FileUpload from "../../../components/FileUpload/FileUpload";
@@ -11,9 +11,12 @@ import { useAuth } from "../../../hooks/useAuth";
 
 interface FormProps {
   onContractSaved: (contract: Contract) => void;
+  onCancel?: () => void;
+  contract?: Contract;
+  isSubmitting?: boolean;
 }
 
-export const Form: React.FC<FormProps> = ({ onContractSaved }) => {
+export const Form: React.FC<FormProps> = ({ onContractSaved, onCancel, contract, isSubmitting = false }) => {
   const { user } = useAuth();
   const [formData, setFormData] = useState<ContractFormData>({
     id: "",
@@ -36,6 +39,26 @@ export const Form: React.FC<FormProps> = ({ onContractSaved }) => {
     type: "success" | "error";
     text: string;
   } | null>(null);
+
+  // Carregar dados do contrato quando estiver editando
+  useEffect(() => {
+    if (contract) {
+      setFormData({
+        id: contract.id,
+        cliente: contract.cliente,
+        obra: contract.obra,
+        numeroContrato: contract.numeroContrato,
+        vigenciaInicio: contract.vigenciaInicio,
+        vigenciaFim: contract.vigenciaFim,
+        valor: formatCurrency(contract.valor.toString()),
+        status: contract.status,
+        pdfFile: contract.pdfFile,
+        createdAt: contract.createdAt,
+        updatedAt: contract.updatedAt,
+        createdBy: contract.createdBy,
+      });
+    }
+  }, [contract]);
 
   const formatCurrency = (value: string): string => {
     const numbers = value.replace(/\D/g, "");
@@ -307,11 +330,22 @@ export const Form: React.FC<FormProps> = ({ onContractSaved }) => {
           <Button
             type="submit"
             variant="primary"
-            loading={isLoading}
-            disabled={isLoading}
+            loading={isLoading || isSubmitting}
+            disabled={isLoading || isSubmitting}
           >
-            {isLoading ? "Salvando..." : "Salvar Contrato"}
+            {isLoading || isSubmitting ? "Salvando..." : contract ? "Atualizar Contrato" : "Salvar Contrato"}
           </Button>
+
+          {onCancel && (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={onCancel}
+              disabled={isLoading || isSubmitting}
+            >
+              Cancelar
+            </Button>
+          )}
         </div>
       </form>
     </div>

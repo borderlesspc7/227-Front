@@ -1,11 +1,13 @@
 .register-user-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  background: #ffffff;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .register-user-page__main {
-  min-height: 100%;
+  flex: 1;
   padding: 32px;
   display: flex;
   align-items: flex-start;
@@ -14,8 +16,11 @@
 
 .register-user-page__content {
   width: 100%;
-  max-width: 720px;
+  max-width: 100%;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 /* Responsive Design */
@@ -53,6 +58,40 @@
 /* Focus management for accessibility */
 .register-user-page__main:focus-within {
   outline: none;
+}
+
+/* Loading and Error States */
+.register-user-page__loading,
+.register-user-page__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  text-align: center;
+  padding: 32px;
+}
+
+.register-user-page__loading p,
+.register-user-page__error p {
+  font-size: 16px;
+  color: #64748b;
+  margin-bottom: 16px;
+}
+
+.register-user-page__error button {
+  padding: 8px 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.register-user-page__error button:hover {
+  background: #2563eb;
 }
 
 /* Print styles */

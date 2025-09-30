@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import PriceForm from "./Form/PriceForm";
 import PriceList from "./List/PriceList";
+import PriceModal from "../../components/ui/PriceModal/PriceModal";
 import type { UnitPrice } from "../../types/unitPrice";
 import { unitPriceService } from "../../services/unitPrice";
 import { useToast } from "../../hooks/useToast";
@@ -12,7 +12,7 @@ const PricesPage: React.FC = () => {
   const { showError } = useToast();
   const [prices, setPrices] = useState<UnitPrice[]>([]);
   const [editingPrice, setEditingPrice] = useState<UnitPrice | null>(null);
-  const [showForm, setShowForm] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,12 +52,23 @@ const PricesPage: React.FC = () => {
 
     await unitPriceService.createUnitPrice(price);
     refreshPrices();
-    setShowForm(false);
+    setIsModalOpen(false);
+    setEditingPrice(null);
   };
 
   const handleEditPrice = (price: UnitPrice) => {
     setEditingPrice(price);
-    setShowForm(true);
+    setIsModalOpen(true);
+  };
+
+  const handleNewPrice = () => {
+    setEditingPrice(null);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingPrice(null);
   };
 
   const handleUpdatePrice = async (updatedPrice: UnitPrice) => {
@@ -73,7 +84,7 @@ const PricesPage: React.FC = () => {
 
     refreshPrices();
     setEditingPrice(null);
-    setShowForm(false);
+    setIsModalOpen(false);
     await unitPriceService.updateUnitPrice(updatedPrice.id!, updatedPrice);
   };
 
@@ -92,18 +103,13 @@ const PricesPage: React.FC = () => {
     refreshPrices();
   };
 
-  const handleCancelForm = () => {
-    setEditingPrice(null);
-    setShowForm(false);
-  };
-
   return (
     <div className="prices-page">
       <div className="prices-page__header">
         <h1 className="prices-page__title">Cadastro de Preços Unitários</h1>
         <button
           className="prices-page__add-btn"
-          onClick={() => setShowForm(true)}
+          onClick={handleNewPrice}
           type="button"
         >
           Novo Preço Unitário
@@ -122,16 +128,6 @@ const PricesPage: React.FC = () => {
         </div>
       )}
 
-      {showForm && (
-        <div className="prices-page__form-section">
-          <PriceForm
-            price={editingPrice}
-            onSubmit={editingPrice ? handleUpdatePrice : handleAddPrice}
-            onCancel={handleCancelForm}
-          />
-        </div>
-      )}
-
       <div className="prices-page__list-section">
         <PriceList
           prices={prices}
@@ -139,6 +135,13 @@ const PricesPage: React.FC = () => {
           onDelete={handleDeletePrice}
         />
       </div>
+
+      <PriceModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onPriceSaved={editingPrice ? handleUpdatePrice : handleAddPrice}
+        price={editingPrice}
+      />
     </div>
   );
 };

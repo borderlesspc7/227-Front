@@ -32,7 +32,7 @@ const menuItems = [
   },
   {
     id: "register-user",
-    label: "Cadastrar Usuário",
+    label: "Usuários",
     icon: FiUser,
     path: "/admin/register-user",
   },
@@ -90,8 +90,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = "" }) => {
                 <NavLink
                   to={item.path}
                   className={({ isActive }) =>
-                    `sidebar__menu-link ${
-                      isActive ? "sidebar__menu-link--active" : ""
+                    `sidebar__menu-link ${isActive ? "sidebar__menu-link--active" : ""
                     }`
                   }
                 >
