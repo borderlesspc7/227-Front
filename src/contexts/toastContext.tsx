@@ -25,7 +25,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
 
   const showToast = useCallback(
     (toast: Omit<ToastData, "id">) => {
-      const id = Math.random().toString(36).substr(2, 9);
+      const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       const newToast: ToastData = {
         ...toast,
         id,

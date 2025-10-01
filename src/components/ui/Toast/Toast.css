@@ -1,15 +1,15 @@
 .toast {
   position: relative;
-  background: white;
+  background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-  border: 1px solid #e2e8f0;
+  border: 1px solid #e5e7eb;
   margin-bottom: 0.75rem;
   min-width: 320px;
   max-width: 400px;
   transform: translateX(100%);
   opacity: 0;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s ease-out;
   overflow: hidden;
   pointer-events: auto;
 }

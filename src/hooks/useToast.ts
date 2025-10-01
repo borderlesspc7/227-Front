@@ -23,7 +23,20 @@ export interface ToastContextType {
 export const useToast = (): ToastContextType => {
   const context = useContext(ToastContext);
   if (context === undefined) {
-    throw new Error("useToast must be used within a ToastProvider");
+    // Fallback para quando o contexto não está disponível
+    console.warn("useToast: ToastProvider não encontrado, usando fallback");
+    return {
+      toasts: [],
+      showToast: (toast) => {
+        console.log(`Toast: ${toast?.type?.toUpperCase() || 'UNKNOWN'} - ${toast?.title || 'Sem título'}${toast?.message ? `: ${toast.message}` : ""}`);
+      },
+      showSuccess: (title, message) => console.log(`✅ ${title}${message ? `: ${message}` : ""}`),
+      showError: (title, message) => console.error(`❌ ${title}${message ? `: ${message}` : ""}`),
+      showWarning: (title, message) => console.warn(`⚠️ ${title}${message ? `: ${message}` : ""}`),
+      showInfo: (title, message) => console.info(`ℹ️ ${title}${message ? `: ${message}` : ""}`),
+      removeToast: () => { },
+      clearAllToasts: () => { },
+    };
   }
   return context;
 };

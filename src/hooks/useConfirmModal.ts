@@ -1,72 +1,62 @@
-import { useState } from "react";
+"use client";
 
-interface ConfirmModalState {
+import { useState, useCallback } from "react";
+
+export interface ConfirmModalState {
   isOpen: boolean;
-  title: string;
-  message: string;
-  onConfirm: () => void;
-  loading: boolean;
-}
-
-interface ConfirmModalConfig {
-  title: string;
+  title?: string;
   message: string;
   confirmText?: string;
   cancelText?: string;
-  type?: "danger" | "warning" | "info" | "success";
+  type?: "danger" | "warning" | "info";
+  onConfirm?: () => void;
 }
 
 export const useConfirmModal = () => {
   const [modalState, setModalState] = useState<ConfirmModalState>({
     isOpen: false,
-    title: "",
     message: "",
-    onConfirm: () => {},
-    loading: false,
   });
 
-  const showConfirm = (
-    config: ConfirmModalConfig,
-    onConfirm: () => void | Promise<void>
+  const showConfirm = useCallback((
+    message: string,
+    onConfirm: () => void,
+    options?: {
+      title?: string;
+      confirmText?: string;
+      cancelText?: string;
+      type?: "danger" | "warning" | "info";
+    }
   ) => {
     setModalState({
       isOpen: true,
-      title: config.title,
-      message: config.message,
-      onConfirm: async () => {
-        setModalState((prev) => ({ ...prev, loading: true }));
-        try {
-          await onConfirm();
-          closeModal();
-        } catch (error) {
-          console.error("Erro na operação:", error);
-          setModalState((prev) => ({ ...prev, loading: false }));
-        }
-      },
-      loading: false,
+      message,
+      onConfirm,
+      title: options?.title,
+      confirmText: options?.confirmText,
+      cancelText: options?.cancelText,
+      type: options?.type || "warning",
     });
-  };
+  }, []);
 
-  const closeModal = () => {
-    if (!modalState.loading) {
-      setModalState({
-        isOpen: false,
-        title: "",
-        message: "",
-        onConfirm: () => {},
-        loading: false,
-      });
+  const hideConfirm = useCallback(() => {
+    setModalState(prev => ({
+      ...prev,
+      isOpen: false,
+    }));
+  }, []);
+
+  const handleConfirm = useCallback(() => {
+    if (modalState.onConfirm) {
+      modalState.onConfirm();
     }
-  };
-
-  const setLoading = (loading: boolean) => {
-    setModalState((prev) => ({ ...prev, loading }));
-  };
+    hideConfirm();
+  }, [modalState.onConfirm, hideConfirm]);
 
   return {
     modalState,
     showConfirm,
-    closeModal,
-    setLoading,
+    hideConfirm,
+    handleConfirm,
   };
 };

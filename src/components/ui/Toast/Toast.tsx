@@ -38,8 +38,8 @@ const Toast: React.FC<ToastProps> = ({
   };
 
   useEffect(() => {
-    // Animação de entrada
-    const timer = setTimeout(() => setIsVisible(true), 100);
+    // Animação de entrada mais rápida
+    const timer = setTimeout(() => setIsVisible(true), 10);
 
     // Auto-close
     const autoCloseTimer = setTimeout(() => {
@@ -84,9 +84,8 @@ const Toast: React.FC<ToastProps> = ({
 
   return (
     <div
-      className={`toast ${getTypeStyles()} ${
-        isVisible ? "toast--visible" : ""
-      } ${isExiting ? "toast--exiting" : ""}`}
+      className={`toast ${getTypeStyles()} ${isVisible ? "toast--visible" : ""
+        } ${isExiting ? "toast--exiting" : ""}`}
     >
       <div className="toast__content">
         <div className="toast__icon">{getIcon()}</div>

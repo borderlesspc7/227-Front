@@ -10,6 +10,7 @@ import {
   FiPlusCircle,
   FiBarChart,
   FiCheck,
+  FiPackage,
 } from "react-icons/fi";
 import { paths } from "../../../routes/paths";
 
@@ -53,6 +54,12 @@ const menuItems = [
     path: paths.adminAdditiveRequests,
     label: "Solicitações de Aditivos",
     icon: FiPlusCircle,
+  },
+  {
+    id: "items",
+    path: paths.adminItems,
+    label: "Cadastro de Itens",
+    icon: FiPackage,
   },
 ];
 

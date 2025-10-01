@@ -38,7 +38,7 @@ const AdditiveRequestPage: React.FC = () => {
     isOpen: false,
     title: "",
     message: "",
-    onConfirm: () => {},
+    onConfirm: () => { },
     loading: false,
   });
 
@@ -112,7 +112,7 @@ const AdditiveRequestPage: React.FC = () => {
         isOpen: false,
         title: "",
         message: "",
-        onConfirm: () => {},
+        onConfirm: () => { },
         loading: false,
       });
     }
@@ -279,14 +279,20 @@ const AdditiveRequestPage: React.FC = () => {
         </div>
       )}
 
+      {/* Modal de nova solicitação */}
       {showForm && (
-        <div className="additive-request-page__form-section">
+        <Modal
+          isOpen={showForm}
+          onClose={handleCancelForm}
+          title={editingRequest ? "Editar Solicitação" : "Nova Solicitação de Aditivo"}
+          size="extra-large"
+        >
           <AdditiveRequestForm
             request={editingRequest}
             onSubmit={editingRequest ? handleUpdateRequest : handleFormSubmit}
             onCancel={handleCancelForm}
           />
-        </div>
+        </Modal>
       )}
 
       <div className="additive-request-page__list-section">

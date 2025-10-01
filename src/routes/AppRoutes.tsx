@@ -9,35 +9,40 @@ import PricesPage from "../pages/Prices/PricePage";
 import AdditiveRequestPage from "../pages/AdditiveRequest/AdditiveRequestPage";
 import DashboardPage from "../pages/Dashboard/DashboardPage";
 import ApprovalsPage from "../pages/Approvals/ApprovalsPage";
+import { ItemsPage } from "../pages/Items/ItemsPage";
+import { ToastProvider } from "../contexts/toastContext";
 
 export default function AppRoutes() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path={paths.home} element={<LoginPage />} />
-        <Route path={paths.login} element={<LoginPage />} />
-        <Route
-          path={paths.adminRoot}
-          element={
-            <ProtectedRoute roles={["admin"]}>
-              <AdminLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<DashboardPage />} />
-          <Route path="dashboard" element={<DashboardPage />} />
-          <Route path={paths.adminRegisterUser} element={<RegisterPage />} />
-          <Route path="register-user" element={<RegisterPage />} />
-          <Route path={paths.adminContracts} element={<ContractsPage />} />
-          <Route path={paths.adminPrices} element={<PricesPage />} />
+    <ToastProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path={paths.home} element={<LoginPage />} />
+          <Route path={paths.login} element={<LoginPage />} />
           <Route
-            path={paths.adminAdditiveRequests}
-            element={<AdditiveRequestPage />}
-          />
-          <Route path={paths.adminApprovals} element={<ApprovalsPage />} />
-          {/* Outras rotas admin: contratos, preços, etc */}
-        </Route>
-      </Routes>
-    </BrowserRouter>
+            path={paths.adminRoot}
+            element={
+              <ProtectedRoute roles={["admin"]}>
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<DashboardPage />} />
+            <Route path="dashboard" element={<DashboardPage />} />
+            <Route path={paths.adminRegisterUser} element={<RegisterPage />} />
+            <Route path="register-user" element={<RegisterPage />} />
+            <Route path={paths.adminContracts} element={<ContractsPage />} />
+            <Route path={paths.adminPrices} element={<PricesPage />} />
+            <Route
+              path={paths.adminAdditiveRequests}
+              element={<AdditiveRequestPage />}
+            />
+            <Route path="items" element={<ItemsPage />} />
+            <Route path={paths.adminApprovals} element={<ApprovalsPage />} />
+            {/* Outras rotas admin: contratos, preços, etc */}
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </ToastProvider>
   );
 }
