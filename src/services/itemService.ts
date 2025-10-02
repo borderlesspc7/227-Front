@@ -41,6 +41,8 @@ export const itemService = {
     // Buscar itens ativos
     async getActiveItems(): Promise<Item[]> {
         try {
+            console.log("Buscando itens ativos no Firestore...");
+
             const q = query(
                 collection(db, "items"),
                 where("ativo", "==", true),
@@ -48,15 +50,50 @@ export const itemService = {
             );
             const querySnapshot = await getDocs(q);
 
-            return querySnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-                createdAt: doc.data().createdAt?.toDate() || new Date(),
-                updatedAt: doc.data().updatedAt?.toDate() || new Date(),
-            })) as Item[];
+            console.log("Query executada, documentos encontrados:", querySnapshot.docs.length);
+
+            const items = querySnapshot.docs.map(doc => {
+                const data = doc.data();
+                console.log("Item encontrado:", doc.id, data);
+                return {
+                    id: doc.id,
+                    ...data,
+                    createdAt: data.createdAt?.toDate() || new Date(),
+                    updatedAt: data.updatedAt?.toDate() || new Date(),
+                } as Item;
+            });
+
+            console.log("Itens processados:", items);
+            return items;
         } catch (error) {
             console.error("Erro ao buscar itens ativos:", error);
-            throw new Error("Erro ao buscar itens ativos");
+            // Se der erro com orderBy, tenta sem orderBy
+            try {
+                console.log("Tentando buscar sem orderBy...");
+                const q = query(
+                    collection(db, "items"),
+                    where("ativo", "==", true)
+                );
+                const querySnapshot = await getDocs(q);
+
+                const items = querySnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        id: doc.id,
+                        ...data,
+                        createdAt: data.createdAt?.toDate() || new Date(),
+                        updatedAt: data.updatedAt?.toDate() || new Date(),
+                    } as Item;
+                });
+
+                // Ordena manualmente
+                items.sort((a, b) => a.descricao.localeCompare(b.descricao));
+                console.log("Itens carregados sem orderBy:", items);
+                return items;
+            } catch (fallbackError) {
+                console.error("Erro no fallback:", fallbackError);
+                throw new Error("Erro ao buscar itens ativos");
+            }
         }
     },
 

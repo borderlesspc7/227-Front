@@ -8,10 +8,13 @@ import type {
 import { additiveRequestService } from "../../../services/additiveRequestService";
 import { contractService } from "../../../services/contractService";
 import { optionsService } from "../../../services/optionsService";
+import { itemService } from "../../../services/itemService";
 import { useToast } from "../../../hooks/useToast";
 import { masks } from "../../../utils/masks";
-import ConfirmModal from "../../../components/ui/ConfirmModal/ConfirmModal";
+import { ConfirmModal } from "../../../components/ui/ConfirmModal/ConfirmModal";
+import ItemModal from "../../../components/ui/ItemModal/ItemModal";
 import { AuthContext } from "../../../contexts/authContext";
+import type { Item } from "../../../types/item";
 import "./AdditiveRequestForm.css";
 
 interface AdditiveRequestFormProps {
@@ -39,6 +42,9 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
     evidencias: [],
   });
 
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
+
   const [generatedProtocol, setGeneratedProtocol] = useState<string>("");
   const [showProtocol, setShowProtocol] = useState(false);
 
@@ -47,6 +53,7 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
   >([]);
   const [priorityOptions, setPriorityOptions] = useState<Array<{ value: string; label: string }>>([]);
   const [unitOptions, setUnitOptions] = useState<Array<{ value: string; label: string }>>([]);
+  const [availableItems, setAvailableItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -65,24 +72,37 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
     loading: false,
   });
 
+  const [showItemModal, setShowItemModal] = useState(false);
+  const [selectedItemId, setSelectedItemId] = useState<string>("");
+
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [contractsFromDB, priorityOpts, unitOpts] = await Promise.all([
+        console.log("Carregando dados...");
+
+        const [contractsFromDB, priorityOpts, unitOpts, itemsFromDB] = await Promise.all([
           contractService.getContracts(),
           optionsService.getPriorityOptions(),
           optionsService.getUnitOptions(),
+          itemService.getActiveItems(),
         ]);
+
+        console.log("Contratos carregados:", contractsFromDB.length);
+        console.log("Opções de prioridade:", priorityOpts.length);
+        console.log("Opções de unidade:", unitOpts.length);
+        console.log("Itens carregados:", itemsFromDB.length, itemsFromDB);
 
         setContracts(contractsFromDB);
         setPriorityOptions(priorityOpts.map(opt => ({ value: opt.value, label: opt.label })));
         setUnitOptions(unitOpts.map(opt => ({ value: opt.value, label: opt.label })));
+        setAvailableItems(itemsFromDB);
       } catch (error) {
-        console.error(error);
+        console.error("Erro ao carregar dados:", error);
+        showError("Erro ao carregar", "Erro ao carregar dados do formulário. Tente recarregar a página.");
       }
     };
     loadData();
-  }, []);
+  }, [showError]);
 
   useEffect(() => {
     if (request) {
@@ -188,6 +208,88 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
     }));
   };
 
+  const selectItem = (itemId: string) => {
+    const selectedItem = availableItems.find(item => item.id === itemId);
+    if (selectedItem) {
+      setFormData((prev) => ({
+        ...prev,
+        itens: [
+          ...prev.itens,
+          {
+            descricao: selectedItem.descricao,
+            quantidade: 0,
+            unidade: selectedItem.unidade,
+            precoUnitario: selectedItem.precoUnitario,
+            observacoes: selectedItem.observacoes || "",
+          },
+        ],
+      }));
+    }
+    setSelectedItemId("");
+  };
+
+  const openNewItemModal = () => {
+    setShowItemModal(true);
+  };
+
+  const handleItemCreated = (newItem: Item) => {
+    setAvailableItems(prev => [newItem, ...prev]);
+    setFormData(prev => ({
+      ...prev,
+      itens: [
+        ...prev.itens,
+        {
+          descricao: newItem.descricao,
+          quantidade: 0,
+          unidade: newItem.unidade,
+          precoUnitario: newItem.precoUnitario,
+          observacoes: newItem.observacoes || "",
+        },
+      ],
+    }));
+    setShowItemModal(false);
+  };
+
+  const reloadItems = async () => {
+    try {
+      console.log("Recarregando itens...");
+      const itemsFromDB = await itemService.getActiveItems();
+      console.log("Itens recarregados:", itemsFromDB);
+      setAvailableItems(itemsFromDB);
+      showSuccess("Itens recarregados", `${itemsFromDB.length} item(s) carregado(s) com sucesso.`);
+    } catch (error) {
+      console.error("Erro ao recarregar itens:", error);
+      showError("Erro ao recarregar", "Erro ao recarregar itens. Tente novamente.");
+    }
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files) return;
+
+    const newImages: File[] = [];
+    const newPreviewUrls: string[] = [];
+
+    Array.from(files).forEach((file) => {
+      if (file.type.startsWith('image/')) {
+        newImages.push(file);
+        const previewUrl = URL.createObjectURL(file);
+        newPreviewUrls.push(previewUrl);
+      }
+    });
+
+    setSelectedImages(prev => [...prev, ...newImages]);
+    setImagePreviewUrls(prev => [...prev, ...newPreviewUrls]);
+  };
+
+  const removeImage = (index: number) => {
+    setSelectedImages(prev => prev.filter((_, i) => i !== index));
+    setImagePreviewUrls(prev => {
+      URL.revokeObjectURL(prev[index]);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
   const removeItem = (index: number) => {
     const item = formData.itens[index];
     const itemDescription = item?.descricao || `item ${index + 1}`;
@@ -231,6 +333,7 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
           ...item,
           valorTotal: item.quantidade * item.precoUnitario,
         })),
+        imagens: selectedImages,
       };
 
       if (request) {
@@ -284,6 +387,7 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
           ...item,
           valorTotal: item.quantidade * item.precoUnitario,
         })),
+        imagens: selectedImages,
       };
 
       if (request) {
@@ -402,7 +506,7 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
           </div>
 
           {/* Descrição */}
-          <div className="additive-request-form__field additive-request-form__field--full">
+          <div className="additive-request-form__field additive-request-form__field--half">
             <label className="additive-request-form__label">
               Descrição*
               <textarea
@@ -417,7 +521,7 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
             </label>
           </div>
 
-          <div className="additive-request-form__field additive-request-form__field--full">
+          <div className="additive-request-form__field additive-request-form__field--half">
             <label className="additive-request-form__label">
               Justificativa*
               <textarea
@@ -433,19 +537,110 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
           </div>
         </div>
 
+        {/* Seção de Imagens */}
+        <div className="additive-request-form__images-section">
+          <div className="additive-request-form__images-header">
+            <h3 className="additive-request-form__section-title">Imagens de Evidência</h3>
+            <p className="additive-request-form__section-description">
+              Adicione imagens que comprovem a necessidade do aditivo
+            </p>
+          </div>
+
+          <div className="additive-request-form__image-upload">
+            <input
+              type="file"
+              id="image-upload"
+              multiple
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="additive-request-form__file-input"
+            />
+            <label htmlFor="image-upload" className="additive-request-form__upload-btn">
+              📷 Adicionar Imagens
+            </label>
+          </div>
+
+          {imagePreviewUrls.length > 0 && (
+            <div className="additive-request-form__image-preview">
+              <h4 className="additive-request-form__preview-title">
+                Imagens Selecionadas ({imagePreviewUrls.length})
+              </h4>
+              <div className="additive-request-form__image-grid">
+                {imagePreviewUrls.map((url, index) => (
+                  <div key={index} className="additive-request-form__image-item">
+                    <img
+                      src={url}
+                      alt={`Preview ${index + 1}`}
+                      className="additive-request-form__preview-image"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="additive-request-form__remove-image-btn"
+                      title="Remover imagem"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Seção de Itens */}
         <div className="additive-request-form__items-section">
           <div className="additive-request-form__items-header">
             <h3 className="additive-request-form__items-title">
               Itens da Solicitação
             </h3>
-            <button
-              type="button"
-              onClick={addItem}
-              className="additive-request-form__add-item-btn"
-            >
-              + Adicionar Item
-            </button>
+            <div className="additive-request-form__item-selection">
+              <select
+                value={selectedItemId}
+                onChange={(e) => selectItem(e.target.value)}
+                className="additive-request-form__item-select"
+              >
+                <option value="">
+                  {availableItems.length === 0
+                    ? "Nenhum item cadastrado"
+                    : "Selecionar item cadastrado"}
+                </option>
+                {availableItems.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.descricao} - R$ {item.precoUnitario.toFixed(2)}/{item.unidade}
+                  </option>
+                ))}
+              </select>
+              {availableItems.length > 0 && (
+                <small className="additive-request-form__item-count">
+                  {availableItems.length} item(s) disponível(is)
+                </small>
+              )}
+              <div className="additive-request-form__item-buttons">
+                <button
+                  type="button"
+                  onClick={reloadItems}
+                  className="additive-request-form__reload-btn"
+                  title="Recarregar itens"
+                >
+                  🔄 Recarregar
+                </button>
+                <button
+                  type="button"
+                  onClick={openNewItemModal}
+                  className="additive-request-form__new-item-btn"
+                >
+                  + Novo Item
+                </button>
+                <button
+                  type="button"
+                  onClick={addItem}
+                  className="additive-request-form__add-item-btn"
+                >
+                  + Adicionar Manual
+                </button>
+              </div>
+            </div>
           </div>
 
           {formData.itens.map((item, index) => (
@@ -638,6 +833,13 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
         cancelText="Cancelar"
         type="warning"
         loading={confirmModal.loading}
+      />
+
+      {/* Modal para criar novo item */}
+      <ItemModal
+        isOpen={showItemModal}
+        onClose={() => setShowItemModal(false)}
+        onItemCreated={handleItemCreated}
       />
     </div>
   );

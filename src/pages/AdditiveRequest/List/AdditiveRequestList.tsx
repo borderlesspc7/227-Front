@@ -13,7 +13,7 @@ import {
 } from "react-icons/fi";
 import { type AdditiveRequest } from "../../../types/additiveRequest";
 import { useToast } from "../../../hooks/useToast";
-import ConfirmModal from "../../../components/ui/ConfirmModal/ConfirmModal";
+import { ConfirmModal } from "../../../components/ui/ConfirmModal/ConfirmModal";
 import "./AdditiveRequestList.css";
 
 interface AdditiveRequestListProps {
@@ -55,7 +55,7 @@ const AdditiveRequestList: React.FC<AdditiveRequestListProps> = ({
     isOpen: false,
     title: "",
     message: "",
-    onConfirm: () => {},
+    onConfirm: () => { },
     loading: false,
   });
 
@@ -168,7 +168,7 @@ const AdditiveRequestList: React.FC<AdditiveRequestListProps> = ({
         isOpen: false,
         title: "",
         message: "",
-        onConfirm: () => {},
+        onConfirm: () => { },
         loading: false,
       });
     }
@@ -210,15 +210,15 @@ const AdditiveRequestList: React.FC<AdditiveRequestListProps> = ({
           <div className="additive-request-list__empty-icon">📋</div>
           <h3 className="additive-request-list__empty-title">
             {searchTerm ||
-            statusFilter !== "todos" ||
-            priorityFilter !== "todos"
+              statusFilter !== "todos" ||
+              priorityFilter !== "todos"
               ? "Nenhuma solicitação encontrada"
               : "Nenhuma solicitação cadastrada"}
           </h3>
           <p className="additive-request-list__empty-text">
             {searchTerm ||
-            statusFilter !== "todos" ||
-            priorityFilter !== "todos"
+              statusFilter !== "todos" ||
+              priorityFilter !== "todos"
               ? "Tente ajustar os filtros ou termo de busca."
               : "Comece criando sua primeira solicitação de aditivo."}
           </p>
@@ -415,39 +415,39 @@ const AdditiveRequestList: React.FC<AdditiveRequestListProps> = ({
 
               {(request.status === "rascunho" ||
                 request.status === "devolvido") && (
-                <>
-                  <button
-                    className="additive-request-list__card-button additive-request-list__card-button--edit"
-                    onClick={() => onEdit(request)}
-                    title="Editar solicitação"
-                  >
-                    <FiEdit />
-                    Editar
-                  </button>
-
-                  {request.status === "rascunho" && (
+                  <>
                     <button
-                      className="additive-request-list__card-button additive-request-list__card-button--submit"
-                      onClick={() => onSubmitForApproval(request)}
-                      title="Enviar para aprovação"
+                      className="additive-request-list__card-button additive-request-list__card-button--edit"
+                      onClick={() => onEdit(request)}
+                      title="Editar solicitação"
                     >
-                      <FiSend />
-                      Enviar
+                      <FiEdit />
+                      Editar
                     </button>
-                  )}
 
-                  {request.status === "devolvido" && (
-                    <button
-                      className="additive-request-list__card-button additive-request-list__card-button--resubmit"
-                      onClick={() => onResubmit(request)}
-                      title="Reenviar para aprovação"
-                    >
-                      <FiSend />
-                      Reenviar
-                    </button>
-                  )}
-                </>
-              )}
+                    {request.status === "rascunho" && (
+                      <button
+                        className="additive-request-list__card-button additive-request-list__card-button--submit"
+                        onClick={() => onSubmitForApproval(request)}
+                        title="Enviar para aprovação"
+                      >
+                        <FiSend />
+                        Enviar
+                      </button>
+                    )}
+
+                    {request.status === "devolvido" && (
+                      <button
+                        className="additive-request-list__card-button additive-request-list__card-button--resubmit"
+                        onClick={() => onResubmit(request)}
+                        title="Reenviar para aprovação"
+                      >
+                        <FiSend />
+                        Reenviar
+                      </button>
+                    )}
+                  </>
+                )}
             </div>
           </div>
         ))}

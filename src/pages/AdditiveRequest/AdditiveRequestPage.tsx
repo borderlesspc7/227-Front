@@ -4,7 +4,7 @@ import AdditiveRequestForm from "../AdditiveRequest/Form/AdditiveRequestForm";
 import AdditiveRequestList from "../AdditiveRequest/List/AdditiveRequestList";
 import AdditiveRequestView from "../AdditiveRequest/View/AdditiveRequestView";
 import Modal from "../../components/ui/Modal/Modal";
-import ConfirmModal from "../../components/ui/ConfirmModal/ConfirmModal";
+import { ConfirmModal } from "../../components/ui/ConfirmModal/ConfirmModal";
 import type {
   AdditiveRequest,
   AdditiveRequestFormData,
