@@ -11,6 +11,7 @@ import {
   FiBarChart,
   FiCheck,
   FiPackage,
+  FiFile,
 } from "react-icons/fi";
 import { paths } from "../../../routes/paths";
 
@@ -60,6 +61,12 @@ const menuItems = [
     path: paths.adminItems,
     label: "Cadastro de Itens",
     icon: FiPackage,
+  },
+  {
+    id: "formalization",
+    path: paths.adminFormalization,
+    label: "Formalização",
+    icon: FiFile,
   },
 ];
 

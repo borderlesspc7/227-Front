@@ -37,20 +37,8 @@ const UserModal: React.FC<UserModalProps> = ({
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={handleCancel} size="large" title={user ? "Editar Usuário" : "Novo Usuário"}>
+        <Modal isOpen={isOpen} onClose={handleCancel} size="large">
             <div className="user-modal">
-                <div className="user-modal__header">
-                    <h2 className="user-modal__title">
-                        {user ? "Editar Usuário" : "Cadastro de Usuário"}
-                    </h2>
-                    <p className="user-modal__subtitle">
-                        {user
-                            ? "Atualize as informações do usuário"
-                            : "Preencha os dados abaixo para cadastrar um novo usuário no sistema"
-                        }
-                    </p>
-                </div>
-
                 <div className="user-modal__content">
                     <UserRegisterForm
                         onUserSaved={handleUserSaved}

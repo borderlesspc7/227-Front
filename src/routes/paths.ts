@@ -11,4 +11,5 @@ export const paths = {
   adminAdditiveRequestNew: "/admin/additive-requests/new",
   adminApprovals: "/admin/approvals",
   adminItems: "/admin/items",
+  adminFormalization: "/admin/formalization",
 } as const;

@@ -38,20 +38,8 @@ const ContractModal: React.FC<ContractModalProps> = ({
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={handleCancel} size="large" title={contract ? "Editar Contrato" : "Novo Contrato"}>
+        <Modal isOpen={isOpen} onClose={handleCancel} size="large">
             <div className="contract-modal">
-                <div className="contract-modal__header">
-                    <h2 className="contract-modal__title">
-                        {contract ? "Editar Contrato" : "Novo Contrato"}
-                    </h2>
-                    <p className="contract-modal__subtitle">
-                        {contract
-                            ? "Atualize as informações do contrato"
-                            : "Preencha as informações do contrato principal"
-                        }
-                    </p>
-                </div>
-
                 <div className="contract-modal__content">
                     <Form
                         onContractSaved={handleContractSaved}

@@ -2,6 +2,7 @@ import React from "react";
 import type { AdditiveRequest } from "../../../types/additiveRequest";
 import type { Department } from "../../../types/approvalWorkflow";
 import ApprovalWorkflow from "../../Approval/ApprovalWorkflow/ApprovalWorkflow";
+import ImageCarousel from "../../../components/ui/ImageCarousel/ImageCarousel";
 import "./AdditiveRequestView.css";
 
 interface AdditiveRequestViewProps {
@@ -374,36 +375,52 @@ const AdditiveRequestView: React.FC<AdditiveRequestViewProps> = ({
         </div>
       </div>
 
-      {/* Evidências */}
-      {request.evidencias && request.evidencias.length > 0 && (
-        <div className="additive-request-view__section">
-          <h3 className="additive-request-view__section-title">
-            Evidências ({request.evidencias.length})
-          </h3>
-          <div className="additive-request-view__evidences">
-            {request.evidencias.map((evidence, index) => (
-              <div key={index} className="additive-request-view__evidence">
-                <div className="additive-request-view__evidence-info">
-                  <span className="additive-request-view__evidence-name">
-                    {evidence.nome}
-                  </span>
-                  <span className="additive-request-view__evidence-size">
-                    {(evidence.tamanho / 1024 / 1024).toFixed(2)} MB
-                  </span>
-                </div>
-                <a
-                  href={evidence.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="additive-request-view__evidence-link"
-                >
-                  Visualizar
-                </a>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Imagens de Evidência */}
+      <div className="additive-request-view__section">
+        <ImageCarousel
+          images={request.evidencias && request.evidencias.length > 0
+            ? request.evidencias.map(evidence => ({
+              id: evidence.id,
+              nome: evidence.nome,
+              url: evidence.url,
+              tipo: evidence.tipo
+            }))
+            : [
+              {
+                id: "demo-001",
+                nome: "Evidência 1 - Estado atual da obra",
+                url: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800&h=600&fit=crop&auto=format",
+                tipo: "image/jpeg"
+              },
+              {
+                id: "demo-002",
+                nome: "Evidência 2 - Detalhe do problema",
+                url: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&h=600&fit=crop&auto=format",
+                tipo: "image/jpeg"
+              },
+              {
+                id: "demo-003",
+                nome: "Evidência 3 - Material necessário",
+                url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop&auto=format",
+                tipo: "image/png"
+              },
+              {
+                id: "demo-004",
+                nome: "Evidência 4 - Planta baixa",
+                url: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=600&fit=crop&auto=format",
+                tipo: "image/jpeg"
+              },
+              {
+                id: "demo-005",
+                nome: "Evidência 5 - Medições",
+                url: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&h=600&fit=crop&auto=format",
+                tipo: "image/jpeg"
+              }
+            ]
+          }
+          className="additive-request-view__image-carousel"
+        />
+      </div>
     </div>
   );
 };

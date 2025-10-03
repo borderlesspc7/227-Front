@@ -373,3 +373,75 @@
     font-size: 28px;
   }
 }
+
+/* Estilos específicos para o carrossel de imagens */
+.additive-request-view__image-carousel {
+  margin-top: 0;
+}
+
+.additive-request-view__image-carousel .image-carousel__title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 16px;
+}
+
+.additive-request-view__image-carousel .image-carousel__image-wrapper {
+  height: 350px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.additive-request-view__image-carousel .image-carousel__thumbnails {
+  margin-top: 16px;
+  padding: 8px 0;
+}
+
+.additive-request-view__image-carousel .image-carousel__thumbnail {
+  width: 70px;
+  height: 70px;
+  border-radius: 8px;
+}
+
+.additive-request-view__image-carousel .image-carousel__info {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.additive-request-view__image-carousel .image-carousel__image-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.additive-request-view__image-carousel .image-carousel__image-type {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+/* Responsivo para o carrossel */
+@media (max-width: 768px) {
+  .additive-request-view__image-carousel .image-carousel__image-wrapper {
+    height: 280px;
+  }
+  
+  .additive-request-view__image-carousel .image-carousel__thumbnail {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .additive-request-view__image-carousel .image-carousel__image-wrapper {
+    height: 220px;
+  }
+  
+  .additive-request-view__image-carousel .image-carousel__thumbnail {
+    width: 50px;
+    height: 50px;
+  }
+}

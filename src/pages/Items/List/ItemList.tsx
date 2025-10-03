@@ -98,15 +98,33 @@ export const ItemList: React.FC<ItemListProps> = ({
                 <div className="item-list__grid">
                     {items.map((item) => (
                         <div key={item.id} className="item-list__card">
+                            {/* Imagem do item - estilo carta Pokémon */}
+                            <div className="item-list__card-image">
+                                {item.imagemUrl ? (
+                                    <img
+                                        src={item.imagemUrl}
+                                        alt={item.descricao}
+                                        className="item-list__card-img"
+                                    />
+                                ) : (
+                                    <div className="item-list__card-placeholder">
+                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                            <circle cx="8.5" cy="8.5" r="1.5" />
+                                            <polyline points="21,15 16,10 5,21" />
+                                        </svg>
+                                    </div>
+                                )}
+                                <div className="item-list__card-image-overlay">
+                                    <div className="item-list__card-category-badge">
+                                        {item.categoria}
+                                    </div>
+                                </div>
+                            </div>
+
                             <div className="item-list__card-header">
                                 <div className="item-list__card-title">
                                     <h3 className="item-list__card-name">{item.descricao}</h3>
-                                    <div
-                                        className="item-list__card-category"
-                                        style={{ backgroundColor: getCategoryColor(item.categoria || "") }}
-                                    >
-                                        {item.categoria}
-                                    </div>
                                 </div>
                                 <div className="item-list__card-status">
                                     <span className={`item-list__card-badge ${item.ativo ? "item-list__card-badge--active" : "item-list__card-badge--inactive"}`}>
@@ -163,14 +181,32 @@ export const ItemList: React.FC<ItemListProps> = ({
                                     className="item-list__card-btn item-list__card-btn--edit"
                                     disabled={!item.ativo}
                                 >
-                                    ✏️ Editar
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                    </svg>
+                                    Editar
                                 </button>
                                 <button
                                     onClick={() => handleDelete(item.id)}
                                     className="item-list__card-btn item-list__card-btn--delete"
                                     disabled={deletingId === item.id}
                                 >
-                                    {deletingId === item.id ? "⏳" : "🗑️"} Excluir
+                                    {deletingId === item.id ? (
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                                            <path d="M3 21v-5h5" />
+                                            <path d="M21 3v5h-5" />
+                                            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                                        </svg>
+                                    ) : (
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M3 6h18" />
+                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                        </svg>
+                                    )}
+                                    Excluir
                                 </button>
                             </div>
                         </div>

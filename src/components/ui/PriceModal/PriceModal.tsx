@@ -37,20 +37,8 @@ const PriceModal: React.FC<PriceModalProps> = ({
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={handleCancel} size="large" title={price ? "Editar Preço Unitário" : "Novo Preço Unitário"}>
+        <Modal isOpen={isOpen} onClose={handleCancel} size="large">
             <div className="price-modal">
-                <div className="price-modal__header">
-                    <h2 className="price-modal__title">
-                        {price ? "Editar Preço Unitário" : "Novo Preço Unitário"}
-                    </h2>
-                    <p className="price-modal__subtitle">
-                        {price
-                            ? "Atualize as informações do preço unitário"
-                            : "Preencha as informações para cadastrar um novo preço unitário"
-                        }
-                    </p>
-                </div>
-
                 <div className="price-modal__content">
                     <PriceForm
                         price={price}

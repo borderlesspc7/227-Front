@@ -5,6 +5,7 @@ export interface Item {
     precoUnitario: number;
     observacoes?: string;
     categoria?: string;
+    imagemUrl?: string;
     ativo: boolean;
     createdBy: string;
     createdAt: Date;
@@ -17,6 +18,7 @@ export interface ItemFormData {
     precoUnitario: number;
     observacoes?: string;
     categoria?: string;
+    imagemUrl?: string;
 }
 
 export interface UpdateItemData {
@@ -25,5 +27,6 @@ export interface UpdateItemData {
     precoUnitario?: number;
     observacoes?: string;
     categoria?: string;
+    imagemUrl?: string;
     ativo?: boolean;
 }

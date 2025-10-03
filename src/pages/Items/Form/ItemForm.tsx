@@ -46,9 +46,12 @@ export const ItemForm: React.FC<ItemFormProps> = ({
         precoUnitario: item?.precoUnitario || 0,
         observacoes: item?.observacoes || "",
         categoria: item?.categoria || "",
+        imagemUrl: item?.imagemUrl || "",
     });
 
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -68,6 +71,39 @@ export const ItemForm: React.FC<ItemFormProps> = ({
         }
     };
 
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            // Validar tipo de arquivo
+            if (!file.type.startsWith('image/')) {
+                showToast({ title: "Erro", message: "Por favor, selecione apenas arquivos de imagem.", type: "error" });
+                return;
+            }
+
+            // Validar tamanho (máximo 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                showToast({ title: "Erro", message: "A imagem deve ter no máximo 5MB.", type: "error" });
+                return;
+            }
+
+            setSelectedImage(file);
+
+            // Criar preview da imagem
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setImagePreview(e.target?.result as string);
+                setFormData(prev => ({ ...prev, imagemUrl: e.target?.result as string }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const removeImage = () => {
+        setSelectedImage(null);
+        setImagePreview(null);
+        setFormData(prev => ({ ...prev, imagemUrl: "" }));
+    };
+
     const validateForm = (): boolean => {
         const newErrors: Record<string, string> = {};
 
@@ -83,7 +119,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
             newErrors.precoUnitario = "Preço unitário deve ser maior que zero";
         }
 
-        if (!formData.categoria.trim()) {
+        if (!formData.categoria?.trim()) {
             newErrors.categoria = "Categoria é obrigatória";
         }
 
@@ -95,7 +131,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
         e.preventDefault();
 
         if (!validateForm()) {
-            showToast("Por favor, corrija os erros no formulário", "error");
+            showToast({ title: "Erro", message: "Por favor, corrija os erros no formulário", type: "error" });
             return;
         }
 
@@ -199,6 +235,50 @@ export const ItemForm: React.FC<ItemFormProps> = ({
                         </select>
                         {errors.categoria && (
                             <span className="item-form__error">{errors.categoria}</span>
+                        )}
+                    </div>
+                </div>
+
+                {/* Campo de Upload de Imagem */}
+                <div className="item-form__field item-form__field--full">
+                    <label className="item-form__label">
+                        Imagem do Item
+                    </label>
+                    <div className="item-form__file-upload">
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="item-form__file-input"
+                            id="item-image"
+                        />
+                        <label htmlFor="item-image" className="item-form__file-label">
+                            <div className="item-form__file-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                    <circle cx="8.5" cy="8.5" r="1.5" />
+                                    <polyline points="21,15 16,10 5,21" />
+                                </svg>
+                            </div>
+                            <div className="item-form__file-text">
+                                <div className="item-form__file-primary">
+                                    {selectedImage ? "Imagem selecionada" : "Clique para selecionar"}
+                                </div>
+                                <div className="item-form__file-secondary">
+                                    {selectedImage ? selectedImage.name : "ou arraste a imagem aqui"}
+                                </div>
+                            </div>
+                        </label>
+                        {imagePreview && (
+                            <div className="item-form__image-preview">
+                                <img src={imagePreview} alt="Preview" />
+                                <button type="button" onClick={removeImage} className="item-form__remove-image">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
                         )}
                     </div>
                 </div>

@@ -556,7 +556,11 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
               className="additive-request-form__file-input"
             />
             <label htmlFor="image-upload" className="additive-request-form__upload-btn">
-              📷 Adicionar Imagens
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+                <circle cx="12" cy="13" r="3" />
+              </svg>
+              Adicionar Imagens
             </label>
           </div>
 
@@ -579,7 +583,10 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
                       className="additive-request-form__remove-image-btn"
                       title="Remover imagem"
                     >
-                      ✕
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 6L6 18" />
+                        <path d="M6 6l12 12" />
+                      </svg>
                     </button>
                   </div>
                 ))}
@@ -623,7 +630,13 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
                   className="additive-request-form__reload-btn"
                   title="Recarregar itens"
                 >
-                  🔄 Recarregar
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                    <path d="M21 3v5h-5" />
+                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                    <path d="M3 21v-5h5" />
+                  </svg>
+                  Recarregar
                 </button>
                 <button
                   type="button"
@@ -832,7 +845,7 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
         confirmText="Remover"
         cancelText="Cancelar"
         type="warning"
-        loading={confirmModal.loading}
+        isLoading={confirmModal.loading}
       />
 
       {/* Modal para criar novo item */}

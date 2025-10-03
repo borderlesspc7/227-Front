@@ -166,4 +166,41 @@ export const itemService = {
             throw new Error("Erro ao buscar itens por categoria");
         }
     },
+
+    // Limpar dados de teste/mockados
+    async clearTestData(): Promise<void> {
+        try {
+            console.log("Limpando dados de teste...");
+
+            // Buscar todos os itens
+            const allItems = await this.getAllItems();
+
+            // Filtrar itens que parecem ser de teste
+            const testItems = allItems.filter(item =>
+                item.descricao.toLowerCase().includes('teste') ||
+                item.descricao.toLowerCase().includes('testeaasd') ||
+                item.descricao.toLowerCase().includes('mock') ||
+                item.descricao.toLowerCase().includes('demo') ||
+                item.descricao.toLowerCase().includes('exemplo') ||
+                item.descricao.toLowerCase().includes('fake')
+            );
+
+            console.log(`Encontrados ${testItems.length} itens de teste para remover`);
+
+            // Deletar cada item de teste
+            for (const item of testItems) {
+                try {
+                    await deleteDoc(doc(db, "items", item.id));
+                    console.log(`Item removido: ${item.descricao}`);
+                } catch (error) {
+                    console.error(`Erro ao remover item ${item.id}:`, error);
+                }
+            }
+
+            console.log("Limpeza de dados de teste concluída");
+        } catch (error) {
+            console.error("Erro ao limpar dados de teste:", error);
+            throw new Error("Erro ao limpar dados de teste");
+        }
+    },
 };

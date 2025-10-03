@@ -84,6 +84,16 @@ export const ItemsPage: React.FC = () => {
         setItems(prev => prev.filter(item => item.id !== itemId));
     };
 
+    const handleClearTestData = async () => {
+        try {
+            await itemService.clearTestData();
+            showToast("Dados de teste removidos com sucesso!", "success");
+            loadItems();
+        } catch (error) {
+            showToast("Erro ao limpar dados de teste", "error");
+        }
+    };
+
     const handleCancelForm = () => {
         setShowForm(false);
         setEditingItem(null);
@@ -117,13 +127,28 @@ export const ItemsPage: React.FC = () => {
                     </p>
                 </div>
 
-                <button
-                    onClick={() => setShowForm(true)}
-                    className="items-page__add-btn"
-                >
-                    <span className="items-page__add-icon">+</span>
-                    Novo Item
-                </button>
+                <div className="items-page__buttons">
+                    <button
+                        onClick={() => setShowForm(true)}
+                        className="items-page__add-btn"
+                    >
+                        <span className="items-page__add-icon">+</span>
+                        Novo Item
+                    </button>
+
+                    <button
+                        onClick={handleClearTestData}
+                        className="items-page__clear-btn"
+                        title="Remover dados de teste/mockados"
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M3 6h18" />
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                        </svg>
+                        Limpar Testes
+                    </button>
+                </div>
             </div>
 
             <div className="items-page__filters">

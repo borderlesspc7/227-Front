@@ -10,6 +10,7 @@ import AdditiveRequestPage from "../pages/AdditiveRequest/AdditiveRequestPage";
 import DashboardPage from "../pages/Dashboard/DashboardPage";
 import ApprovalsPage from "../pages/Approvals/ApprovalsPage";
 import { ItemsPage } from "../pages/Items/ItemsPage";
+import FormalizationPage from "../pages/Formalization/FormalizationPage";
 import { ToastProvider } from "../contexts/toastContext";
 
 export default function AppRoutes() {
@@ -39,6 +40,7 @@ export default function AppRoutes() {
             />
             <Route path="items" element={<ItemsPage />} />
             <Route path={paths.adminApprovals} element={<ApprovalsPage />} />
+            <Route path={paths.adminFormalization} element={<FormalizationPage />} />
             {/* Outras rotas admin: contratos, preços, etc */}
           </Route>
         </Routes>
