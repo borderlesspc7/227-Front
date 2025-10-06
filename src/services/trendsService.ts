@@ -30,7 +30,7 @@ class TrendsService {
     /**
      * Calcular trends comparando período atual com período anterior
      */
-    async calculateTrends(): Promise<TrendsData> {
+    async calculateTrends(companyId?: string): Promise<TrendsData> {
         try {
             const now = new Date();
             const currentPeriodStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -38,10 +38,10 @@ class TrendsService {
             const previousPeriodEnd = new Date(now.getFullYear(), now.getMonth(), 0);
 
             // Buscar dados do período atual
-            const currentData = await this.getPeriodData(currentPeriodStart, now);
+            const currentData = await this.getPeriodData(currentPeriodStart, now, companyId);
 
             // Buscar dados do período anterior
-            const previousData = await this.getPeriodData(previousPeriodStart, previousPeriodEnd);
+            const previousData = await this.getPeriodData(previousPeriodStart, previousPeriodEnd, companyId);
 
             return {
                 totalRequests: this.calculateTrend(currentData.totalRequests, previousData.totalRequests),
@@ -61,14 +61,26 @@ class TrendsService {
     /**
      * Buscar dados de um período específico
      */
-    private async getPeriodData(startDate: Date, endDate: Date) {
+    private async getPeriodData(startDate: Date, endDate: Date, companyId?: string) {
         const requestsRef = collection(db, "additiveRequests");
-        const q = query(
-            requestsRef,
-            where("createdAt", ">=", Timestamp.fromDate(startDate)),
-            where("createdAt", "<=", Timestamp.fromDate(endDate)),
-            orderBy("createdAt", "desc")
-        );
+
+        let q;
+        if (companyId) {
+            q = query(
+                requestsRef,
+                where("companyId", "==", companyId),
+                where("createdAt", ">=", Timestamp.fromDate(startDate)),
+                where("createdAt", "<=", Timestamp.fromDate(endDate)),
+                orderBy("createdAt", "desc")
+            );
+        } else {
+            q = query(
+                requestsRef,
+                where("createdAt", ">=", Timestamp.fromDate(startDate)),
+                where("createdAt", "<=", Timestamp.fromDate(endDate)),
+                orderBy("createdAt", "desc")
+            );
+        }
 
         const snapshot = await getDocs(q);
         const requests = snapshot.docs.map(doc => ({

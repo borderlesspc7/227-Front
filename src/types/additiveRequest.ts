@@ -2,17 +2,18 @@ import type { WorkflowStatus } from "./approvalWorkflow";
 
 export interface AdditiveRequest {
   id?: string;
+  companyId: string; // Referência para a empresa
   protocolo: string;
   contratoId: string;
   descricao: string;
   justificativa: string;
   status:
-    | "rascunho"
-    | "pendente"
-    | "aprovado"
-    | "rejeitado"
-    | "devolvido"
-    | "cancelado";
+  | "rascunho"
+  | "pendente"
+  | "aprovado"
+  | "rejeitado"
+  | "devolvido"
+  | "cancelado";
   prioridade: "baixa" | "media" | "alta" | "urgente";
 
   itens: AdditiveItem[];
@@ -73,12 +74,12 @@ export interface UpdateAdditiveRequestData {
   prioridade?: "baixa" | "media" | "alta" | "urgente";
   itens?: Omit<AdditiveItem, "id" | "valorTotal">[];
   status?:
-    | "rascunho"
-    | "pendente"
-    | "aprovado"
-    | "rejeitado"
-    | "devolvido"
-    | "cancelado";
+  | "rascunho"
+  | "pendente"
+  | "aprovado"
+  | "rejeitado"
+  | "devolvido"
+  | "cancelado";
   rejectionReason?: string;
   currentApprovalStep?: string | null;
   isWorkflowActive?: boolean;

@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useMemo } from "react";
 import { authService } from "../services/authService";
 import type {
   User,
@@ -6,6 +6,7 @@ import type {
   RegisterCredentials,
 } from "../types/auth";
 import type { ReactNode } from "react";
+import { CompanyProvider } from "./companyContext";
 
 interface AuthContextType {
   user: User | null;
@@ -101,7 +102,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearError,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  // Memoizar o usuário para evitar re-renderizações desnecessárias do CompanyProvider
+  const memoizedUser = useMemo(() => user, [user?.uid, user?.companyId, user?.email]);
+
+  return (
+    <AuthContext.Provider value={value}>
+      <CompanyProvider user={memoizedUser}>
+        {children}
+      </CompanyProvider>
+    </AuthContext.Provider>
+  );
 }
 
 export { AuthContext };

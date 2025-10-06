@@ -17,7 +17,7 @@ export const ContractsPage: React.FC = () => {
   const [editingContract, setEditingContract] = useState<Contract | null>(null);
 
   useEffect(() => {
-    if (!user) {
+    if (!user || !user.companyId) {
       setLoading(false);
       return;
     }
@@ -25,14 +25,14 @@ export const ContractsPage: React.FC = () => {
     setLoading(true);
     setError(null);
 
-    const unsubscribe = contractService.observeContracts((contracts) => {
+    const unsubscribe = contractService.observeContracts(user.companyId, (contracts) => {
       setContracts(contracts);
       setLoading(false);
       setError(null);
     });
 
     return () => unsubscribe();
-  }, [user]);
+  }, [user?.companyId]);
 
   const handleContractSaved = (newContract: Contract) => {
     console.log("Contrato salvo:", newContract);

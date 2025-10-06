@@ -1,6 +1,9 @@
 export const paths = {
   home: "/",
   login: "/login",
+  register: "/register",
+  registerCompany: "/register-company",
+  dashboard: "/dashboard",
   adminRoot: "/admin",
   adminDashboard: "/admin/dashboard",
   adminRegisterUser: "/admin/register-user",
@@ -12,4 +15,5 @@ export const paths = {
   adminApprovals: "/admin/approvals",
   adminItems: "/admin/items",
   adminFormalization: "/admin/formalization",
+  adminProfile: "/admin/profile",
 } as const;

@@ -20,6 +20,7 @@ export const Form: React.FC<FormProps> = ({ onContractSaved, onCancel, contract,
   const { user } = useAuth();
   const [formData, setFormData] = useState<ContractFormData>({
     id: "",
+    companyId: user?.companyId || "",
     cliente: "",
     obra: "",
     numeroContrato: "",
@@ -45,6 +46,7 @@ export const Form: React.FC<FormProps> = ({ onContractSaved, onCancel, contract,
     if (contract) {
       setFormData({
         id: contract.id,
+        companyId: contract.companyId,
         cliente: contract.cliente,
         obra: contract.obra,
         numeroContrato: contract.numeroContrato,

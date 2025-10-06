@@ -12,11 +12,13 @@ import type {
 import { additiveRequestService } from "../../services/additiveRequestService";
 import { workflowService } from "../../services/workflowService";
 import { useToast } from "../../hooks/useToast";
+import { useAuth } from "../../hooks/useAuth";
 import "./AdditiveRequestPage.css";
 import { PlusIcon } from "lucide-react";
 
 const AdditiveRequestPage: React.FC = () => {
   const { showError, showSuccess } = useToast();
+  const { user } = useAuth();
 
   const [requests, setRequests] = useState<AdditiveRequest[]>([]);
   const [editingRequest, setEditingRequest] = useState<AdditiveRequest | null>(
@@ -46,9 +48,13 @@ const AdditiveRequestPage: React.FC = () => {
     const loadRequests = async () => {
       try {
         setLoading(true);
-        const requestFromDB =
-          await additiveRequestService.getAdditiveRequests();
-        setRequests(requestFromDB);
+        if (user?.companyId) {
+          const requestFromDB =
+            await additiveRequestService.getAdditiveRequests(user.companyId);
+          setRequests(requestFromDB);
+        } else {
+          setRequests([]);
+        }
       } catch (error) {
         const errorMessage = "Erro ao carregar solicitações de aditivos";
         setError(errorMessage);
@@ -62,7 +68,7 @@ const AdditiveRequestPage: React.FC = () => {
       }
     };
     loadRequests();
-  }, [showError]);
+  }, [user?.companyId, showError]);
 
   const handleFormSubmit = async (_requestData: AdditiveRequestFormData) => {
     // Esta função só atualiza a lista, não cria solicitação
@@ -72,8 +78,10 @@ const AdditiveRequestPage: React.FC = () => {
 
   const refreshRequestsList = async () => {
     try {
-      const requestsFromDB = await additiveRequestService.getAdditiveRequests();
-      setRequests(requestsFromDB);
+      if (user?.companyId) {
+        const requestsFromDB = await additiveRequestService.getAdditiveRequests(user.companyId);
+        setRequests(requestsFromDB);
+      }
     } catch (err) {
       console.error("Erro ao recarregar solicitações:", err);
     }
@@ -132,9 +140,11 @@ const AdditiveRequestPage: React.FC = () => {
   const handleUpdateRequest = (_updatedRequest: AdditiveRequestFormData) => {
     const refreshRequests = async () => {
       try {
-        const requestsFromDB =
-          await additiveRequestService.getAdditiveRequests();
-        setRequests(requestsFromDB);
+        if (user?.companyId) {
+          const requestsFromDB =
+            await additiveRequestService.getAdditiveRequests(user.companyId);
+          setRequests(requestsFromDB);
+        }
       } catch (err) {
         console.error("Erro ao recarregar solicitações:", err);
       }
@@ -155,9 +165,11 @@ const AdditiveRequestPage: React.FC = () => {
       () =>
         executeWithLoading(async () => {
           await additiveRequestService.deleteAdditiveRequest(id);
-          const requestsFromDB =
-            await additiveRequestService.getAdditiveRequests();
-          setRequests(requestsFromDB);
+          if (user?.companyId) {
+            const requestsFromDB =
+              await additiveRequestService.getAdditiveRequests(user.companyId);
+            setRequests(requestsFromDB);
+          }
         })
     );
   };
@@ -188,9 +200,11 @@ const AdditiveRequestPage: React.FC = () => {
 
       await additiveRequestService.submitForApproval(request.id);
 
-      const updatedRequests =
-        await additiveRequestService.getAdditiveRequests();
-      setRequests(updatedRequests);
+      if (user?.companyId) {
+        const updatedRequests =
+          await additiveRequestService.getAdditiveRequests(user.companyId);
+        setRequests(updatedRequests);
+      }
 
       showSuccess(
         "Enviado para aprovação!",
@@ -233,8 +247,10 @@ const AdditiveRequestPage: React.FC = () => {
 
       await additiveRequestService.submitForApproval(request.id);
 
-      const updateRequests = await additiveRequestService.getAdditiveRequests();
-      setRequests(updateRequests);
+      if (user?.companyId) {
+        const updateRequests = await additiveRequestService.getAdditiveRequests(user.companyId);
+        setRequests(updateRequests);
+      }
 
       showSuccess(
         "Solicitação reenviada!",

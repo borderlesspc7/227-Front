@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   FiBarChart,
   FiTrendingUp,
@@ -15,10 +15,12 @@ import { additiveRequestService } from "../../services/additiveRequestService";
 import { contractService } from "../../services/contractService";
 import { trendsService } from "../../services/trendsService";
 import { useToast } from "../../hooks/useToast";
+import { useAuth } from "../../hooks/useAuth";
 import KPICard from "./components/KPICard/KPICard";
 import FilterSection from "./components/FilterSection/FilterSection";
 import ChartSection from "./components/ChartSection/ChartSection";
 import RecentActivities from "./components/RecentActivities/RecentActivities";
+import { CompanySetupPrompt } from "../../components/ui/CompanySetupPrompt/CompanySetupPrompt";
 import "./DashboardPage.css";
 
 interface DashboardFilters {
@@ -34,6 +36,12 @@ interface DashboardFilters {
 
 const DashboardPage: React.FC = () => {
   const { showError } = useToast();
+  const { user } = useAuth();
+
+  // Função estável para mostrar erro
+  const handleError = useCallback((title: string, message: string) => {
+    showError(title, message);
+  }, [showError]);
 
   // Estados
   const [requests, setRequests] = useState<AdditiveRequest[]>([]);
@@ -53,31 +61,40 @@ const DashboardPage: React.FC = () => {
     createdBy: "todos",
   });
 
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const [requestsData, contractsData, trendsData] = await Promise.all([
-        additiveRequestService.getAdditiveRequests(),
-        contractService.getContracts(),
-        trendsService.calculateTrends(),
-      ]);
-
-      setRequests(requestsData);
-      setContracts(contractsData);
-      setTrends(trendsData);
-    } catch (error) {
-      console.error("Erro ao carregar dados do dashboard:", error);
-      showError("Erro", "Erro ao carregar dados do dashboard");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Carregamento de dados
   useEffect(() => {
-    loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const loadData = async () => {
+      if (!user?.companyId) {
+        console.warn("Usuário sem companyId, não é possível carregar dados");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const [requestsData, contractsData, trendsData] = await Promise.all([
+          additiveRequestService.getAdditiveRequests(user.companyId),
+          contractService.getContracts(user.companyId),
+          trendsService.calculateTrends(user.companyId),
+        ]);
+
+        setRequests(requestsData);
+        setContracts(contractsData);
+        setTrends(trendsData);
+      } catch (error) {
+        console.error("Erro ao carregar dados do dashboard:", error);
+        handleError("Erro", "Erro ao carregar dados do dashboard");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user?.companyId) {
+      loadData();
+    } else {
+      setLoading(false);
+    }
+  }, [user?.companyId, handleError]);
 
   // Dados filtrados
   const filteredRequests = useMemo(() => {
@@ -251,6 +268,11 @@ const DashboardPage: React.FC = () => {
         </div>
       </div>
     );
+  }
+
+  // Se o usuário não tem companyId, exibir prompt de configuração
+  if (!user?.companyId) {
+    return <CompanySetupPrompt />;
   }
 
   return (

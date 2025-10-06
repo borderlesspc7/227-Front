@@ -10,9 +10,11 @@ export interface User {
   email: string;
   displayName?: string;
   cnpj?: string;
+  companyId?: string; // Referência para a empresa
   createdAt: Date;
   lastLoginAt: Date;
   role?: UserRole;
+  isActive: boolean;
 }
 
 export interface AuthState {
@@ -24,6 +26,7 @@ export interface AuthState {
 export interface LoginCredentials {
   email: string;
   password: string;
+  cnpj?: string; // CNPJ para login por empresa
 }
 
 export interface RegisterCredentials extends LoginCredentials {
@@ -31,6 +34,18 @@ export interface RegisterCredentials extends LoginCredentials {
   phone: string;
   cpf: string;
   role: UserRole;
+  companyName: string;
+  companyCnpj: string;
+  companyAddress: {
+    street: string;
+    number: string;
+    complement?: string;
+    neighborhood: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  };
+  subscriptionPlan: "starter" | "business" | "enterprise";
 }
 
 export interface AuthError {

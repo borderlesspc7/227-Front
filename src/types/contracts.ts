@@ -1,5 +1,6 @@
 export interface Contract {
   id: string;
+  companyId: string; // Referência para a empresa
   cliente: string;
   obra: string;
   numeroContrato: string;
@@ -16,6 +17,7 @@ export interface Contract {
 // Tipo para o formulário onde valor é string (formatado)
 export interface ContractFormData {
   id: string;
+  companyId: string; // Referência para a empresa
   cliente: string;
   obra: string;
   numeroContrato: string;

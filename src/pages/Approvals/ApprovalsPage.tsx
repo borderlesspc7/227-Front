@@ -76,7 +76,9 @@ const ApprovalsPage: React.FC = () => {
         );
 
       // Carregar todas as solicitações para estatísticas
-      await additiveRequestService.getAdditiveRequests();
+      if (user?.companyId) {
+        await additiveRequestService.getAdditiveRequests(user.companyId);
+      }
 
       // Carregar estatísticas
       const workflowStats = await workflowService.getWorkflowStats();
@@ -336,15 +338,15 @@ const ApprovalsPage: React.FC = () => {
             <FiFileText className="approvals-page__empty-icon" />
             <h3 className="approvals-page__empty-title">
               {filters.search ||
-              filters.status !== "todos" ||
-              filters.priority !== "todos"
+                filters.status !== "todos" ||
+                filters.priority !== "todos"
                 ? "Nenhuma solicitação encontrada"
                 : "Nenhuma solicitação pendente"}
             </h3>
             <p className="approvals-page__empty-text">
               {filters.search ||
-              filters.status !== "todos" ||
-              filters.priority !== "todos"
+                filters.status !== "todos" ||
+                filters.priority !== "todos"
                 ? "Tente ajustar os filtros para encontrar solicitações."
                 : "Não há solicitações aguardando aprovação no momento."}
             </p>

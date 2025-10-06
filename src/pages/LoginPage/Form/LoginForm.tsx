@@ -5,15 +5,16 @@ import { Button } from "../../../components/ui/Button/Button";
 import InputField from "../../../components/ui/InputField/InputField";
 import "./LoginForm.css";
 import { useAuth } from "../../../hooks/useAuth";
-import { useNavigation } from "../../../hooks/useNavigation";
+import { useNavigate } from "react-router-dom";
 import { paths } from "../../../routes/paths";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [cnpj, setCnpj] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { user, login, error, clearError } = useAuth();
-  const { goTo } = useNavigation();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +22,7 @@ export default function LoginForm() {
     clearError();
 
     try {
-      await login({ email, password });
+      await login({ email, password, cnpj: cnpj || undefined });
     } catch (error) {
       console.error("Login failed:", error);
     } finally {
@@ -31,9 +32,14 @@ export default function LoginForm() {
 
   useEffect(() => {
     if (user) {
-      goTo(paths.adminRoot);
+      // Navigate based on user role
+      if (user.role === 'admin') {
+        navigate(paths.adminRoot, { replace: true });
+      } else {
+        navigate(paths.dashboard, { replace: true });
+      }
     }
-  }, [user, goTo]);
+  }, [user, navigate]);
 
   const handleEmailChange = (value: string) => {
     setEmail(value);
@@ -42,6 +48,11 @@ export default function LoginForm() {
 
   const handlePasswordChange = (value: string) => {
     setPassword(value);
+    if (error) clearError();
+  };
+
+  const handleCnpjChange = (value: string) => {
+    setCnpj(value);
     if (error) clearError();
   };
 
@@ -71,6 +82,14 @@ export default function LoginForm() {
           onChange={handlePasswordChange}
           placeholder="Digite sua senha"
           required
+        />
+
+        <InputField
+          label="CNPJ da Empresa (Opcional)"
+          type="text"
+          value={cnpj}
+          onChange={handleCnpjChange}
+          placeholder="00.000.000/0000-00"
         />
 
         {error && (

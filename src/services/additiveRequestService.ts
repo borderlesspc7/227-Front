@@ -37,6 +37,7 @@ const convertFirestoreData = (
 
   return {
     id: data.id as string,
+    companyId: data.companyId as string,
     protocolo: data.protocolo as string,
     contratoId: data.contratoId as string,
     descricao: data.descricao as string,
@@ -53,9 +54,9 @@ const convertFirestoreData = (
     valorTotal: data.valorTotal as number,
     evidencias: Array.isArray(data.evidencias)
       ? (data.evidencias.map((evidence: Record<string, unknown>) => ({
-          ...evidence,
-          uploadedAt: convertTimestamp(evidence.uploadedAt),
-        })) as Evidence[])
+        ...evidence,
+        uploadedAt: convertTimestamp(evidence.uploadedAt),
+      })) as Evidence[])
       : [],
     createdBy: data.createdBy as string,
     createdAt: convertTimestamp(data.createdAt),
@@ -96,7 +97,8 @@ export const additiveRequestService = {
 
   createAdditiveRequest: async (
     requestData: AdditiveRequestFormData,
-    userId?: string
+    userId?: string,
+    companyId?: string
   ): Promise<AdditiveRequest> => {
     try {
       const protocolo = await additiveRequestService.generateProtocol();
@@ -114,6 +116,7 @@ export const additiveRequestService = {
       }));
 
       const newRequest = {
+        companyId: companyId || "",
         protocolo,
         contratoId: requestData.contratoId,
         descricao: requestData.descricao,
@@ -132,6 +135,7 @@ export const additiveRequestService = {
       const docRef = await addDoc(requestsRef, newRequest);
       const createdRequest: AdditiveRequest = {
         id: docRef.id,
+        companyId: newRequest.companyId,
         protocolo: newRequest.protocolo,
         contratoId: newRequest.contratoId,
         descricao: newRequest.descricao,
@@ -153,10 +157,19 @@ export const additiveRequestService = {
     }
   },
 
-  getAdditiveRequests: async (): Promise<AdditiveRequest[]> => {
+  getAdditiveRequests: async (companyId: string): Promise<AdditiveRequest[]> => {
     try {
+      if (!companyId) {
+        console.warn("CompanyId is undefined, returning empty array");
+        return [];
+      }
+
       const requestsRef = collection(db, "additiveRequests");
-      const q = query(requestsRef, orderBy("createdAt", "desc"));
+      const q = query(
+        requestsRef,
+        where("companyId", "==", companyId),
+        orderBy("createdAt", "desc")
+      );
       const snapshot = await getDocs(q);
 
       return snapshot.docs.map((doc) =>

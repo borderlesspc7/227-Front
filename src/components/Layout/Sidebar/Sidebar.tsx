@@ -2,7 +2,7 @@
 
 import type React from "react";
 import "./Sidebar.css";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import {
   FiUser,
   FiFileText,
@@ -12,65 +12,79 @@ import {
   FiCheck,
   FiPackage,
   FiFile,
+  FiSettings,
 } from "react-icons/fi";
 import { paths } from "../../../routes/paths";
+import { useAuth } from "../../../hooks/useAuth";
 
 interface SidebarProps {
   className?: string;
 }
 
-const menuItems = [
-  {
-    id: "dashboard",
-    label: "Dashboard Gerencial",
-    icon: FiBarChart,
-    path: "/admin/dashboard",
-  },
-  {
-    id: "approvals",
-    label: "Aprovações",
-    icon: FiCheck,
-    path: "/admin/approvals",
-  },
-  {
-    id: "register-user",
-    label: "Usuários",
-    icon: FiUser,
-    path: "/admin/register-user",
-  },
-  {
-    id: "register-contracts",
-    label: "Cadastro de Contratos Principais",
-    icon: FiFileText,
-    path: "/admin/contracts",
-  },
-  {
-    id: "register-prices",
-    label: "Cadastro de Preços Unitários",
-    icon: FiDollarSign,
-    path: "/admin/prices",
-  },
-  {
-    id: "additive-requests",
-    path: paths.adminAdditiveRequests,
-    label: "Solicitações de Aditivos",
-    icon: FiPlusCircle,
-  },
-  {
-    id: "items",
-    path: paths.adminItems,
-    label: "Cadastro de Itens",
-    icon: FiPackage,
-  },
-  {
-    id: "formalization",
-    path: paths.adminFormalization,
-    label: "Formalização",
-    icon: FiFile,
-  },
-];
-
 export const Sidebar: React.FC<SidebarProps> = ({ className = "" }) => {
+  const { user } = useAuth();
+  const location = useLocation();
+
+  // Determinar o prefixo baseado na rota atual
+  const isAdminRoute = location.pathname.startsWith('/admin');
+  const basePath = isAdminRoute ? '/admin' : '/dashboard';
+
+  const menuItems = [
+    {
+      id: "dashboard",
+      label: "Dashboard Gerencial",
+      icon: FiBarChart,
+      path: `${basePath}`,
+    },
+    {
+      id: "approvals",
+      label: "Aprovações",
+      icon: FiCheck,
+      path: `${basePath}/approvals`,
+    },
+    {
+      id: "register-user",
+      label: "Usuários",
+      icon: FiUser,
+      path: `${basePath}/register-user`,
+    },
+    {
+      id: "register-contracts",
+      label: "Cadastro de Contratos Principais",
+      icon: FiFileText,
+      path: `${basePath}/contracts`,
+    },
+    {
+      id: "register-prices",
+      label: "Cadastro de Preços Unitários",
+      icon: FiDollarSign,
+      path: `${basePath}/prices`,
+    },
+    {
+      id: "additive-requests",
+      path: `${basePath}/additive-requests`,
+      label: "Solicitações de Aditivos",
+      icon: FiPlusCircle,
+    },
+    {
+      id: "items",
+      path: `${basePath}/items`,
+      label: "Cadastro de Itens",
+      icon: FiPackage,
+    },
+    {
+      id: "formalization",
+      path: `${basePath}/formalization`,
+      label: "Formalização",
+      icon: FiFile,
+    },
+    {
+      id: "profile",
+      path: `${basePath}/profile`,
+      label: "Perfil",
+      icon: FiSettings,
+    },
+  ];
   return (
     <aside className={`sidebar ${className}`}>
       <div className="sidebar__header">
