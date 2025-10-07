@@ -1,0 +1,243 @@
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.loading-spinner__icon {
+  animation: spin 1s linear infinite;
+}
+
+.loading-spinner__text {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Size variants */
+.loading-spinner--sm {
+  gap: 0.5rem;
+}
+
+.loading-spinner--sm .loading-spinner__icon {
+  width: 16px;
+  height: 16px;
+}
+
+.loading-spinner--sm .loading-spinner__text {
+  font-size: 0.75rem;
+}
+
+.loading-spinner--md {
+  gap: 0.75rem;
+}
+
+.loading-spinner--md .loading-spinner__icon {
+  width: 24px;
+  height: 24px;
+}
+
+.loading-spinner--lg {
+  gap: 1rem;
+}
+
+.loading-spinner--lg .loading-spinner__icon {
+  width: 32px;
+  height: 32px;
+}
+
+.loading-spinner--lg .loading-spinner__text {
+  font-size: 1rem;
+}
+
+.loading-spinner--xl {
+  gap: 1.25rem;
+}
+
+.loading-spinner--xl .loading-spinner__icon {
+  width: 48px;
+  height: 48px;
+}
+
+.loading-spinner--xl .loading-spinner__text {
+  font-size: 1.125rem;
+}
+
+/* Variant styles */
+.loading-spinner--spinner .loading-spinner__icon {
+  color: #3b82f6;
+}
+
+.loading-spinner--dots {
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
+.loading-dots {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.loading-dots__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #3b82f6;
+  animation: dots-bounce 1.4s ease-in-out infinite both;
+}
+
+.loading-dots__dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.loading-dots__dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.loading-dots__dot:nth-child(3) {
+  animation-delay: 0s;
+}
+
+.loading-pulse {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #3b82f6;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.loading-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 300px;
+}
+
+.loading-skeleton__line {
+  height: 12px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+.loading-skeleton__line--short {
+  width: 60%;
+}
+
+.loading-skeleton__line--medium {
+  width: 80%;
+}
+
+.loading-skeleton__line--long {
+  width: 100%;
+}
+
+/* Full screen and overlay variants */
+.loading-spinner--fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-spinner--overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(2px);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Animations */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dots-bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
+  70% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .loading-spinner--fullscreen {
+    background: rgba(0, 0, 0, 0.95);
+  }
+  
+  .loading-spinner--overlay {
+    background: rgba(0, 0, 0, 0.8);
+  }
+  
+  .loading-spinner__text {
+    color: #9ca3af;
+  }
+  
+  .loading-skeleton__line {
+    background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+    background-size: 200% 100%;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .loading-spinner--xl .loading-spinner__icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .loading-spinner--xl .loading-spinner__text {
+    font-size: 1rem;
+  }
+}

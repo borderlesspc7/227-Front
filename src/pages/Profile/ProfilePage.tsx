@@ -1,22 +1,83 @@
-import React, { useState, useEffect } from "react";
-import { FiUser, FiCreditCard, FiSettings, FiShield, FiCalendar, FiDollarSign } from "react-icons/fi";
-import { useAuth } from "../../hooks/useAuth";
-import { useCompany } from "../../contexts/companyContext";
-import { subscriptionService } from "../../services/subscriptionService";
-import type { Company, SubscriptionStatus } from "../../types/subscription";
+import { useState } from "react";
+import { FiUser, FiCreditCard, FiSettings, FiShield, FiDollarSign } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "../../hooks/useToast";
+import { PaymentModal } from "../../components/ui/PaymentModal/PaymentModal";
+import { PlanChangeModal } from "../../components/ui/PlanChangeModal/PlanChangeModal";
+import { SubscriptionModal } from "../../components/ui/SubscriptionModal/SubscriptionModal";
 import "./ProfilePage.css";
 
 export function ProfilePage() {
-    const { user } = useAuth();
-    const { company, loading: companyLoading } = useCompany();
     const [activeTab, setActiveTab] = useState("overview");
-    const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [showPlanModal, setShowPlanModal] = useState(false);
+    const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+    const navigate = useNavigate();
+    const { showInfo } = useToast();
 
-    useEffect(() => {
-        if (company) {
-            setSubscriptionStatus(company.subscription.status);
+    // Funções de redirecionamento
+    const handleManagePayment = () => {
+        setShowPaymentModal(true);
+    };
+
+    const handleChangePlan = () => {
+        setShowPlanModal(true);
+    };
+
+    const handleManageSubscription = () => {
+        setShowSubscriptionModal(true);
+    };
+
+    const handleSetup2FA = () => {
+        showInfo("Autenticação de Dois Fatores", "Funcionalidade em desenvolvimento. Em breve você poderá configurar 2FA.");
+    };
+
+    const handleChangePassword = () => {
+        showInfo("Alterar Senha", "Funcionalidade em desenvolvimento. Em breve você poderá alterar sua senha.");
+    };
+
+    const handleViewSessions = () => {
+        showInfo("Sessões Ativas", "Funcionalidade em desenvolvimento. Em breve você poderá ver suas sessões ativas.");
+    };
+
+    // Funções com redirecionamento real
+    const handleViewContracts = () => {
+        navigate("/admin/contracts");
+    };
+
+    const handleViewUsers = () => {
+        navigate("/admin/register-user");
+    };
+
+    const handleViewPrices = () => {
+        navigate("/admin/prices");
+    };
+
+    // Dados mockados para teste
+    const mockCompany = {
+        id: "123",
+        companyName: "Empresa Teste",
+        email: "teste@empresa.com",
+        cnpj: "12.345.678/0001-90",
+        phone: "(11) 99999-9999",
+        address: {
+            street: "Rua Teste",
+            number: "123",
+            complement: "Sala 1",
+            neighborhood: "Centro",
+            city: "São Paulo",
+            state: "SP",
+            zipCode: "01234-567"
+        },
+        subscription: {
+            plan: "starter" as const,
+            status: "trial" as const,
+            startDate: new Date("2024-01-01"),
+            endDate: new Date("2024-02-01"),
+            trialEndDate: new Date("2024-01-15"),
+            autoRenew: false
         }
-    }, [company]);
+    };
 
     const getPlanDetails = (plan: string) => {
         const plans = {
@@ -70,31 +131,10 @@ export function ProfilePage() {
         }
     };
 
-    if (companyLoading) {
-        return (
-            <div className="profile-page">
-                <div className="loading-state">
-                    <div className="loading-spinner"></div>
-                    <p>Carregando perfil...</p>
-                </div>
-            </div>
-        );
-    }
-
-    if (!company) {
-        return (
-            <div className="profile-page">
-                <div className="error-state">
-                    <h2>Empresa não encontrada</h2>
-                    <p>Não foi possível carregar as informações da empresa.</p>
-                </div>
-            </div>
-        );
-    }
-
+    const company = mockCompany;
     const planDetails = getPlanDetails(company.subscription.plan);
 
-    return (
+    return (<>
         <div className="profile-page">
             <div className="profile-header">
                 <div className="profile-avatar">
@@ -106,9 +146,9 @@ export function ProfilePage() {
                     <div className="profile-status">
                         <span
                             className="status-badge"
-                            style={{ backgroundColor: getStatusColor(subscriptionStatus || "inactive") }}
+                            style={{ backgroundColor: getStatusColor(company.subscription.status) }}
                         >
-                            {getStatusText(subscriptionStatus || "inactive")}
+                            {getStatusText(company.subscription.status)}
                         </span>
                     </div>
                 </div>
@@ -196,6 +236,24 @@ export function ProfilePage() {
                                     </div>
                                 </div>
                             </div>
+
+                            <div className="quick-actions">
+                                <h3>Ações Rápidas</h3>
+                                <div className="quick-actions-grid">
+                                    <button className="btn-secondary" onClick={handleViewContracts}>
+                                        <FiCreditCard />
+                                        Ver Contratos
+                                    </button>
+                                    <button className="btn-secondary" onClick={handleViewUsers}>
+                                        <FiUser />
+                                        Gerenciar Usuários
+                                    </button>
+                                    <button className="btn-secondary" onClick={handleViewPrices}>
+                                        <FiDollarSign />
+                                        Ver Preços
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     )}
 
@@ -223,9 +281,9 @@ export function ProfilePage() {
                                         <label>Status</label>
                                         <span
                                             className="status-text"
-                                            style={{ color: getStatusColor(subscriptionStatus || "inactive") }}
+                                            style={{ color: getStatusColor(company.subscription.status) }}
                                         >
-                                            {getStatusText(subscriptionStatus || "inactive")}
+                                            {getStatusText(company.subscription.status)}
                                         </span>
                                     </div>
                                     <div className="detail-item">
@@ -250,11 +308,11 @@ export function ProfilePage() {
                             </div>
 
                             <div className="subscription-actions">
-                                <button className="btn-primary">
+                                <button className="btn-primary" onClick={handleChangePlan}>
                                     <FiCreditCard />
                                     Alterar Plano
                                 </button>
-                                <button className="btn-secondary">
+                                <button className="btn-secondary" onClick={handleManageSubscription}>
                                     <FiSettings />
                                     Gerenciar Assinatura
                                 </button>
@@ -272,7 +330,7 @@ export function ProfilePage() {
                                             <FiCreditCard />
                                             <span>Cartão de Crédito</span>
                                         </div>
-                                        <button className="btn-secondary">Gerenciar</button>
+                                        <button className="btn-secondary" onClick={handleManagePayment}>Gerenciar</button>
                                     </div>
                                 </div>
 
@@ -301,7 +359,7 @@ export function ProfilePage() {
                                         <h4>Autenticação de Dois Fatores</h4>
                                         <p>Adicione uma camada extra de segurança à sua conta</p>
                                     </div>
-                                    <button className="btn-secondary">Configurar</button>
+                                    <button className="btn-secondary" onClick={handleSetup2FA}>Configurar</button>
                                 </div>
 
                                 <div className="security-item">
@@ -309,7 +367,7 @@ export function ProfilePage() {
                                         <h4>Alterar Senha</h4>
                                         <p>Atualize sua senha regularmente para manter a segurança</p>
                                     </div>
-                                    <button className="btn-secondary">Alterar</button>
+                                    <button className="btn-secondary" onClick={handleChangePassword}>Alterar</button>
                                 </div>
 
                                 <div className="security-item">
@@ -317,7 +375,7 @@ export function ProfilePage() {
                                         <h4>Sessões Ativas</h4>
                                         <p>Gerencie os dispositivos conectados à sua conta</p>
                                     </div>
-                                    <button className="btn-secondary">Ver Sessões</button>
+                                    <button className="btn-secondary" onClick={handleViewSessions}>Ver Sessões</button>
                                 </div>
                             </div>
                         </div>
@@ -325,5 +383,24 @@ export function ProfilePage() {
                 </div>
             </div>
         </div>
+
+        {/* Modais */}
+        <PaymentModal
+            isOpen={showPaymentModal}
+            onClose={() => setShowPaymentModal(false)}
+        />
+
+        <PlanChangeModal
+            isOpen={showPlanModal}
+            onClose={() => setShowPlanModal(false)}
+            currentPlan={company.subscription.plan}
+        />
+
+        <SubscriptionModal
+            isOpen={showSubscriptionModal}
+            onClose={() => setShowSubscriptionModal(false)}
+            subscription={company.subscription}
+        />
+    </>
     );
 }

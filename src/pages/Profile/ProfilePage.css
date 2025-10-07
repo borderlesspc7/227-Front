@@ -425,36 +425,48 @@
   color: #6b7280;
 }
 
-/* Responsive */
+/* Ações Rápidas */
+.quick-actions {
+  margin-top: 24px;
+}
+
+.quick-actions h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 16px 0;
+}
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.quick-actions-grid .btn-secondary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  color: #374151;
+  text-align: left;
+}
+
+.quick-actions-grid .btn-secondary:hover {
+  background: #e5e7eb;
+  transform: translateY(-1px);
+}
+
+/* Responsive para ações rápidas */
 @media (max-width: 768px) {
-  .profile-page {
-    padding: 16px;
-  }
-  
-  .profile-header {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .profile-content {
-    flex-direction: column;
-  }
-  
-  .profile-tabs {
-    width: 100%;
-    flex-direction: row;
-    overflow-x: auto;
-  }
-  
-  .subscription-overview {
+  .quick-actions-grid {
     grid-template-columns: 1fr;
-  }
-  
-  .info-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .subscription-actions {
-    flex-direction: column;
   }
 }

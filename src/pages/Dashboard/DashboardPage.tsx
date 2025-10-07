@@ -20,6 +20,7 @@ import KPICard from "./components/KPICard/KPICard";
 import FilterSection from "./components/FilterSection/FilterSection";
 import ChartSection from "./components/ChartSection/ChartSection";
 import RecentActivities from "./components/RecentActivities/RecentActivities";
+import AlertDashboard from "../../components/ui/AlertDashboard/AlertDashboard";
 import { CompanySetupPrompt } from "../../components/ui/CompanySetupPrompt/CompanySetupPrompt";
 import "./DashboardPage.css";
 
@@ -295,6 +296,9 @@ const DashboardPage: React.FC = () => {
           )} - {new Date(filters.dateRange.endDate).toLocaleDateString("pt-BR")}
         </div>
       </div>
+
+      {/* Alertas Avançados */}
+      <AlertDashboard />
 
       {/* Filtros */}
       <FilterSection

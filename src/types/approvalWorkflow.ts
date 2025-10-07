@@ -52,12 +52,17 @@ export interface ApprovalNotification {
   requestProtocol: string; // Protocolo da solicitação para exibição
   userId: string;
   type:
-    | "new_request"
-    | "approval_required"
-    | "approved"
-    | "rejected"
-    | "returned"
-    | "request_submitted";
+  | "new_request"
+  | "approval_required"
+  | "approved"
+  | "rejected"
+  | "returned"
+  | "request_submitted"
+  | "contract_limit_warning"
+  | "user_limit_warning"
+  | "storage_limit_warning"
+  | "pending_returns"
+  | "pending_formalizations";
   title: string;
   message: string;
   isRead: boolean;

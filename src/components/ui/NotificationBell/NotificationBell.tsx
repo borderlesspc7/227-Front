@@ -114,6 +114,14 @@ const NotificationBell: React.FC = () => {
         return (
           <FiAlertCircle className="notification-bell__type-icon returned" />
         );
+      case "contract_limit_warning":
+      case "user_limit_warning":
+      case "storage_limit_warning":
+        return <FiAlertCircle className="notification-bell__type-icon urgent" />;
+      case "pending_returns":
+        return <FiClock className="notification-bell__type-icon high" />;
+      case "pending_formalizations":
+        return <FiFileText className="notification-bell__type-icon medium" />;
       default:
         return <FiBell className="notification-bell__type-icon default" />;
     }
@@ -171,9 +179,8 @@ const NotificationBell: React.FC = () => {
               notifications.slice(0, 10).map((notification) => (
                 <div
                   key={notification.id}
-                  className={`notification-bell__item ${
-                    !notification.isRead ? "unread" : ""
-                  } ${notification.priority}`}
+                  className={`notification-bell__item ${!notification.isRead ? "unread" : ""
+                    } ${notification.priority}`}
                   onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="notification-bell__item-header">

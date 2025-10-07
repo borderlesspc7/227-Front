@@ -15,6 +15,63 @@
   pointer-events: auto;
 }
 
+/* Position variants */
+.toast-container--top-left {
+  top: 20px;
+  left: 20px;
+  right: auto;
+}
+
+.toast-container--bottom-right {
+  top: auto;
+  bottom: 20px;
+  right: 20px;
+}
+
+.toast-container--bottom-left {
+  top: auto;
+  bottom: 20px;
+  left: 20px;
+  right: auto;
+}
+
+/* Toast positioning within container */
+.toast--top-left {
+  transform: translateX(-100%);
+}
+
+.toast--top-left.toast--visible {
+  transform: translateX(0);
+}
+
+.toast--top-left.toast--exiting {
+  transform: translateX(-100%);
+}
+
+.toast--bottom-right {
+  transform: translateY(100%);
+}
+
+.toast--bottom-right.toast--visible {
+  transform: translateY(0);
+}
+
+.toast--bottom-right.toast--exiting {
+  transform: translateY(100%);
+}
+
+.toast--bottom-left {
+  transform: translateX(-100%) translateY(100%);
+}
+
+.toast--bottom-left.toast--visible {
+  transform: translateX(0) translateY(0);
+}
+
+.toast--bottom-left.toast--exiting {
+  transform: translateX(-100%) translateY(100%);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .toast-container {

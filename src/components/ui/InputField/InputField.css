@@ -1,5 +1,6 @@
 .input-field {
   margin-bottom: 20px;
+  position: relative;
 }
 
 .input-field__label {
@@ -15,6 +16,12 @@
   margin-left: 2px;
 }
 
+.input-field__wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
 .input-field__input {
   width: 100%;
   padding: 10px 14px;
@@ -26,28 +33,193 @@
   font-family: inherit;
 }
 
+.input-field--with-icon .input-field__input {
+  padding-left: 40px;
+}
+
+.input-field--icon-right .input-field__input {
+  padding-left: 14px;
+  padding-right: 40px;
+}
+
+.input-field--with-icon.input-field--icon-right .input-field__input {
+  padding-left: 14px;
+  padding-right: 40px;
+}
+
 .input-field__input:focus {
   outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-.input-field__input--error {
+.input-field__input:disabled {
+  background-color: #f9fafb;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.input-field__input::placeholder {
+  color: #9ca3af;
+}
+
+/* Icon styles */
+.input-field__icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  z-index: 2;
+}
+
+.input-field__icon--left {
+  left: 12px;
+}
+
+.input-field__icon--right {
+  right: 12px;
+}
+
+/* Password toggle */
+.input-field__password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.input-field__password-toggle:hover {
+  color: #374151;
+  background: #f3f4f6;
+}
+
+/* Status icons */
+.input-field__status-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+.input-field__status-icon--error {
+  color: #ef4444;
+}
+
+.input-field__status-icon--success {
+  color: #10b981;
+}
+
+/* Loading spinner */
+.input-field__loading-spinner {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  z-index: 2;
+}
+
+/* Field states */
+.input-field--error .input-field__input {
   border-color: #ef4444;
 }
 
-.input-field__input--error:focus {
+.input-field--error .input-field__input:focus {
   border-color: #ef4444;
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
 
-.input-field__error {
-  display: block;
+.input-field--success .input-field__input {
+  border-color: #10b981;
+}
+
+.input-field--success .input-field__input:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.input-field--focused .input-field__input {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.input-field--disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Error and help messages */
+.input-field__error-message {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   margin-top: 4px;
   font-size: 12px;
   color: #ef4444;
 }
 
-.input-field__input::placeholder {
-  color: #9ca3af;
+.input-field__help-text {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Animations */
+@keyframes spin {
+  0% {
+    transform: translateY(-50%) rotate(0deg);
+  }
+  100% {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .input-field__input {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  .input-field--with-icon .input-field__input {
+    padding-left: 36px;
+  }
+  
+  .input-field--icon-right .input-field__input {
+    padding-right: 36px;
+  }
+  
+  .input-field__icon--left {
+    left: 10px;
+  }
+  
+  .input-field__icon--right {
+    right: 10px;
+  }
+  
+  .input-field__password-toggle {
+    right: 10px;
+  }
+  
+  .input-field__status-icon {
+    right: 10px;
+  }
+  
+  .input-field__loading-spinner {
+    right: 10px;
+  }
 }

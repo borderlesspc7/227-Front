@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect, useContext } from "react";
+import { createContext, useState, useEffect, useContext, useCallback } from "react";
 import type { ReactNode } from "react";
 import type { Company, SubscriptionStatus } from "../types/subscription";
 import { subscriptionService } from "../services/subscriptionService";
@@ -13,7 +13,7 @@ interface CompanyContextType {
     refreshSubscription: () => Promise<void>;
 }
 
-const CompanyContext = createContext<CompanyContextType | undefined>(undefined);
+export const CompanyContext = createContext<CompanyContextType | undefined>(undefined);
 
 export function CompanyProvider({ children, user }: { children: ReactNode; user: User | null }) {
     const [company, setCompany] = useState<Company | null>(null);
@@ -21,7 +21,7 @@ export function CompanyProvider({ children, user }: { children: ReactNode; user:
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const refreshCompany = async () => {
+    const refreshCompany = useCallback(async () => {
         if (!user?.companyId) return;
 
         try {
@@ -34,9 +34,9 @@ export function CompanyProvider({ children, user }: { children: ReactNode; user:
         } finally {
             setLoading(false);
         }
-    };
+    }, [user?.companyId]);
 
-    const refreshSubscription = async () => {
+    const refreshSubscription = useCallback(async () => {
         if (!user?.companyId) return;
 
         try {
@@ -45,7 +45,7 @@ export function CompanyProvider({ children, user }: { children: ReactNode; user:
         } catch (err) {
             console.error("Erro ao carregar status da assinatura:", err);
         }
-    };
+    }, [user?.companyId]);
 
     useEffect(() => {
         if (user?.companyId) {
@@ -56,7 +56,7 @@ export function CompanyProvider({ children, user }: { children: ReactNode; user:
             setSubscriptionStatus(null);
             setLoading(false);
         }
-    }, [user?.companyId]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [user?.companyId, refreshCompany, refreshSubscription]);
 
     const value = {
         company,

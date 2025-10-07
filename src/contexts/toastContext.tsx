@@ -41,29 +41,73 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
   );
 
   const showSuccess = useCallback(
-    (title: string, message?: string, duration = 4000) => {
-      showToast({ type: "success", title, message, duration });
+    (title: string, message?: string, duration = 4000, options?: {
+      action?: { label: string; onClick: () => void };
+      persistent?: boolean;
+      position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+    }) => {
+      showToast({
+        type: "success",
+        title,
+        message,
+        duration: options?.persistent ? 0 : duration,
+        action: options?.action,
+        position: options?.position || 'top-right'
+      });
     },
     [showToast]
   );
 
   const showError = useCallback(
-    (title: string, message?: string, duration = 6000) => {
-      showToast({ type: "error", title, message, duration });
+    (title: string, message?: string, duration = 6000, options?: {
+      action?: { label: string; onClick: () => void };
+      persistent?: boolean;
+      position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+    }) => {
+      showToast({
+        type: "error",
+        title,
+        message,
+        duration: options?.persistent ? 0 : duration,
+        action: options?.action,
+        position: options?.position || 'top-right'
+      });
     },
     [showToast]
   );
 
   const showWarning = useCallback(
-    (title: string, message?: string, duration = 5000) => {
-      showToast({ type: "warning", title, message, duration });
+    (title: string, message?: string, duration = 5000, options?: {
+      action?: { label: string; onClick: () => void };
+      persistent?: boolean;
+      position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+    }) => {
+      showToast({
+        type: "warning",
+        title,
+        message,
+        duration: options?.persistent ? 0 : duration,
+        action: options?.action,
+        position: options?.position || 'top-right'
+      });
     },
     [showToast]
   );
 
   const showInfo = useCallback(
-    (title: string, message?: string, duration = 4000) => {
-      showToast({ type: "info", title, message, duration });
+    (title: string, message?: string, duration = 4000, options?: {
+      action?: { label: string; onClick: () => void };
+      persistent?: boolean;
+      position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+    }) => {
+      showToast({
+        type: "info",
+        title,
+        message,
+        duration: options?.persistent ? 0 : duration,
+        action: options?.action,
+        position: options?.position || 'top-right'
+      });
     },
     [showToast]
   );

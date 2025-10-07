@@ -7,15 +7,33 @@ export interface ToastData {
   title: string;
   message?: string;
   duration?: number;
+  action?: { label: string; onClick: () => void };
+  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
 }
 
 export interface ToastContextType {
   toasts: ToastData[];
   showToast: (toast: Omit<ToastData, "id">) => void;
-  showSuccess: (title: string, message?: string, duration?: number) => void;
-  showError: (title: string, message?: string, duration?: number) => void;
-  showWarning: (title: string, message?: string, duration?: number) => void;
-  showInfo: (title: string, message?: string, duration?: number) => void;
+  showSuccess: (title: string, message?: string, duration?: number, options?: {
+    action?: { label: string; onClick: () => void };
+    persistent?: boolean;
+    position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+  }) => void;
+  showError: (title: string, message?: string, duration?: number, options?: {
+    action?: { label: string; onClick: () => void };
+    persistent?: boolean;
+    position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+  }) => void;
+  showWarning: (title: string, message?: string, duration?: number, options?: {
+    action?: { label: string; onClick: () => void };
+    persistent?: boolean;
+    position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+  }) => void;
+  showInfo: (title: string, message?: string, duration?: number, options?: {
+    action?: { label: string; onClick: () => void };
+    persistent?: boolean;
+    position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+  }) => void;
   removeToast: (id: string) => void;
   clearAllToasts: () => void;
 }

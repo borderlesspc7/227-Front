@@ -18,6 +18,9 @@ import type {
   ApprovalStep,
 } from "../types/approvalWorkflow";
 import type { AdditiveRequest } from "../types/additiveRequest";
+import type { Contract } from "../types/contracts";
+import type { OSAGroup } from "../types/formalization";
+import { subscriptionService } from "./subscriptionService";
 
 export const notificationService = {
   // Criar notificação
@@ -77,22 +80,21 @@ export const notificationService = {
           userId: approverId,
           type: "new_request",
           title: "Nova solicitação para aprovação",
-          message: `Nova solicitação ${
-            request.protocolo
-          } enviada por ${senderName}. Valor: R$ ${request.valorTotal.toLocaleString(
-            "pt-BR",
-            { minimumFractionDigits: 2 }
-          )}`,
+          message: `Nova solicitação ${request.protocolo
+            } enviada por ${senderName}. Valor: R$ ${request.valorTotal.toLocaleString(
+              "pt-BR",
+              { minimumFractionDigits: 2 }
+            )}`,
           isRead: false,
           actionUrl: `/admin/approvals`,
           priority:
             request.prioridade === "urgente"
               ? "urgent"
               : request.prioridade === "alta"
-              ? "high"
-              : request.prioridade === "media"
-              ? "medium"
-              : "low",
+                ? "high"
+                : request.prioridade === "media"
+                  ? "medium"
+                  : "low",
           department: firstStep.department,
           senderName: senderName,
         });
@@ -172,17 +174,15 @@ export const notificationService = {
         case "rejected":
           type = "rejected";
           title = "Solicitação rejeitada";
-          message = `Sua solicitação ${requestProtocol} foi rejeitada. ${
-            comments ? `Motivo: ${comments}` : ""
-          }`;
+          message = `Sua solicitação ${requestProtocol} foi rejeitada. ${comments ? `Motivo: ${comments}` : ""
+            }`;
           priority = "urgent";
           break;
         case "returned":
           type = "returned";
           title = "Solicitação devolvida";
-          message = `Sua solicitação ${requestProtocol} foi devolvida para correções. ${
-            comments ? `Comentários: ${comments}` : ""
-          }`;
+          message = `Sua solicitação ${requestProtocol} foi devolvida para correções. ${comments ? `Comentários: ${comments}` : ""
+            }`;
           priority = "high";
           break;
         default:
@@ -305,6 +305,313 @@ export const notificationService = {
     } catch (error) {
       console.error("Erro ao remover notificação:", error);
       throw error;
+    }
+  },
+
+  // ===== ALERTAS AVANÇADOS =====
+
+  // Helper function para notificar administradores
+  notifyAdmins: async (companyId: string, notification: Omit<ApprovalNotification, "id" | "createdAt" | "userId">): Promise<void> => {
+    try {
+      const usersRef = collection(db, "users");
+      const adminQuery = query(
+        usersRef,
+        where("companyId", "==", companyId),
+        where("role", "==", "admin")
+      );
+      const adminSnapshot = await getDocs(adminQuery);
+      const adminUsers = adminSnapshot.docs.map(doc => doc.id);
+
+      const notificationPromises = adminUsers.map(async (adminUserId) => {
+        await notificationService.createNotification({
+          ...notification,
+          userId: adminUserId,
+        });
+      });
+
+      await Promise.all(notificationPromises);
+    } catch (error) {
+      console.error("Erro ao notificar administradores:", error);
+    }
+  },
+
+  // Verificar e notificar limites de contrato
+  checkContractLimits: async (companyId: string): Promise<void> => {
+    try {
+      const subscriptionStatus = await subscriptionService.getSubscriptionStatus(companyId);
+
+      if (!subscriptionStatus) return;
+
+      const limits = subscriptionStatus.limits;
+      const currentUsage = subscriptionStatus.usage;
+
+      // Verificar limite de contratos ativos
+      if (limits.maxActiveContracts > 0 && currentUsage.activeContracts >= limits.maxActiveContracts * 0.9) {
+        const percentage = Math.round((currentUsage.activeContracts / limits.maxActiveContracts) * 100);
+
+        await notificationService.notifyAdmins(companyId, {
+          requestId: "system",
+          requestProtocol: "LIMIT-ALERT",
+          type: "contract_limit_warning",
+          title: "⚠️ Limite de Contratos Próximo",
+          message: `Você está usando ${percentage}% do limite de contratos ativos (${currentUsage.activeContracts}/${limits.maxActiveContracts}). Considere fazer upgrade do plano.`,
+          isRead: false,
+          actionUrl: "/subscription",
+          priority: percentage >= 95 ? "urgent" : "high",
+          department: "system",
+          senderName: "Sistema de Monitoramento",
+        });
+      }
+
+      // Verificar limite de usuários
+      if (limits.maxUsers > 0 && currentUsage.totalUsers >= limits.maxUsers * 0.9) {
+        const percentage = Math.round((currentUsage.totalUsers / limits.maxUsers) * 100);
+
+        await notificationService.notifyAdmins(companyId, {
+          requestId: "system",
+          requestProtocol: "LIMIT-ALERT",
+          type: "user_limit_warning",
+          title: "⚠️ Limite de Usuários Próximo",
+          message: `Você está usando ${percentage}% do limite de usuários (${currentUsage.totalUsers}/${limits.maxUsers}). Considere fazer upgrade do plano.`,
+          isRead: false,
+          actionUrl: "/subscription",
+          priority: percentage >= 95 ? "urgent" : "high",
+          department: "system",
+          senderName: "Sistema de Monitoramento",
+        });
+      }
+
+      // Verificar limite de armazenamento
+      if (limits.storageGB > 0 && currentUsage.storageUsedGB >= limits.storageGB * 0.9) {
+        const percentage = Math.round((currentUsage.storageUsedGB / limits.storageGB) * 100);
+
+        await notificationService.notifyAdmins(companyId, {
+          requestId: "system",
+          requestProtocol: "LIMIT-ALERT",
+          type: "storage_limit_warning",
+          title: "⚠️ Limite de Armazenamento Próximo",
+          message: `Você está usando ${percentage}% do limite de armazenamento (${currentUsage.storageUsedGB.toFixed(1)}GB/${limits.storageGB}GB). Considere fazer upgrade do plano.`,
+          isRead: false,
+          actionUrl: "/subscription",
+          priority: percentage >= 95 ? "urgent" : "high",
+          department: "system",
+          senderName: "Sistema de Monitoramento",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao verificar limites de contrato:", error);
+    }
+  },
+
+  // Notificar devoluções pendentes
+  notifyPendingReturns: async (companyId: string): Promise<void> => {
+    try {
+      // Buscar solicitações devolvidas há mais de 24 horas
+      const requestsRef = collection(db, "additiveRequests");
+      const q = query(
+        requestsRef,
+        where("companyId", "==", companyId),
+        where("status", "==", "devolvido"),
+        orderBy("updatedAt", "desc")
+      );
+
+      const snapshot = await getDocs(q);
+      const returnedRequests = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+      })) as AdditiveRequest[];
+
+      // Filtrar solicitações devolvidas há mais de 24 horas
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const pendingReturns = returnedRequests.filter(request =>
+        request.updatedAt < twentyFourHoursAgo
+      );
+
+      if (pendingReturns.length > 0) {
+        // Buscar usuários da empresa para notificar
+        const usersRef = collection(db, "users");
+        const usersQuery = query(usersRef, where("companyId", "==", companyId));
+        const usersSnapshot = await getDocs(usersQuery);
+        const companyUsers = usersSnapshot.docs.map(doc => doc.id);
+
+        // Notificar cada usuário da empresa
+        const notificationPromises = companyUsers.map(async (userId) => {
+          await notificationService.createNotification({
+            requestId: "system",
+            requestProtocol: "RETURN-ALERT",
+            userId: userId,
+            type: "pending_returns",
+            title: "📋 Devoluções Pendentes",
+            message: `Você tem ${pendingReturns.length} solicitação(ões) devolvida(s) há mais de 24 horas que precisam de atenção.`,
+            isRead: false,
+            actionUrl: "/additive-requests?status=devolvido",
+            priority: "high",
+            department: "system",
+            senderName: "Sistema de Monitoramento",
+          });
+        });
+
+        await Promise.all(notificationPromises);
+      }
+    } catch (error) {
+      console.error("Erro ao notificar devoluções pendentes:", error);
+    }
+  },
+
+  // Notificar formalizações pendentes
+  notifyPendingFormalizations: async (companyId: string): Promise<void> => {
+    try {
+      // Buscar agrupamentos prontos para formalização há mais de 48 horas
+      const groupsRef = collection(db, "osaGroups");
+      const q = query(
+        groupsRef,
+        where("status", "==", "ready"),
+        orderBy("createdAt", "desc")
+      );
+
+      const snapshot = await getDocs(q);
+      const readyGroups = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate() || new Date(),
+      })) as OSAGroup[];
+
+      // Filtrar agrupamentos prontos há mais de 48 horas
+      const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
+      const pendingFormalizations = readyGroups.filter(group =>
+        group.createdAt < fortyEightHoursAgo
+      );
+
+      if (pendingFormalizations.length > 0) {
+        // Buscar usuários da empresa para notificar
+        const usersRef = collection(db, "users");
+        const usersQuery = query(usersRef, where("companyId", "==", companyId));
+        const usersSnapshot = await getDocs(usersQuery);
+        const companyUsers = usersSnapshot.docs.map(doc => doc.id);
+
+        // Notificar cada usuário da empresa
+        const notificationPromises = companyUsers.map(async (userId) => {
+          await notificationService.createNotification({
+            requestId: "system",
+            requestProtocol: "FORMALIZATION-ALERT",
+            userId: userId,
+            type: "pending_formalizations",
+            title: "📄 Formalizações Pendentes",
+            message: `Você tem ${pendingFormalizations.length} agrupamento(s) pronto(s) para formalização há mais de 48 horas.`,
+            isRead: false,
+            actionUrl: "/formalization",
+            priority: "medium",
+            department: "system",
+            senderName: "Sistema de Monitoramento",
+          });
+        });
+
+        await Promise.all(notificationPromises);
+      }
+    } catch (error) {
+      console.error("Erro ao notificar formalizações pendentes:", error);
+    }
+  },
+
+  // Executar todas as verificações de alertas
+  runAdvancedAlerts: async (companyId: string): Promise<void> => {
+    try {
+      await Promise.all([
+        notificationService.checkContractLimits(companyId),
+        notificationService.notifyPendingReturns(companyId),
+        notificationService.notifyPendingFormalizations(companyId),
+      ]);
+    } catch (error) {
+      console.error("Erro ao executar alertas avançados:", error);
+    }
+  },
+
+  // Obter estatísticas de alertas para dashboard
+  getAlertStats: async (companyId: string): Promise<{
+    contractLimitAlerts: number;
+    pendingReturns: number;
+    pendingFormalizations: number;
+    urgentNotifications: number;
+  }> => {
+    try {
+      const usersRef = collection(db, "users");
+      const usersQuery = query(usersRef, where("companyId", "==", companyId));
+      const usersSnapshot = await getDocs(usersQuery);
+      const companyUserIds = usersSnapshot.docs.map(doc => doc.id);
+
+      if (companyUserIds.length === 0) {
+        return {
+          contractLimitAlerts: 0,
+          pendingReturns: 0,
+          pendingFormalizations: 0,
+          urgentNotifications: 0,
+        };
+      }
+
+      // Buscar notificações urgentes
+      const notificationsRef = collection(db, "notifications");
+      const urgentQuery = query(
+        notificationsRef,
+        where("userId", "in", companyUserIds),
+        where("priority", "==", "urgent"),
+        where("isRead", "==", false)
+      );
+      const urgentSnapshot = await getDocs(urgentQuery);
+      const urgentNotifications = urgentSnapshot.docs.length;
+
+      // Buscar solicitações devolvidas
+      const requestsRef = collection(db, "additiveRequests");
+      const returnedQuery = query(
+        requestsRef,
+        where("companyId", "==", companyId),
+        where("status", "==", "devolvido")
+      );
+      const returnedSnapshot = await getDocs(returnedQuery);
+      const pendingReturns = returnedSnapshot.docs.length;
+
+      // Buscar formalizações pendentes
+      const groupsRef = collection(db, "osaGroups");
+      const formalizationQuery = query(
+        groupsRef,
+        where("status", "==", "ready")
+      );
+      const formalizationSnapshot = await getDocs(formalizationQuery);
+      const pendingFormalizations = formalizationSnapshot.docs.length;
+
+      // Verificar limites de contrato
+      const subscriptionStatus = await subscriptionService.getSubscriptionStatus(companyId);
+      let contractLimitAlerts = 0;
+
+      if (subscriptionStatus) {
+        const limits = subscriptionStatus.limits;
+        const currentUsage = subscriptionStatus.usage;
+
+        if (limits.maxActiveContracts > 0 && currentUsage.activeContracts >= limits.maxActiveContracts * 0.9) {
+          contractLimitAlerts++;
+        }
+        if (limits.maxUsers > 0 && currentUsage.totalUsers >= limits.maxUsers * 0.9) {
+          contractLimitAlerts++;
+        }
+        if (limits.storageGB > 0 && currentUsage.storageUsedGB >= limits.storageGB * 0.9) {
+          contractLimitAlerts++;
+        }
+      }
+
+      return {
+        contractLimitAlerts,
+        pendingReturns,
+        pendingFormalizations,
+        urgentNotifications,
+      };
+    } catch (error) {
+      console.error("Erro ao obter estatísticas de alertas:", error);
+      return {
+        contractLimitAlerts: 0,
+        pendingReturns: 0,
+        pendingFormalizations: 0,
+        urgentNotifications: 0,
+      };
     }
   },
 };
