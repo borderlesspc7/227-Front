@@ -1,5 +1,4 @@
-import React from "react";
-import type { SubscriptionPlanConfig } from "../../types/subscription";
+import type { SubscriptionPlanConfig } from "../../../types/subscription";
 import "./PlanSelector.css";
 
 interface PlanSelectorProps {
@@ -100,7 +99,7 @@ export function PlanSelector({
                         <div className="plan-features">
                             <h4>Recursos Incluídos:</h4>
                             <ul>
-                                {plan.features.map((feature, index) => (
+                                {plan.features.map((feature: string, index: number) => (
                                     <li key={index}>
                                         <span className="feature-check">✓</span>
                                         {feature}

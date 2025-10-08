@@ -81,7 +81,7 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
         console.log("Carregando dados...");
 
         const [contractsFromDB, priorityOpts, unitOpts, itemsFromDB] = await Promise.all([
-          contractService.getContracts(),
+          contractService.getContracts(user?.companyId || ""),
           optionsService.getPriorityOptions(),
           optionsService.getUnitOptions(),
           itemService.getActiveItems(),

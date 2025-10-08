@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
-import { FiBell, FiCheck, FiX, FiClock, FiAlertCircle } from "react-icons/fi";
+import { FiBell, FiCheck, FiX, FiClock, FiAlertCircle, FiFileText } from "react-icons/fi";
 import { AuthContext } from "../../../contexts/authContext";
 import { notificationService } from "../../../services/notificationService";
 import type { ApprovalNotification } from "../../../types/approvalWorkflow";

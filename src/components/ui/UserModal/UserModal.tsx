@@ -37,7 +37,7 @@ const UserModal: React.FC<UserModalProps> = ({
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={handleCancel} size="large">
+        <Modal isOpen={isOpen} onClose={handleCancel} size="large" title="Gerenciar Usuários">
             <div className="user-modal">
                 <div className="user-modal__content">
                     <UserRegisterForm

@@ -60,11 +60,11 @@ class AnalyticsService {
   /**
    * Obter dados analíticos gerais
    */
-  async getAnalyticsData(filters?: AnalyticsFilters): Promise<AnalyticsData> {
+  async getAnalyticsData(companyId: string, filters?: AnalyticsFilters): Promise<AnalyticsData> {
     try {
       const [requests, contracts] = await Promise.all([
-        additiveRequestService.getAdditiveRequests(),
-        contractService.getContracts(),
+        additiveRequestService.getAdditiveRequests(companyId),
+        contractService.getContracts(companyId),
       ]);
 
       // Aplicar filtros
@@ -81,6 +81,7 @@ class AnalyticsService {
    * Obter dados para comparação de períodos
    */
   async getComparativeData(
+    companyId: string,
     currentFilters: AnalyticsFilters,
     previousFilters: AnalyticsFilters
   ): Promise<{
@@ -90,8 +91,8 @@ class AnalyticsService {
   }> {
     try {
       const [currentData, previousData] = await Promise.all([
-        this.getAnalyticsData(currentFilters),
-        this.getAnalyticsData(previousFilters),
+        this.getAnalyticsData(companyId, currentFilters),
+        this.getAnalyticsData(companyId, previousFilters),
       ]);
 
       const trends = this.calculateTrends(currentData, previousData);
@@ -111,11 +112,12 @@ class AnalyticsService {
    * Exportar dados para relatório
    */
   async exportReport(
+    companyId: string,
     format: "csv" | "json" | "excel",
     filters?: AnalyticsFilters
   ): Promise<string> {
     try {
-      const data = await this.getAnalyticsData(filters);
+      const data = await this.getAnalyticsData(companyId, filters);
 
       switch (format) {
         case "csv":
@@ -485,8 +487,7 @@ class AnalyticsService {
       "Contrato,Quantidade,Valor Total",
       ...data.topContracts.map(
         (contract) =>
-          `"${contract.contractName}",${
-            contract.requestCount
+          `"${contract.contractName}",${contract.requestCount
           },R$ ${contract.totalValue.toLocaleString("pt-BR")}`
       ),
     ];

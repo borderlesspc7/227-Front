@@ -37,7 +37,7 @@ const PriceModal: React.FC<PriceModalProps> = ({
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={handleCancel} size="large">
+        <Modal isOpen={isOpen} onClose={handleCancel} size="large" title="Gerenciar Preços">
             <div className="price-modal">
                 <div className="price-modal__content">
                     <PriceForm

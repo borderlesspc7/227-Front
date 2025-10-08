@@ -29,6 +29,15 @@ export interface LoginCredentials {
   cnpj?: string; // CNPJ para login por empresa
 }
 
+export interface UserRegisterCredentials {
+  displayName: string;
+  email: string;
+  password: string;
+  cpf: string;
+  phone: string;
+  role: UserRole;
+}
+
 export interface RegisterCredentials extends LoginCredentials {
   displayName: string;
   phone: string;

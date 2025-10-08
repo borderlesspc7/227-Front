@@ -183,7 +183,7 @@ export const contractService = {
           await subscriptionService.updateCompanyUsage(contract.companyId, {
             activeContracts: usage.activeContracts + 1,
           });
-        } else if (contract.status === "ativo" && updateData.status !== "ativo") {
+        } else if (contract.status === "ativo" && (updateData.status === "pendente" || updateData.status === "inativo")) {
           await subscriptionService.updateCompanyUsage(contract.companyId, {
             activeContracts: Math.max(0, usage.activeContracts - 1),
           });

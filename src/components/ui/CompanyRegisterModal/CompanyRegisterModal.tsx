@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { FiX, FiChevronLeft, FiChevronRight, FiCheck } from "react-icons/fi";
 import { authService } from "../../../services/authService";
 import { subscriptionService } from "../../../services/subscriptionService";

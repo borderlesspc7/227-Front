@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { SubscriptionStatusComponent } from "../../components/ui/SubscriptionStatus/SubscriptionStatus";
 import { PlanSelector } from "../../components/ui/PlanSelector/PlanSelector";
 import { useCompany } from "../../contexts/companyContext";
@@ -10,7 +10,7 @@ export function SubscriptionPage() {
     const { company, subscriptionStatus, refreshSubscription } = useCompany();
     const { showToast } = useToast();
     const [showPlanSelector, setShowPlanSelector] = useState(false);
-    const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+    const [selectedPlan] = useState<string | null>(null);
 
     const handleUpgrade = () => {
         setShowPlanSelector(true);
@@ -20,19 +20,19 @@ export function SubscriptionPage() {
         setShowPlanSelector(true);
     };
 
-    const handlePlanSelect = async (plan: any) => {
+    const handlePlanSelect = async () => {
         if (!company) return;
 
         try {
             // Aqui você implementaria a lógica de mudança de plano
             // Por exemplo, integração com gateway de pagamento
-            showToast("Funcionalidade de mudança de plano será implementada em breve", "info");
+            showToast({ type: "info", title: "Funcionalidade de mudança de plano será implementada em breve" });
 
             // Simulação de atualização
             await refreshSubscription();
             setShowPlanSelector(false);
         } catch (error) {
-            showToast("Erro ao alterar plano", "error");
+            showToast({ type: "error", title: "Erro ao alterar plano" });
         }
     };
 

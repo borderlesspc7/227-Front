@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FiCreditCard, FiPlus, FiTrash2, FiEdit, FiX } from "react-icons/fi";
+import { FiPlus, FiTrash2, FiEdit, FiX } from "react-icons/fi";
 import { useToast } from "../../../hooks/useToast";
 import "./PaymentModal.css";
 
@@ -31,7 +31,7 @@ export function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
     },
   ]);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [editingMethod, setEditingMethod] = useState<PaymentMethod | null>(null);
+  const [, setEditingMethod] = useState<PaymentMethod | null>(null);
   const { showSuccess, showError } = useToast();
 
   const handleAddMethod = () => {

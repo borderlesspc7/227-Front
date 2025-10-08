@@ -8,9 +8,7 @@ import {
     updateDoc,
     query,
     where,
-    orderBy,
     addDoc,
-    deleteDoc,
     Timestamp
 } from "firebase/firestore";
 import type {
@@ -259,11 +257,9 @@ export const subscriptionService = {
             if (updates.subscription) {
                 updateData.subscription = {
                     ...updates.subscription,
-                    startDate: Timestamp.fromDate(updates.subscription.startDate),
-                    endDate: Timestamp.fromDate(updates.subscription.endDate),
-                    trialEndDate: updates.subscription.trialEndDate
-                        ? Timestamp.fromDate(updates.subscription.trialEndDate)
-                        : null,
+                    startDate: updates.subscription.startDate,
+                    endDate: updates.subscription.endDate,
+                    trialEndDate: updates.subscription.trialEndDate,
                 };
             }
 
@@ -368,12 +364,12 @@ export const subscriptionService = {
                                 "storageUsedGB"] as number;
 
             const limit = status.limits[action];
-            const canExecute = limit === -1 || currentUsage < limit;
+            const canExecute = typeof limit === 'number' ? (limit === -1 || currentUsage < limit) : true;
 
             return {
                 canExecute,
                 currentUsage,
-                limit,
+                limit: typeof limit === 'number' ? limit : 0,
             };
         } catch (error) {
             throw new Error(`Erro ao verificar limites: ${error}`);

@@ -14,7 +14,6 @@ import {
   FiFile,
   FiSettings,
 } from "react-icons/fi";
-import { paths } from "../../../routes/paths";
 import { useAuth } from "../../../hooks/useAuth";
 
 interface SidebarProps {
@@ -22,7 +21,7 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ className = "" }) => {
-  const { user } = useAuth();
+  const { } = useAuth();
   const location = useLocation();
 
   // Determinar o prefixo baseado na rota atual

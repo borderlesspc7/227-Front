@@ -347,7 +347,7 @@ const AdditiveRequestPage: React.FC = () => {
         confirmText="Confirmar"
         cancelText="Cancelar"
         type="danger"
-        loading={confirmModal.loading}
+        isLoading={confirmModal.loading}
       />
     </div>
   );

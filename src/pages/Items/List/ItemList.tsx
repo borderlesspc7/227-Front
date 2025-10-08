@@ -19,7 +19,6 @@ export const ItemList: React.FC<ItemListProps> = ({
     items,
     onEdit,
     onDelete,
-    onRefresh,
 }) => {
     const { showToast } = useToast();
     const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -36,9 +35,9 @@ export const ItemList: React.FC<ItemListProps> = ({
                     setDeletingId(itemId);
                     await itemService.deleteItem(itemId);
                     onDelete(itemId);
-                    showToast("Item excluído com sucesso!", "success");
+                    showToast({ type: "success", title: "Item excluído com sucesso!" });
                 } catch (error) {
-                    showToast("Erro ao excluir item", "error");
+                    showToast({ type: "error", title: "Erro ao excluir item" });
                 } finally {
                     setDeletingId(null);
                 }
@@ -67,17 +66,6 @@ export const ItemList: React.FC<ItemListProps> = ({
             hour: "2-digit",
             minute: "2-digit",
         }).format(date);
-    };
-
-    const getCategoryColor = (categoria: string): string => {
-        const colors: Record<string, string> = {
-            Material: "#3b82f6",
-            Serviço: "#10b981",
-            Equipamento: "#f59e0b",
-            "Mão de Obra": "#8b5cf6",
-            Outros: "#6b7280",
-        };
-        return colors[categoria] || "#6b7280";
     };
 
     if (items.length === 0) {

@@ -11,7 +11,8 @@ import { ItemList } from "./List/ItemList";
 import "./ItemsPage.css";
 
 export const ItemsPage: React.FC = () => {
-    const { user } = useContext(AuthContext);
+    const authContext = useContext(AuthContext);
+    const user = authContext?.user;
     const { showToast } = useToast();
 
     const [items, setItems] = useState<Item[]>([]);
@@ -39,7 +40,7 @@ export const ItemsPage: React.FC = () => {
             const allItems = await itemService.getAllItems();
             setItems(allItems);
         } catch (error) {
-            showToast("Erro ao carregar itens", "error");
+            showToast({ type: "error", title: "Erro ao carregar itens" });
         } finally {
             setLoading(false);
         }
@@ -48,16 +49,16 @@ export const ItemsPage: React.FC = () => {
     const handleCreateItem = async (itemData: ItemFormData) => {
         try {
             if (!user?.uid) {
-                showToast("Usuário não autenticado", "error");
+                showToast({ type: "error", title: "Usuário não autenticado" });
                 return;
             }
 
             await itemService.createItem(itemData, user.uid);
-            showToast("Item criado com sucesso!", "success");
+            showToast({ type: "success", title: "Item criado com sucesso!" });
             setShowForm(false);
             loadItems();
         } catch (error) {
-            showToast("Erro ao criar item", "error");
+            showToast({ type: "error", title: "Erro ao criar item" });
         }
     };
 
@@ -66,12 +67,12 @@ export const ItemsPage: React.FC = () => {
             if (!editingItem) return;
 
             await itemService.updateItem(editingItem.id, itemData);
-            showToast("Item atualizado com sucesso!", "success");
+            showToast({ type: "success", title: "Item atualizado com sucesso!" });
             setShowForm(false);
             setEditingItem(null);
             loadItems();
         } catch (error) {
-            showToast("Erro ao atualizar item", "error");
+            showToast({ type: "error", title: "Erro ao atualizar item" });
         }
     };
 
@@ -87,10 +88,10 @@ export const ItemsPage: React.FC = () => {
     const handleClearTestData = async () => {
         try {
             await itemService.clearTestData();
-            showToast("Dados de teste removidos com sucesso!", "success");
+            showToast({ type: "success", title: "Dados de teste removidos com sucesso!" });
             loadItems();
         } catch (error) {
-            showToast("Erro ao limpar dados de teste", "error");
+            showToast({ type: "error", title: "Erro ao limpar dados de teste" });
         }
     };
 

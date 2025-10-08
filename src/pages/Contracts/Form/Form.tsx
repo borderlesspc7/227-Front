@@ -184,6 +184,7 @@ export const Form: React.FC<FormProps> = ({ onContractSaved, onCancel, contract,
 
     try {
       const contractDataForFirebse = {
+        companyId: user?.companyId || "",
         cliente: formData.cliente.trim(),
         obra: formData.obra.trim(),
         numeroContrato: formData.numeroContrato.trim(),

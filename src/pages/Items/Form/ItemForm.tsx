@@ -19,7 +19,6 @@ const unidades = [
     "KG",
     "TON",
     "L",
-    "M³",
     "H",
     "DIA",
     "MÊS",

@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { CompanyRegisterModal } from "../../components/ui/CompanyRegisterModal/CompanyRegisterModal";
 import "./CompanyRegisterPage.css";
 
 export function CompanyRegisterPage() {
-    const [isModalOpen, setIsModalOpen] = useState(true);
+    const [isModalOpen] = useState(true);
 
     const handleSuccess = () => {
         // Após cadastro bem-sucedido, redirecionar para dashboard

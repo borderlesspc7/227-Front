@@ -463,7 +463,7 @@ const AdditiveRequestList: React.FC<AdditiveRequestListProps> = ({
         confirmText="Excluir"
         cancelText="Cancelar"
         type="danger"
-        loading={confirmModal.loading}
+        isLoading={confirmModal.loading}
       />
     </div>
   );

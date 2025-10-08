@@ -1,5 +1,5 @@
 import { useAuth } from "../hooks/useAuth";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import type { ReactNode } from "react";
 import { paths } from "./paths";
 import type { UserRole } from "../types/auth";

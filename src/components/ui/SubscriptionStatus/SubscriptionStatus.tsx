@@ -1,5 +1,4 @@
-import React from "react";
-import type { SubscriptionStatus } from "../../types/subscription";
+import type { SubscriptionStatus } from "../../../types/subscription";
 import "./SubscriptionStatus.css";
 
 interface SubscriptionStatusProps {

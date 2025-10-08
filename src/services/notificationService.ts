@@ -18,7 +18,6 @@ import type {
   ApprovalStep,
 } from "../types/approvalWorkflow";
 import type { AdditiveRequest } from "../types/additiveRequest";
-import type { Contract } from "../types/contracts";
 import type { OSAGroup } from "../types/formalization";
 import { subscriptionService } from "./subscriptionService";
 

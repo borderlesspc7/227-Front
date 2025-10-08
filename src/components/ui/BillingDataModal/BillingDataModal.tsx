@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FiCreditCard, FiUser, FiMapPin, FiMail, FiPhone, FiX, FiSave, FiEdit } from "react-icons/fi";
+import { FiCreditCard, FiUser, FiMapPin, FiMail, FiX, FiSave, FiEdit } from "react-icons/fi";
 import { useToast } from "../../../hooks/useToast";
 import "./BillingDataModal.css";
 
@@ -74,7 +74,7 @@ export function BillingDataModal({ isOpen, onClose, companyData }: BillingDataMo
 
         // Limpar erro do campo
         if (errors[field]) {
-            setErrors(prev => ({
+            setErrors((prev: Record<string, string>) => ({
                 ...prev,
                 [field]: null
             }));
@@ -126,7 +126,7 @@ export function BillingDataModal({ isOpen, onClose, companyData }: BillingDataMo
 
     const handleSave = async () => {
         if (!validateForm()) {
-            showToast("Por favor, corrija os erros no formulário", "error");
+            showToast({ type: "error", title: "Por favor, corrija os erros no formulário" });
             return;
         }
 
@@ -134,11 +134,11 @@ export function BillingDataModal({ isOpen, onClose, companyData }: BillingDataMo
         try {
             // Simular chamada à API
             await new Promise(resolve => setTimeout(resolve, 1500));
-            showToast("Dados de cobrança atualizados com sucesso!", "success");
+            showToast({ type: "success", title: "Dados de cobrança atualizados com sucesso!" });
             setIsEditing(false);
             onClose();
         } catch (error) {
-            showToast("Erro ao atualizar dados de cobrança", "error");
+            showToast({ type: "error", title: "Erro ao atualizar dados de cobrança" });
         } finally {
             setIsLoading(false);
         }

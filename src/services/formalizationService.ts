@@ -16,7 +16,6 @@ import {
     doc,
     query,
     orderBy,
-    where,
     serverTimestamp,
 } from "firebase/firestore";
 
@@ -52,12 +51,13 @@ export const formalizationService = {
     // Criar novo agrupamento de OSAs
     createOSAGroup: async (
         groupData: OSAFormalizationFormData,
-        userId?: string
+        userId?: string,
+        companyId?: string
     ): Promise<OSAGroup> => {
         try {
             // Buscar as OSAs selecionadas
             const { additiveRequestService } = await import("./additiveRequestService");
-            const allOSAs = await additiveRequestService.getAdditiveRequests();
+            const allOSAs = await additiveRequestService.getAdditiveRequests(companyId || "");
 
             const selectedOSAs = allOSAs.filter(osa =>
                 groupData.selectedOSAs.includes(osa.id || "")
@@ -168,10 +168,10 @@ export const formalizationService = {
     },
 
     // Buscar OSAs elegíveis para agrupamento
-    getEligibleOSAs: async (criteria?: CutoffCriteria): Promise<AdditiveRequest[]> => {
+    getEligibleOSAs: async (companyId?: string, criteria?: CutoffCriteria): Promise<AdditiveRequest[]> => {
         try {
             const { additiveRequestService } = await import("./additiveRequestService");
-            const allOSAs = await additiveRequestService.getAdditiveRequests();
+            const allOSAs = await additiveRequestService.getAdditiveRequests(companyId || "");
 
             // Filtrar apenas OSAs aprovadas
             const approvedOSAs = allOSAs.filter(osa => osa.status === "aprovado");

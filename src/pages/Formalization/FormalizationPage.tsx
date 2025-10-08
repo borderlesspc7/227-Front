@@ -29,11 +29,7 @@ const FormalizationPage: React.FC = () => {
             } catch (error) {
                 const errorMessage = "Erro ao carregar agrupamentos de OSAs";
                 setError(errorMessage);
-                showError({
-                    title: "Erro ao carregar",
-                    message: errorMessage + ". Verifique sua conexão e tente novamente.",
-                    type: "error"
-                });
+                showError(errorMessage + ". Verifique sua conexão e tente novamente.");
                 console.error(error);
             } finally {
                 setLoading(false);
@@ -48,17 +44,9 @@ const FormalizationPage: React.FC = () => {
             const newGroup = await formalizationService.createOSAGroup(formData, user?.uid);
             setGroups(prev => [newGroup, ...prev]);
             setShowForm(false);
-            showSuccess({
-                title: "Sucesso",
-                message: "Agrupamento de OSAs criado com sucesso!",
-                type: "success"
-            });
+            showSuccess("Agrupamento de OSAs criado com sucesso!");
         } catch (error) {
-            showError({
-                title: "Erro",
-                message: "Erro ao criar agrupamento de OSAs. Tente novamente.",
-                type: "error"
-            });
+            showError("Erro ao criar agrupamento de OSAs. Tente novamente.");
             console.error(error);
         } finally {
             setLoading(false);
@@ -79,17 +67,9 @@ const FormalizationPage: React.FC = () => {
             setLoading(true);
             await formalizationService.deleteOSAGroup(groupId);
             setGroups(prev => prev.filter(group => group.id !== groupId));
-            showSuccess({
-                title: "Sucesso",
-                message: "Agrupamento removido com sucesso!",
-                type: "success"
-            });
+            showSuccess("Agrupamento removido com sucesso!");
         } catch (error) {
-            showError({
-                title: "Erro",
-                message: "Erro ao remover agrupamento. Tente novamente.",
-                type: "error"
-            });
+            showError("Erro ao remover agrupamento. Tente novamente.");
             console.error(error);
         } finally {
             setLoading(false);
@@ -108,17 +88,9 @@ const FormalizationPage: React.FC = () => {
                     : group
             ));
 
-            showSuccess({
-                title: "Documento Gerado",
-                message: `Documento de formalização ${documentNumber} gerado com sucesso!`,
-                type: "success"
-            });
+            showSuccess(`Documento de formalização ${documentNumber} gerado com sucesso!`);
         } catch (error) {
-            showError({
-                title: "Erro",
-                message: "Erro ao gerar documento de formalização. Tente novamente.",
-                type: "error"
-            });
+            showError("Erro ao gerar documento de formalização. Tente novamente.");
             console.error(error);
         } finally {
             setLoading(false);
@@ -141,17 +113,9 @@ const FormalizationPage: React.FC = () => {
                     : group
             ));
 
-            showSuccess({
-                title: "Sucesso",
-                message: "Agrupamento marcado como formalizado!",
-                type: "success"
-            });
+            showSuccess("Agrupamento marcado como formalizado!");
         } catch (error) {
-            showError({
-                title: "Erro",
-                message: "Erro ao marcar como formalizado. Tente novamente.",
-                type: "error"
-            });
+            showError("Erro ao marcar como formalizado. Tente novamente.");
             console.error(error);
         } finally {
             setLoading(false);
@@ -161,15 +125,6 @@ const FormalizationPage: React.FC = () => {
     const handleCancelForm = () => {
         setShowForm(false);
         setEditingGroup(null);
-    };
-
-    const refreshGroupsList = async () => {
-        try {
-            const groupsFromDB = await formalizationService.getOSAGroups();
-            setGroups(groupsFromDB);
-        } catch (err) {
-            console.error("Erro ao recarregar agrupamentos:", err);
-        }
     };
 
     return (
@@ -209,6 +164,7 @@ const FormalizationPage: React.FC = () => {
                     isOpen={showForm}
                     onClose={handleCancelForm}
                     size="extra-large"
+                    title="Nova Formalização"
                 >
                     <FormalizationForm
                         group={editingGroup}
@@ -237,6 +193,7 @@ const FormalizationPage: React.FC = () => {
                     isOpen={!!viewingGroup}
                     onClose={() => setViewingGroup(null)}
                     size="extra-large"
+                    title="Visualizar Formalização"
                 >
                     <FormalizationView
                         group={viewingGroup}

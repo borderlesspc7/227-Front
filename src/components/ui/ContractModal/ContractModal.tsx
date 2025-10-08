@@ -38,7 +38,7 @@ const ContractModal: React.FC<ContractModalProps> = ({
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={handleCancel} size="large">
+        <Modal isOpen={isOpen} onClose={handleCancel} size="large" title="Visualizar Contrato">
             <div className="contract-modal">
                 <div className="contract-modal__content">
                     <Form

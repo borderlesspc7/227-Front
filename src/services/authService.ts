@@ -6,12 +6,13 @@ import {
   onAuthStateChanged,
   type Unsubscribe,
 } from "firebase/auth";
-import { doc, setDoc, getDoc, collection, addDoc, Timestamp, updateDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, Timestamp, updateDoc } from "firebase/firestore";
 import { getAuth as getAuthFromApp } from "firebase/auth";
 import { initializeApp, deleteApp } from "firebase/app";
 import type {
   LoginCredentials,
   RegisterCredentials,
+  UserRegisterCredentials,
   User,
 } from "../types/auth";
 import { subscriptionService } from "./subscriptionService";
@@ -161,6 +162,37 @@ export const authService = {
       }
     } catch (error) {
       throw new Error("Erro ao registrar usuário: " + error);
+    }
+  },
+
+  async registerForAdmin(credentials: UserRegisterCredentials): Promise<User> {
+    try {
+      const firebaseUser = await createUserWithEmailAndPassword(
+        auth,
+        credentials.email,
+        credentials.password
+      );
+
+      // Criar usuário sem empresa (para administradores)
+      const userData: User = {
+        uid: firebaseUser.user.uid,
+        email: firebaseUser.user.email ?? credentials.email,
+        displayName: credentials.displayName,
+        createdAt: new Date(),
+        lastLoginAt: new Date(),
+        role: credentials.role,
+        isActive: true,
+      };
+
+      await setDoc(doc(db, "users", firebaseUser.user.uid), {
+        ...userData,
+        createdAt: Timestamp.fromDate(userData.createdAt),
+        lastLoginAt: Timestamp.fromDate(userData.lastLoginAt),
+      });
+
+      return userData;
+    } catch (error) {
+      throw new Error(getFirebaseErrorMessage(error));
     }
   },
 

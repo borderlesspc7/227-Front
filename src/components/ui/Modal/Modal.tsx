@@ -4,7 +4,7 @@ import "./Modal.css";
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
+  title?: string;
   children: React.ReactNode;
   size?: "small" | "medium" | "large" | "extra-large";
 }
@@ -47,6 +47,11 @@ const Modal: React.FC<ModalProps> = ({
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
+        {title && (
+          <div className="modal__header">
+            <h2 className="modal__title">{title}</h2>
+          </div>
+        )}
         <div className="modal__content">{children}</div>
       </div>
     </div>

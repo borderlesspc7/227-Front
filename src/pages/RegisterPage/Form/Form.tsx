@@ -5,8 +5,9 @@ import { useState, useEffect } from "react";
 import InputField from "../../../components/ui/InputField/InputField";
 import { SelectField } from "../../../components/ui/SelectField/SelectField";
 import { Button } from "../../../components/ui/Button/Button";
-import type { RegisterCredentials, UserRole } from "../../../types/auth";
+import type { UserRegisterCredentials, UserRole } from "../../../types/auth";
 import { useAuth } from "../../../hooks/useAuth";
+import { authService } from "../../../services/authService";
 import { optionsService } from "../../../services/optionsService";
 import { userService } from "../../../services/userService";
 
@@ -31,7 +32,7 @@ interface UserRegisterFormProps {
 }
 
 export const UserRegisterForm: React.FC<UserRegisterFormProps> = ({ onUserSaved, onCancel, isSubmitting = false, user }) => {
-  const { registerForAdmin } = useAuth();
+  const { } = useAuth();
   const [formData, setFormData] = useState<FormData>({
     displayName: "",
     email: "",
@@ -181,7 +182,7 @@ export const UserRegisterForm: React.FC<UserRegisterFormProps> = ({ onUserSaved,
         }
       } else {
         // Criação de novo usuário
-        const payload: RegisterCredentials = {
+        const payload: UserRegisterCredentials = {
           displayName: formData.displayName,
           email: formData.email,
           password: formData.password,
@@ -190,7 +191,7 @@ export const UserRegisterForm: React.FC<UserRegisterFormProps> = ({ onUserSaved,
           role: formData.role as UserRole,
         };
 
-        const newUser = await registerForAdmin(payload);
+        const newUser = await authService.registerForAdmin(payload);
 
         setFormData({
           displayName: "",

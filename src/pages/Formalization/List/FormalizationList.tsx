@@ -53,21 +53,6 @@ const FormalizationList: React.FC<FormalizationListProps> = ({
         }
     };
 
-    const getPriorityColor = (priority: string) => {
-        switch (priority) {
-            case "urgente":
-                return "#dc2626";
-            case "alta":
-                return "#f59e0b";
-            case "media":
-                return "#3b82f6";
-            case "baixa":
-                return "#059669";
-            default:
-                return "#6b7280";
-        }
-    };
-
     if (loading) {
         return (
             <div className="formalization-list__loading">

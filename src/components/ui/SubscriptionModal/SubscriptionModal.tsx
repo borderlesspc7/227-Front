@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FiSettings, FiCalendar, FiCreditCard, FiDownload, FiPause, FiPlay, FiX } from "react-icons/fi";
+import { FiSettings, FiCreditCard, FiDownload, FiPause, FiPlay, FiX } from "react-icons/fi";
 import { useToast } from "../../../hooks/useToast";
 import { BillingDataModal } from "../BillingDataModal/BillingDataModal";
 import "./SubscriptionModal.css";
@@ -23,10 +23,10 @@ export function SubscriptionModal({ isOpen, onClose, subscription }: Subscriptio
         try {
             // Simular chamada à API
             await new Promise(resolve => setTimeout(resolve, 1000));
-            showToast("Assinatura pausada com sucesso!", "success");
+            showToast({ type: "success", title: "Assinatura pausada com sucesso!" });
             onClose();
         } catch (error) {
-            showToast("Erro ao pausar assinatura", "error");
+            showToast({ type: "error", title: "Erro ao pausar assinatura" });
         } finally {
             setIsLoading(false);
         }
@@ -37,10 +37,10 @@ export function SubscriptionModal({ isOpen, onClose, subscription }: Subscriptio
         try {
             // Simular chamada à API
             await new Promise(resolve => setTimeout(resolve, 1000));
-            showToast("Assinatura reativada com sucesso!", "success");
+            showToast({ type: "success", title: "Assinatura reativada com sucesso!" });
             onClose();
         } catch (error) {
-            showToast("Erro ao reativar assinatura", "error");
+            showToast({ type: "error", title: "Erro ao reativar assinatura" });
         } finally {
             setIsLoading(false);
         }
@@ -51,18 +51,18 @@ export function SubscriptionModal({ isOpen, onClose, subscription }: Subscriptio
         try {
             // Simular chamada à API
             await new Promise(resolve => setTimeout(resolve, 1000));
-            showToast("Assinatura cancelada com sucesso!", "success");
+            showToast({ type: "success", title: "Assinatura cancelada com sucesso!" });
             setShowCancelConfirm(false);
             onClose();
         } catch (error) {
-            showToast("Erro ao cancelar assinatura", "error");
+            showToast({ type: "error", title: "Erro ao cancelar assinatura" });
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleDownloadInvoice = () => {
-        showToast("Download da fatura iniciado!", "info");
+        showToast({ type: "info", title: "Download da fatura iniciado!" });
     };
 
     const handleUpdateBillingInfo = () => {

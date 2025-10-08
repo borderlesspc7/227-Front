@@ -5,8 +5,8 @@ import { AuthContext } from "../../../contexts/authContext";
 import type {
     OSAFormalizationFormData,
     CutoffCriteria,
-    AdditiveRequest
 } from "../../../types/formalization";
+import type { AdditiveRequest } from "../../../types/additiveRequest";
 import type { OSAGroup } from "../../../types/formalization";
 import "./FormalizationForm.css";
 
@@ -21,8 +21,8 @@ const FormalizationForm: React.FC<FormalizationFormProps> = ({
     onSubmit,
     onCancel,
 }) => {
-    const { showSuccess, showError } = useToast();
-    const { user } = useContext(AuthContext) || {};
+    const { showError } = useToast();
+    const { } = useContext(AuthContext) || {};
 
     const [formData, setFormData] = useState<OSAFormalizationFormData>({
         name: "",
@@ -36,7 +36,6 @@ const FormalizationForm: React.FC<FormalizationFormProps> = ({
 
     const [availableOSAs, setAvailableOSAs] = useState<AdditiveRequest[]>([]);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
 
     useEffect(() => {
         const loadData = async () => {
@@ -54,7 +53,6 @@ const FormalizationForm: React.FC<FormalizationFormProps> = ({
                     });
                 }
             } catch (error) {
-                setError("Erro ao carregar OSAs disponíveis");
                 console.error(error);
             } finally {
                 setLoading(false);
@@ -104,20 +102,12 @@ const FormalizationForm: React.FC<FormalizationFormProps> = ({
         e.preventDefault();
 
         if (!formData.name.trim()) {
-            showError({
-                title: "Erro de Validação",
-                message: "Nome do agrupamento é obrigatório",
-                type: "error"
-            });
+            showError("Nome do agrupamento é obrigatório");
             return;
         }
 
         if (formData.selectedOSAs.length === 0) {
-            showError({
-                title: "Erro de Validação",
-                message: "Selecione pelo menos uma OSA para o agrupamento",
-                type: "error"
-            });
+            showError("Selecione pelo menos uma OSA para o agrupamento");
             return;
         }
 
@@ -125,11 +115,7 @@ const FormalizationForm: React.FC<FormalizationFormProps> = ({
             setLoading(true);
             await onSubmit(formData);
         } catch (error) {
-            showError({
-                title: "Erro",
-                message: "Erro ao processar formulário. Tente novamente.",
-                type: "error"
-            });
+            showError("Erro ao processar formulário. Tente novamente.");
             console.error(error);
         } finally {
             setLoading(false);
@@ -141,10 +127,6 @@ const FormalizationForm: React.FC<FormalizationFormProps> = ({
             const osa = availableOSAs.find(o => o.id === osaId);
             return total + (osa?.valorTotal || 0);
         }, 0);
-    };
-
-    const getSelectedOSAs = () => {
-        return availableOSAs.filter(osa => formData.selectedOSAs.includes(osa.id || ""));
     };
 
     return (

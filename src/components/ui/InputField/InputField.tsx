@@ -6,7 +6,7 @@ import "./InputField.css";
 
 interface InputFieldProps {
   label: string;
-  type?: "text" | "email" | "password" | "number" | "tel" | "url" | "search";
+  type?: "text" | "email" | "password" | "number" | "tel" | "url" | "search" | "date";
   value: string;
   onChange: (value: string) => void;
   onBlur?: () => void;
