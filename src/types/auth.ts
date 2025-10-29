@@ -3,7 +3,8 @@ export type UserRole =
   | "solicitante"
   | "engenheiro"
   | "suprimento"
-  | "diretor";
+  | "diretor"
+  | "cliente";
 
 export interface User {
   uid: string;

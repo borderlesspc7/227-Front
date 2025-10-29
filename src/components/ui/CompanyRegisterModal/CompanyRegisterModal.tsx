@@ -427,7 +427,11 @@ export function CompanyRegisterModal({ isOpen, onClose, onSuccess }: CompanyRegi
                                     >
                                         <option value="">Selecione o tipo de usuário</option>
                                         <option value="admin">Administrador</option>
-                                        <option value="user">Usuário</option>
+                                        <option value="solicitante">Solicitante de OSAs</option>
+                                        <option value="engenheiro">Engenheiro Aprovador</option>
+                                        <option value="suprimento">Suprimentos</option>
+                                        <option value="diretor">Diretor/Financeiro</option>
+                                        <option value="cliente">Cliente</option>
                                     </select>
                                     {errors.role && <span className="error-message">{errors.role}</span>}
                                 </div>

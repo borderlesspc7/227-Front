@@ -59,6 +59,7 @@ class OptionsService {
                 { value: "engenheiro", label: "Engenheiro Aprovador", order: 3, department: "engenharia" },
                 { value: "suprimento", label: "Suprimentos", order: 4, department: "suprimentos" },
                 { value: "diretor", label: "Diretor/Financeiro", order: 5, department: "diretoria" },
+                { value: "cliente", label: "Cliente", order: 6, department: "cliente" },
             ];
 
             // Salvar no Firestore
@@ -151,7 +152,34 @@ class OptionsService {
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
-                return docSnap.data().options;
+                const existingOptions = docSnap.data().options as UserRoleOption[];
+                
+                // Verificar se todas as 6 roles estão presentes
+                const requiredRoles = ["admin", "solicitante", "engenheiro", "suprimento", "diretor", "cliente"];
+                const existingValues = existingOptions.map(opt => opt.value);
+                const missingRoles = requiredRoles.filter(role => !existingValues.includes(role));
+                
+                // Se faltar alguma role, atualizar o documento
+                if (missingRoles.length > 0) {
+                    console.log("Atualizando roles faltantes:", missingRoles);
+                    const updatedOptions: UserRoleOption[] = [
+                        { value: "admin", label: "Administrador", order: 1, department: "admin" },
+                        { value: "solicitante", label: "Solicitante de OSAs", order: 2, department: "operacional" },
+                        { value: "engenheiro", label: "Engenheiro Aprovador", order: 3, department: "engenharia" },
+                        { value: "suprimento", label: "Suprimentos", order: 4, department: "suprimentos" },
+                        { value: "diretor", label: "Diretor/Financeiro", order: 5, department: "diretoria" },
+                        { value: "cliente", label: "Cliente", order: 6, department: "cliente" },
+                    ];
+                    
+                    await setDoc(doc(db, "systemOptions", "userRoles"), {
+                        options: updatedOptions,
+                        updatedAt: serverTimestamp(),
+                    });
+                    
+                    return updatedOptions;
+                }
+                
+                return existingOptions;
             } else {
                 // Se não existir, inicializar com padrões
                 await this.initializeDefaultOptions();
@@ -166,6 +194,7 @@ class OptionsService {
                 { value: "engenheiro", label: "Engenheiro Aprovador", order: 3, department: "engenharia" },
                 { value: "suprimento", label: "Suprimentos", order: 4, department: "suprimentos" },
                 { value: "diretor", label: "Diretor/Financeiro", order: 5, department: "diretoria" },
+                { value: "cliente", label: "Cliente", order: 6, department: "cliente" },
             ];
         }
     }

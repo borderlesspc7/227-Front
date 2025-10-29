@@ -16,12 +16,14 @@ import { contractService } from "../../services/contractService";
 import { trendsService } from "../../services/trendsService";
 import { useToast } from "../../hooks/useToast";
 import { useAuth } from "../../hooks/useAuth";
+import { usePermissions } from "../../hooks/usePermissions";
 import KPICard from "./components/KPICard/KPICard";
 import FilterSection from "./components/FilterSection/FilterSection";
 import ChartSection from "./components/ChartSection/ChartSection";
 import RecentActivities from "./components/RecentActivities/RecentActivities";
 import AlertDashboard from "../../components/ui/AlertDashboard/AlertDashboard";
 import { CompanySetupPrompt } from "../../components/ui/CompanySetupPrompt/CompanySetupPrompt";
+import ClientDashboard from "./ClientDashboard/ClientDashboard";
 import "./DashboardPage.css";
 
 interface DashboardFilters {
@@ -38,6 +40,12 @@ interface DashboardFilters {
 const DashboardPage: React.FC = () => {
   const { showError } = useToast();
   const { user } = useAuth();
+  const { isCliente } = usePermissions();
+
+  // Se for cliente, mostrar dashboard simplificado
+  if (isCliente) {
+    return <ClientDashboard />;
+  }
 
   // Função estável para mostrar erro
   const handleError = useCallback((title: string, message: string) => {

@@ -15,6 +15,7 @@ import { CompanyRegisterPage } from "../pages/CompanyRegister/CompanyRegisterPag
 import { ProfilePage } from "../pages/Profile/ProfilePage";
 import { ErrorBoundary } from "../components/ui/ErrorBoundary/ErrorBoundary";
 import { ToastProvider } from "../contexts/toastContext";
+import type { UserRole } from "../types/auth";
 
 export default function AppRoutes() {
   return (
@@ -33,16 +34,86 @@ export default function AppRoutes() {
                 </ProtectedRoute>
               }
             >
-              <Route index element={<DashboardPage />} />
-              <Route path="dashboard" element={<DashboardPage />} />
-              <Route path="register-user" element={<RegisterPage />} />
-              <Route path="contracts" element={<ContractsPage />} />
-              <Route path="prices" element={<PricesPage />} />
-              <Route path="additive-requests" element={<AdditiveRequestPage />} />
-              <Route path="items" element={<ItemsPage />} />
-              <Route path="approvals" element={<ApprovalsPage />} />
-              <Route path="formalization" element={<FormalizationPage />} />
-              <Route path="profile" element={<ProfilePage />} />
+              <Route 
+                index 
+                element={
+                  <ProtectedRoute roles={["admin", "diretor", "engenheiro", "solicitante", "suprimento", "cliente"]}>
+                    <DashboardPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="dashboard" 
+                element={
+                  <ProtectedRoute roles={["admin", "diretor", "engenheiro", "solicitante", "suprimento", "cliente"]}>
+                    <DashboardPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="register-user" 
+                element={
+                  <ProtectedRoute roles={["admin"]}>
+                    <RegisterPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="contracts" 
+                element={
+                  <ProtectedRoute roles={["admin", "diretor", "engenheiro", "solicitante", "suprimento"]}>
+                    <ContractsPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="prices" 
+                element={
+                  <ProtectedRoute roles={["admin", "diretor", "engenheiro", "solicitante", "suprimento"]}>
+                    <PricesPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="additive-requests" 
+                element={
+                  <ProtectedRoute roles={["admin", "diretor", "engenheiro", "solicitante"]}>
+                    <AdditiveRequestPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="items" 
+                element={
+                  <ProtectedRoute roles={["admin", "diretor", "engenheiro", "solicitante", "suprimento"]}>
+                    <ItemsPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="approvals" 
+                element={
+                  <ProtectedRoute roles={["admin", "diretor", "solicitante", "cliente"]}>
+                    <ApprovalsPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="formalization" 
+                element={
+                  <ProtectedRoute roles={["admin", "diretor", "engenheiro", "solicitante", "cliente"]}>
+                    <FormalizationPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="profile" 
+                element={
+                  <ProtectedRoute roles={["admin", "diretor", "engenheiro", "solicitante", "suprimento", "cliente"]}>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                } 
+              />
             </Route>
             <Route
               path={paths.adminRoot}
@@ -66,7 +137,6 @@ export default function AppRoutes() {
               <Route path={paths.adminApprovals} element={<ApprovalsPage />} />
               <Route path={paths.adminFormalization} element={<FormalizationPage />} />
               <Route path={paths.adminProfile} element={<ProfilePage />} />
-              {/* Outras rotas admin: contratos, preços, etc */}
             </Route>
           </Routes>
         </ErrorBoundary>

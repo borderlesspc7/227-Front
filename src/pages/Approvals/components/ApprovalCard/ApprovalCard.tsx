@@ -9,6 +9,7 @@ import {
   FiCalendar,
   FiUser,
   FiAlertCircle,
+  FiMessageSquare,
 } from "react-icons/fi";
 import type { AdditiveRequest } from "../../../../types/additiveRequest";
 import type {
@@ -17,6 +18,8 @@ import type {
 } from "../../../../types/approvalWorkflow";
 import { formatCurrency, formatDateTime } from "../../../../utils/dateUtils";
 import ApprovalModal from "../../../Approval/ApprovalModal/ApprovalModal";
+import { usePermissions } from "../../../../hooks/usePermissions";
+import { HasRole, HasPermission } from "../../../../components/ui/HasRole";
 import "./ApprovalCard.css";
 
 interface ApprovalCardProps {
@@ -36,10 +39,12 @@ const ApprovalCard: React.FC<ApprovalCardProps> = ({
   currentUserDepartment,
   loading = false,
 }) => {
+  const { hasPermission } = usePermissions();
   const [showModal, setShowModal] = useState(false);
   const [modalAction, setModalAction] = useState<
     "approve" | "reject" | "return"
   >("approve");
+  const [showCommentModal, setShowCommentModal] = useState(false);
 
   const getPriorityColor = (priority: string): string => {
     switch (priority) {
@@ -113,7 +118,13 @@ const ApprovalCard: React.FC<ApprovalCardProps> = ({
     if (loading) return false;
     if (request.status !== "pendente") return false;
     if (!request.currentApprovalStep) return false;
+    // Verificar se o usuário tem permissão para aprovar
+    if (!hasPermission("approve_additive_requests")) return false;
     return request.currentApprovalStep.includes(currentUserDepartment);
+  };
+
+  const canComment = () => {
+    return hasPermission("comment_on_approvals");
   };
 
   const handleActionClick = (action: "approve" | "reject" | "return") => {
@@ -247,36 +258,53 @@ const ApprovalCard: React.FC<ApprovalCardProps> = ({
             Ver Detalhes
           </button>
 
-          {canTakeAction() && (
-            <>
-              <button
-                className="approval-card__action-btn approval-card__action-btn--approve"
-                onClick={() => handleActionClick("approve")}
-                disabled={loading}
-              >
-                <FiCheckCircle />
-                Aprovar
-              </button>
+          {/* Apenas roles com permissão podem aprovar, rejeitar ou devolver */}
+          <HasPermission permission="approve_additive_requests">
+            {canTakeAction() && (
+              <>
+                <button
+                  className="approval-card__action-btn approval-card__action-btn--approve"
+                  onClick={() => handleActionClick("approve")}
+                  disabled={loading}
+                >
+                  <FiCheckCircle />
+                  Aprovar
+                </button>
 
-              <button
-                className="approval-card__action-btn approval-card__action-btn--reject"
-                onClick={() => handleActionClick("reject")}
-                disabled={loading}
-              >
-                <FiXCircle />
-                Rejeitar
-              </button>
+                <button
+                  className="approval-card__action-btn approval-card__action-btn--reject"
+                  onClick={() => handleActionClick("reject")}
+                  disabled={loading}
+                >
+                  <FiXCircle />
+                  Rejeitar
+                </button>
 
-              <button
-                className="approval-card__action-btn approval-card__action-btn--return"
-                onClick={() => handleActionClick("return")}
-                disabled={loading}
-              >
-                <FiArrowLeft />
-                Devolver
-              </button>
-            </>
-          )}
+                <HasRole roles={["admin", "diretor", "engenheiro"]}>
+                  <button
+                    className="approval-card__action-btn approval-card__action-btn--return"
+                    onClick={() => handleActionClick("return")}
+                    disabled={loading}
+                  >
+                    <FiArrowLeft />
+                    Devolver
+                  </button>
+                </HasRole>
+              </>
+            )}
+          </HasPermission>
+
+          {/* Cliente e outros podem comentar */}
+          <HasPermission permission="comment_on_approvals">
+            <button
+              className="approval-card__action-btn approval-card__action-btn--comment"
+              onClick={() => setShowCommentModal(true)}
+              disabled={loading}
+            >
+              <FiMessageSquare />
+              Comentar
+            </button>
+          </HasPermission>
         </div>
       </div>
 

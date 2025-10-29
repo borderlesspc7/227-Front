@@ -14,76 +14,95 @@ import {
   FiFile,
   FiSettings,
 } from "react-icons/fi";
-import { useAuth } from "../../../hooks/useAuth";
+import { usePermissions } from "../../../hooks/usePermissions";
 
 interface SidebarProps {
   className?: string;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ className = "" }) => {
-  const { } = useAuth();
+  const { canAccessRoute, hasPermission } = usePermissions();
   const location = useLocation();
 
   // Determinar o prefixo baseado na rota atual
   const isAdminRoute = location.pathname.startsWith('/admin');
   const basePath = isAdminRoute ? '/admin' : '/dashboard';
 
-  const menuItems = [
+  const allMenuItems = [
     {
       id: "dashboard",
       label: "Dashboard Gerencial",
       icon: FiBarChart,
       path: `${basePath}`,
+      requiredPermission: "view_dashboard" as const,
     },
     {
       id: "approvals",
       label: "Aprovações",
       icon: FiCheck,
       path: `${basePath}/approvals`,
+      requiredPermission: "view_approvals" as const,
     },
     {
       id: "register-user",
       label: "Usuários",
       icon: FiUser,
       path: `${basePath}/register-user`,
+      requiredPermission: "view_users" as const,
     },
     {
       id: "register-contracts",
       label: "Cadastro de Contratos Principais",
       icon: FiFileText,
       path: `${basePath}/contracts`,
+      requiredPermission: "view_contracts" as const,
     },
     {
       id: "register-prices",
       label: "Cadastro de Preços Unitários",
       icon: FiDollarSign,
       path: `${basePath}/prices`,
+      requiredPermission: "view_prices" as const,
     },
     {
       id: "additive-requests",
       path: `${basePath}/additive-requests`,
       label: "Solicitações de Aditivos",
       icon: FiPlusCircle,
+      requiredPermission: "view_additive_requests" as const,
     },
     {
       id: "items",
       path: `${basePath}/items`,
       label: "Cadastro de Itens",
       icon: FiPackage,
+      requiredPermission: "view_items" as const,
     },
     {
       id: "formalization",
       path: `${basePath}/formalization`,
       label: "Formalização",
       icon: FiFile,
+      requiredPermission: "view_formalization" as const,
     },
     {
       id: "profile",
       path: `${basePath}/profile`,
       label: "Perfil",
       icon: FiSettings,
+      requiredPermission: "view_profile" as const,
     },
   ];
+
+  // Filtrar itens do menu baseado nas permissões do usuário
+  const menuItems = allMenuItems.filter((item) => {
+    // Verificar se o usuário tem a permissão necessária para ver este item
+    try {
+      return hasPermission(item.requiredPermission);
+    } catch {
+      return false;
+    }
+  });
   return (
     <aside className={`sidebar ${className}`}>
       <div className="sidebar__header">

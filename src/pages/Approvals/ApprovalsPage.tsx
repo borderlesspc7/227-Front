@@ -13,6 +13,8 @@ import { AuthContext } from "../../contexts/authContext";
 import { workflowService } from "../../services/workflowService";
 import { additiveRequestService } from "../../services/additiveRequestService";
 import { useToast } from "../../hooks/useToast";
+import { usePermissions } from "../../hooks/usePermissions";
+import { HasRole } from "../../components/ui/HasRole";
 import type { AdditiveRequest } from "../../types/additiveRequest";
 import type {
   ApprovalStats,
@@ -26,6 +28,7 @@ import "./ApprovalsPage.css";
 const ApprovalsPage: React.FC = () => {
   const { user } = useContext(AuthContext) || {};
   const { showSuccess, showError } = useToast();
+  const { isCliente } = usePermissions();
 
   // Estados principais
   const [requests, setRequests] = useState<AdditiveRequest[]>([]);
@@ -69,22 +72,40 @@ const ApprovalsPage: React.FC = () => {
         // Continuar mesmo se a configuração falhar
       }
 
-      // Carregar solicitações pendentes do departamento do usuário
-      const pendingRequests =
-        await workflowService.getPendingRequestsByDepartmentOptimized(
-          currentUserDepartment
-        );
+      let pendingRequests: AdditiveRequest[] = [];
 
-      // Carregar todas as solicitações para estatísticas
-      if (user?.companyId) {
+      // Cliente vê todas as solicitações, outros veem apenas do departamento
+      if (isCliente) {
+        // Cliente vê todas as solicitações relacionadas à sua empresa
+        if (user?.companyId) {
+          const allRequests = await additiveRequestService.getAdditiveRequests(
+            user.companyId
+          );
+          // Filtrar apenas solicitações que não estão em rascunho
+          pendingRequests = allRequests.filter(
+            (req) => req.status !== "rascunho"
+          );
+        }
+      } else {
+        // Carregar solicitações pendentes do departamento do usuário
+        pendingRequests =
+          await workflowService.getPendingRequestsByDepartmentOptimized(
+            currentUserDepartment
+          );
+      }
+
+      // Carregar todas as solicitações para estatísticas (apenas para não-clientes)
+      if (user?.companyId && !isCliente) {
         await additiveRequestService.getAdditiveRequests(user.companyId);
       }
 
-      // Carregar estatísticas
-      const workflowStats = await workflowService.getWorkflowStats();
+      // Carregar estatísticas (apenas para não-clientes)
+      if (!isCliente) {
+        const workflowStats = await workflowService.getWorkflowStats();
+        setStats(workflowStats as ApprovalStats);
+      }
 
       setRequests(pendingRequests);
-      setStats(workflowStats as ApprovalStats);
     } catch (err) {
       const errorMessage = "Erro ao carregar dados de aprovação";
       setError(errorMessage);
@@ -251,7 +272,9 @@ const ApprovalsPage: React.FC = () => {
             Central de Aprovações
           </h1>
           <p className="approvals-page__subtitle">
-            Gerencie as solicitações de OSAs do seu departamento
+            {isCliente
+              ? "Visualize e acompanhe as solicitações de OSAs"
+              : "Gerencie as solicitações de OSAs do seu departamento"}
           </p>
         </div>
 
@@ -271,9 +294,10 @@ const ApprovalsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Estatísticas */}
-      {departmentStats && (
-        <div className="approvals-page__stats">
+      {/* Estatísticas - Cliente não vê estatísticas detalhadas */}
+      <HasRole roles={["admin", "diretor", "engenheiro", "solicitante", "suprimento"]}>
+        {departmentStats && (
+          <div className="approvals-page__stats">
           <div className="approvals-page__stat-card">
             <div className="approvals-page__stat-icon approvals-page__stat-icon--pending">
               <FiClock />
@@ -322,7 +346,8 @@ const ApprovalsPage: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
+        )}
+      </HasRole>
 
       {/* Filtros */}
       <ApprovalFilters
