@@ -165,12 +165,20 @@ export const additiveRequestService = {
       }
 
       const requestsRef = collection(db, "additiveRequests");
-      const q = query(
-        requestsRef,
-        where("companyId", "==", companyId),
-        orderBy("createdAt", "desc")
-      );
-      const snapshot = await getDocs(q);
+      let snapshot;
+      try {
+        const q = query(
+          requestsRef,
+          where("companyId", "==", companyId),
+          orderBy("createdAt", "desc")
+        );
+        snapshot = await getDocs(q);
+      } catch (err) {
+        // Fallback sem orderBy caso índice não exista ou createdAt esteja ausente
+        console.warn("Falha ao ordenar additiveRequests por createdAt, usando fallback sem orderBy.", err);
+        const qNoOrder = query(requestsRef, where("companyId", "==", companyId));
+        snapshot = await getDocs(qNoOrder);
+      }
 
       return snapshot.docs.map((doc) =>
         convertFirestoreData({
@@ -180,6 +188,24 @@ export const additiveRequestService = {
       );
     } catch (error) {
       console.error("Error getting additive requests:", error);
+      throw error;
+    }
+  },
+
+  // Listar todas as solicitações (sem filtro por empresa) — útil para administradores sem companyId
+  getAllAdditiveRequests: async (): Promise<AdditiveRequest[]> => {
+    try {
+      const requestsRef = collection(db, "additiveRequests");
+      const q = query(requestsRef, orderBy("createdAt", "desc"));
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map((doc) =>
+        convertFirestoreData({
+          id: doc.id,
+          ...doc.data(),
+        })
+      );
+    } catch (error) {
+      console.error("Error getting all additive requests:", error);
       throw error;
     }
   },

@@ -87,12 +87,20 @@ export const contractService = {
       }
 
       const contractsRef = collection(db, "contracts");
-      const q = query(
-        contractsRef,
-        where("companyId", "==", companyId),
-        orderBy("createdAt", "desc")
-      );
-      const querySnapshot = await getDocs(q);
+      let querySnapshot;
+      try {
+        const q = query(
+          contractsRef,
+          where("companyId", "==", companyId),
+          orderBy("createdAt", "desc")
+        );
+        querySnapshot = await getDocs(q);
+      } catch (err) {
+        // Fallback sem orderBy (evita necessidade de índice composto e documentos sem createdAt)
+        console.warn("Falha ao ordenar por createdAt, usando fallback sem orderBy.", err);
+        const qNoOrder = query(contractsRef, where("companyId", "==", companyId));
+        querySnapshot = await getDocs(qNoOrder);
+      }
 
       const contracts: Contract[] = [];
       querySnapshot.forEach((doc) => {

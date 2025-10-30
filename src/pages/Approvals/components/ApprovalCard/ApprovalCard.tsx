@@ -1,5 +1,5 @@
 // src/pages/Approvals/components/ApprovalCard/ApprovalCard.tsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FiCheckCircle,
   FiXCircle,
@@ -18,8 +18,10 @@ import type {
 } from "../../../../types/approvalWorkflow";
 import { formatCurrency, formatDateTime } from "../../../../utils/dateUtils";
 import ApprovalModal from "../../../Approval/ApprovalModal/ApprovalModal";
+import ApprovalDetailsModal from "../ApprovalDetailsModal/ApprovalDetailsModal";
 import { usePermissions } from "../../../../hooks/usePermissions";
 import { HasRole, HasPermission } from "../../../../components/ui/HasRole";
+import { userService } from "../../../../services/userService";
 import "./ApprovalCard.css";
 
 interface ApprovalCardProps {
@@ -45,6 +47,18 @@ const ApprovalCard: React.FC<ApprovalCardProps> = ({
     "approve" | "reject" | "return"
   >("approve");
   const [showCommentModal, setShowCommentModal] = useState(false);
+  const [creatorName, setCreatorName] = useState<string>("");
+
+  useEffect(() => {
+    let mounted = true;
+    const loadCreator = async () => {
+      if (!request?.createdBy) return;
+      const user = await userService.getUserById(request.createdBy);
+      if (mounted) setCreatorName(user?.displayName || user?.email || request.createdBy);
+    };
+    void loadCreator();
+    return () => { mounted = false; };
+  }, [request?.createdBy]);
 
   const getPriorityColor = (priority: string): string => {
     switch (priority) {
@@ -138,8 +152,10 @@ const ApprovalCard: React.FC<ApprovalCardProps> = ({
   };
 
   const handleViewDetails = () => {
-    // Implementar visualização de detalhes
+    setShowDetails(true);
   };
+
+  const [showDetails, setShowDetails] = useState(false);
 
   return (
     <>
@@ -187,9 +203,7 @@ const ApprovalCard: React.FC<ApprovalCardProps> = ({
               <FiUser className="approval-card__info-icon" />
               <div className="approval-card__info-content">
                 <span className="approval-card__info-label">Criado por</span>
-                <span className="approval-card__info-value">
-                  {request.createdBy}
-                </span>
+                <span className="approval-card__info-value">{creatorName}</span>
               </div>
             </div>
 
@@ -316,6 +330,13 @@ const ApprovalCard: React.FC<ApprovalCardProps> = ({
         stepName={`${currentUserDepartment.toUpperCase()}`}
         actionType={modalAction}
         loading={loading}
+      />
+
+      <ApprovalDetailsModal
+        isOpen={showDetails}
+        onClose={() => setShowDetails(false)}
+        request={request}
+        creatorName={creatorName}
       />
     </>
   );

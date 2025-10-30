@@ -72,7 +72,7 @@ const ApprovalsPage: React.FC = () => {
         // Continuar mesmo se a configuração falhar
       }
 
-      let pendingRequests: AdditiveRequest[] = [];
+      let listForPage: AdditiveRequest[] = [];
 
       // Cliente vê todas as solicitações, outros veem apenas do departamento
       if (isCliente) {
@@ -82,21 +82,43 @@ const ApprovalsPage: React.FC = () => {
             user.companyId
           );
           // Filtrar apenas solicitações que não estão em rascunho
-          pendingRequests = allRequests.filter(
+          const nonDraft = allRequests.filter(
             (req) => req.status !== "rascunho"
           );
+          listForPage = nonDraft;
         }
       } else {
-        // Carregar solicitações pendentes do departamento do usuário
-        pendingRequests =
-          await workflowService.getPendingRequestsByDepartmentOptimized(
-            currentUserDepartment
+        // Para não-clientes (admin/engenheiro/etc.), a lista da página deve permitir filtrar por qualquer status.
+        // Portanto, carregamos TODAS as solicitações da empresa do usuário.
+        if (user?.companyId) {
+          const companyRequests = await additiveRequestService.getAdditiveRequests(
+            user.companyId
           );
+          listForPage = companyRequests; // inclui aprovadas/rejeitadas/pendentes
+          // Se por algum motivo vier vazio (índices/regras), tenta carregar todas
+          if (!listForPage || listForPage.length === 0) {
+            try {
+              const allRequests = await additiveRequestService.getAllAdditiveRequests();
+              if (allRequests.length > 0) listForPage = allRequests;
+            } catch {}
+          }
+        } else {
+          // Admin sem companyId: carregar todas as solicitações
+          const allRequests = await additiveRequestService.getAllAdditiveRequests();
+          listForPage = allRequests;
+        }
       }
 
-      // Carregar todas as solicitações para estatísticas (apenas para não-clientes)
-      if (user?.companyId && !isCliente) {
-        await additiveRequestService.getAdditiveRequests(user.companyId);
+      // Fallback: se ainda estiver vazio (regras/erro silencioso), tenta ao menos pendentes por departamento
+      if (!listForPage || listForPage.length === 0) {
+        try {
+          const deptPendings = await workflowService.getPendingRequestsByDepartmentOptimized(
+            currentUserDepartment
+          );
+          if (deptPendings && deptPendings.length > 0) {
+            listForPage = deptPendings;
+          }
+        } catch {}
       }
 
       // Carregar estatísticas (apenas para não-clientes)
@@ -105,7 +127,7 @@ const ApprovalsPage: React.FC = () => {
         setStats(workflowStats as ApprovalStats);
       }
 
-      setRequests(pendingRequests);
+      setRequests(listForPage);
     } catch (err) {
       const errorMessage = "Erro ao carregar dados de aprovação";
       setError(errorMessage);

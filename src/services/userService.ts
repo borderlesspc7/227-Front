@@ -1,5 +1,5 @@
 import { db } from "../lib/firebaseconfig";
-import { collection, getDocs, doc, deleteDoc, updateDoc, query, orderBy } from "firebase/firestore";
+import { collection, getDocs, doc, deleteDoc, updateDoc, query, orderBy, getDoc } from "firebase/firestore";
 
 export interface User {
     id: string;
@@ -28,6 +28,27 @@ export const userService = {
         } catch (error) {
             console.error("Erro ao buscar usuários:", error);
             throw error;
+        }
+    },
+
+    async getUserById(userId: string): Promise<User | null> {
+        try {
+            if (!userId) return null;
+            const snap = await getDoc(doc(db, "users", userId));
+            if (!snap.exists()) return null;
+            const data: any = snap.data();
+            return {
+                id: snap.id,
+                displayName: data.displayName || "",
+                email: data.email || "",
+                role: data.role || "",
+                phone: data.phone || "",
+                createdAt: data?.createdAt?.toDate?.() || new Date(),
+                lastLoginAt: data?.lastLoginAt?.toDate?.(),
+            } as User;
+        } catch (error) {
+            console.error("Erro ao buscar usuário por ID:", error);
+            return null;
         }
     },
 

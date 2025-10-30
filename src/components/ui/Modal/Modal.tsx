@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import "./Modal.css";
 
 interface ModalProps {
@@ -24,7 +25,12 @@ const Modal: React.FC<ModalProps> = ({
     }
   };
 
-  return (
+  const portalTarget =
+    (typeof document !== "undefined" && document.querySelector(".admin-layout")) ||
+    (typeof document !== "undefined" && document.getElementById("root")) ||
+    undefined;
+
+  const modalContent = (
     <div className="modal__backdrop" onClick={handleBackdropClick}>
       <div className={`modal__container modal__container--${size}`}>
         <button
@@ -56,6 +62,9 @@ const Modal: React.FC<ModalProps> = ({
       </div>
     </div>
   );
+
+  // Renderiza dentro da área .admin-layout; fallback para #root quando não disponível
+  return portalTarget ? createPortal(modalContent, portalTarget) : modalContent;
 };
 
 export default Modal;

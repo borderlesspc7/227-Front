@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { X, CheckCircle, XCircle, ArrowLeft, Upload } from "lucide-react";
 import type { ApprovalActionFormData } from "../../../types/approvalWorkflow";
 import "./ApprovalModal.css";
+import Modal from "../../../components/ui/Modal/Modal";
 
 interface ApprovalModalProps {
   isOpen: boolean;
@@ -87,23 +88,13 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="approval-modal__overlay">
+    <Modal isOpen={isOpen} onClose={onClose} title={config.title} size="medium">
       <div className="approval-modal">
         <div className="approval-modal__header">
           <div className="approval-modal__title-section">
             {config.icon}
-            <div>
-              <h2 className="approval-modal__title">{config.title}</h2>
-              <p className="approval-modal__subtitle">Etapa: {stepName}</p>
-            </div>
+            <p className="approval-modal__subtitle">Etapa: {stepName}</p>
           </div>
-          <button
-            className="approval-modal__close-btn"
-            onClick={onClose}
-            disabled={loading}
-          >
-            <X />
-          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="approval-modal__form">
@@ -194,7 +185,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   );
 };
 

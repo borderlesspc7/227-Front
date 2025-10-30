@@ -16,6 +16,7 @@ import ItemModal from "../../../components/ui/ItemModal/ItemModal";
 import { AuthContext } from "../../../contexts/authContext";
 import type { Item } from "../../../types/item";
 import "./AdditiveRequestForm.css";
+import Modal from "../../../components/ui/Modal/Modal";
 
 interface AdditiveRequestFormProps {
   request?: AdditiveRequest | null;
@@ -75,13 +76,24 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
   const [showItemModal, setShowItemModal] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<string>("");
 
+  // Modal de criação rápida de contrato
+  const [showCreateContract, setShowCreateContract] = useState(false);
+  const [newContract, setNewContract] = useState({
+    numeroContrato: "",
+    cliente: "",
+    obra: "",
+    status: "ativo" as "ativo" | "pendente" | "inativo",
+  });
+  const [creatingContract, setCreatingContract] = useState(false);
+  const [createContractError, setCreateContractError] = useState<string>("");
+
   useEffect(() => {
     const loadData = async () => {
       try {
         console.log("Carregando dados...");
 
         const [contractsFromDB, priorityOpts, unitOpts, itemsFromDB] = await Promise.all([
-          contractService.getContracts(user?.companyId || ""),
+          user?.companyId ? contractService.getContracts(user.companyId) : Promise.resolve([]),
           optionsService.getPriorityOptions(),
           optionsService.getUnitOptions(),
           itemService.getActiveItems(),
@@ -101,8 +113,22 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
         showError("Erro ao carregar", "Erro ao carregar dados do formulário. Tente recarregar a página.");
       }
     };
-    loadData();
-  }, [showError]);
+    // Evita buscar contratos sem companyId; reexecuta quando companyId estiver disponível
+    if (user?.companyId !== undefined) {
+      void loadData();
+    }
+  }, [user?.companyId, showError]);
+
+  // Observa contratos em tempo real para refletir criações recentes
+  useEffect(() => {
+    if (!user?.companyId) return;
+    const unsubscribe = contractService.observeContracts(user.companyId, (list) => {
+      setContracts(list.map(c => ({ id: c.id, numeroContrato: c.numeroContrato, cliente: c.cliente, obra: c.obra })));
+    });
+    return () => {
+      try { unsubscribe(); } catch {}
+    };
+  }, [user?.companyId]);
 
   useEffect(() => {
     if (request) {
@@ -351,7 +377,8 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
         const createdRequest =
           await additiveRequestService.createAdditiveRequest(
             requestData,
-            user?.uid
+            user?.uid,
+            user?.companyId
           );
         setGeneratedProtocol(createdRequest.protocolo);
         setShowProtocol(true);
@@ -406,7 +433,8 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
         const createdRequest =
           await additiveRequestService.createAdditiveRequest(
             requestData,
-            user?.uid
+            user?.uid,
+            user?.companyId
           );
         await additiveRequestService.submitForApproval(createdRequest.id!);
         setGeneratedProtocol(createdRequest.protocolo);
@@ -484,6 +512,20 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
                 ))}
               </select>
             </label>
+            {contracts.length === 0 && (
+              <small className="additive-request-form__hint">
+                Nenhum contrato encontrado para sua empresa. Cadastre um contrato em Contratos.
+              </small>
+            )}
+            <div style={{ marginTop: 8 }}>
+              <button
+                type="button"
+                className="additive-request-form__new-item-btn"
+                onClick={() => setShowCreateContract(true)}
+              >
+                + Cadastrar contrato
+              </button>
+            </div>
           </div>
 
           <div className="additive-request-form__field">
@@ -854,6 +896,110 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
         onClose={() => setShowItemModal(false)}
         onItemCreated={handleItemCreated}
       />
+
+      {/* Modal de criação rápida de contrato */}
+      <Modal
+        isOpen={showCreateContract}
+        onClose={() => setShowCreateContract(false)}
+        title="Cadastrar Contrato"
+        size="medium"
+      >
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            if (!user?.companyId) {
+              setCreateContractError("Empresa não identificada.");
+              return;
+            }
+            try {
+              setCreatingContract(true);
+              setCreateContractError("");
+              const created = await contractService.createContract({
+                companyId: user.companyId,
+                numeroContrato: newContract.numeroContrato.trim(),
+                cliente: newContract.cliente.trim(),
+                obra: newContract.obra.trim(),
+                vigenciaInicio: "",
+                vigenciaFim: "",
+                valor: "0,00",
+                pdfFile: null,
+                createdBy: user.uid,
+                status: newContract.status,
+              });
+              setShowCreateContract(false);
+              setNewContract({ numeroContrato: "", cliente: "", obra: "", status: "ativo" });
+              setFormData((prev) => ({ ...prev, contratoId: created.id }));
+              showSuccess("Contrato criado", `Contrato ${created.numeroContrato} criado.`);
+            } catch (err: any) {
+              setCreateContractError(err?.message || "Falha ao criar contrato");
+            } finally {
+              setCreatingContract(false);
+            }
+          }}
+        >
+          <div className="additive-request-form__field">
+            <label className="additive-request-form__label">
+              Número do Contrato*
+              <input
+                type="text"
+                className="additive-request-form__input"
+                value={newContract.numeroContrato}
+                onChange={(e) => setNewContract({ ...newContract, numeroContrato: e.target.value })}
+                required
+              />
+            </label>
+          </div>
+          <div className="additive-request-form__field">
+            <label className="additive-request-form__label">
+              Cliente*
+              <input
+                type="text"
+                className="additive-request-form__input"
+                value={newContract.cliente}
+                onChange={(e) => setNewContract({ ...newContract, cliente: e.target.value })}
+                required
+              />
+            </label>
+          </div>
+          <div className="additive-request-form__field">
+            <label className="additive-request-form__label">
+              Obra*
+              <input
+                type="text"
+                className="additive-request-form__input"
+                value={newContract.obra}
+                onChange={(e) => setNewContract({ ...newContract, obra: e.target.value })}
+                required
+              />
+            </label>
+          </div>
+          <div className="additive-request-form__field">
+            <label className="additive-request-form__label">
+              Status
+              <select
+                className="additive-request-form__select"
+                value={newContract.status}
+                onChange={(e) => setNewContract({ ...newContract, status: e.target.value as any })}
+              >
+                <option value="ativo">Ativo</option>
+                <option value="pendente">Pendente</option>
+                <option value="inativo">Inativo</option>
+              </select>
+            </label>
+          </div>
+          {createContractError && (
+            <div className="additive-request-form__error">{createContractError}</div>
+          )}
+          <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+            <button type="button" className="additive-request-form__cancel-btn" onClick={() => setShowCreateContract(false)}>
+              Cancelar
+            </button>
+            <button type="submit" className="additive-request-form__submit-btn" disabled={creatingContract}>
+              {creatingContract ? "Criando..." : "Criar"}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };
