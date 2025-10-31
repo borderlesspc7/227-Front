@@ -1,0 +1,148 @@
+.signature-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.signature-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.signature-card__header {
+  padding: 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.signature-card__title-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.signature-card__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.signature-card__status {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.signature-card__content {
+  padding: 16px;
+}
+
+.signature-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.signature-card__info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.signature-card__info-item:last-child {
+  border-bottom: none;
+}
+
+.signature-card__info-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.signature-card__info-value {
+  font-size: 14px;
+  color: #1f2937;
+  font-weight: 500;
+  text-align: right;
+  word-break: break-word;
+  max-width: 60%;
+}
+
+.signature-card__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.signature-card__action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.signature-card__action-btn--primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.signature-card__action-btn--primary:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.signature-card__action-btn--success {
+  background: #10b981;
+  color: white;
+}
+
+.signature-card__action-btn--success:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.signature-card__action-btn svg {
+  flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .signature-card__actions {
+    flex-direction: column;
+  }
+
+  .signature-card__action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .signature-card__info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .signature-card__info-value {
+    max-width: 100%;
+    text-align: left;
+  }
+}
+

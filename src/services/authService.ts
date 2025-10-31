@@ -209,8 +209,14 @@ export const authService = {
             } else {
               callback(null); // Usuário não encontrado no Firestore
             }
-          } catch (error) {
+          } catch (error: any) {
             console.error("Erro ao buscar dados do usuário:", error);
+            if (error.code === 'permission-denied') {
+              console.error("⚠️ PERMISSÃO NEGADA: Verifique as regras do Firestore!");
+              console.error("A coleção 'users' precisa permitir leitura para o próprio usuário.");
+              console.error("Configure as regras em: Firebase Console → Firestore Database → Rules");
+              console.error("Veja o arquivo FIREBASE_STORAGE_RULES.md para instruções detalhadas.");
+            }
             callback(null);
           }
         } else {

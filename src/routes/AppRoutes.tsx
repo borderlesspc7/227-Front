@@ -11,6 +11,7 @@ import DashboardPage from "../pages/Dashboard/DashboardPage";
 import ApprovalsPage from "../pages/Approvals/ApprovalsPage";
 import { ItemsPage } from "../pages/Items/ItemsPage";
 import FormalizationPage from "../pages/Formalization/FormalizationPage";
+import SignaturesPage from "../pages/Signatures/SignaturesPage";
 import { CompanyRegisterPage } from "../pages/CompanyRegister/CompanyRegisterPage";
 import { ProfilePage } from "../pages/Profile/ProfilePage";
 import { ErrorBoundary } from "../components/ui/ErrorBoundary/ErrorBoundary";
@@ -107,6 +108,14 @@ export default function AppRoutes() {
                 } 
               />
               <Route 
+                path="signatures" 
+                element={
+                  <ProtectedRoute roles={["admin", "diretor", "engenheiro", "solicitante", "cliente"]}>
+                    <SignaturesPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
                 path="profile" 
                 element={
                   <ProtectedRoute roles={["admin", "diretor", "engenheiro", "solicitante", "suprimento", "cliente"]}>
@@ -136,6 +145,7 @@ export default function AppRoutes() {
               <Route path="items" element={<ItemsPage />} />
               <Route path={paths.adminApprovals} element={<ApprovalsPage />} />
               <Route path={paths.adminFormalization} element={<FormalizationPage />} />
+              <Route path={paths.adminSignatures} element={<SignaturesPage />} />
               <Route path={paths.adminProfile} element={<ProfilePage />} />
             </Route>
           </Routes>

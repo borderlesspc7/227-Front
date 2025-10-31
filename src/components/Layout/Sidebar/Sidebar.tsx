@@ -13,6 +13,7 @@ import {
   FiPackage,
   FiFile,
   FiSettings,
+  FiEdit3,
 } from "react-icons/fi";
 import { usePermissions } from "../../../hooks/usePermissions";
 
@@ -84,6 +85,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = "" }) => {
       label: "Formalização",
       icon: FiFile,
       requiredPermission: "view_formalization" as const,
+    },
+    {
+      id: "signatures",
+      path: `${basePath}/signatures`,
+      label: "Documentos Assinados",
+      icon: FiEdit3,
+      requiredPermission: "view_approvals" as const,
     },
     {
       id: "profile",

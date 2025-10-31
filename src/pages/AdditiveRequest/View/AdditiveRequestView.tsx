@@ -3,6 +3,7 @@ import type { AdditiveRequest } from "../../../types/additiveRequest";
 import type { Department } from "../../../types/approvalWorkflow";
 import ApprovalWorkflow from "../../Approval/ApprovalWorkflow/ApprovalWorkflow";
 import ImageCarousel from "../../../components/ui/ImageCarousel/ImageCarousel";
+import FluxoAssinatura from "../../../components/ui/Signature/FluxoAssinatura";
 import "./AdditiveRequestView.css";
 
 interface AdditiveRequestViewProps {
@@ -380,11 +381,11 @@ const AdditiveRequestView: React.FC<AdditiveRequestViewProps> = ({
         <ImageCarousel
           images={request.evidencias && request.evidencias.length > 0
             ? request.evidencias.map(evidence => ({
-              id: evidence.id,
-              nome: evidence.nome,
-              url: evidence.url,
-              tipo: evidence.tipo
-            }))
+                id: evidence.id,
+                nome: evidence.nome,
+                url: evidence.url,
+                tipo: evidence.tipo
+              }))
             : [
               {
                 id: "demo-001",
@@ -421,6 +422,13 @@ const AdditiveRequestView: React.FC<AdditiveRequestViewProps> = ({
           className="additive-request-view__image-carousel"
         />
       </div>
+
+      {/* Fluxo de Assinatura Digital - Mostrar apenas para aditivos aprovados */}
+      {request.status === "aprovado" && (
+        <div className="additive-request-view__section">
+          <FluxoAssinatura aditivo={request} />
+        </div>
+      )}
     </div>
   );
 };

@@ -102,8 +102,11 @@ class OptionsService {
                 await this.initializeDefaultOptions();
                 return await this.getPriorityOptions();
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("Erro ao obter opções de prioridade:", error);
+            if (error.code === 'permission-denied') {
+                console.error("Permissão negada: Verifique as regras do Firestore. A coleção 'systemOptions' precisa permitir leitura para usuários autenticados.");
+            }
             // Fallback para opções hardcoded em caso de erro
             return [
                 { value: "baixa", label: "Baixa", order: 1, color: "#10b981" },

@@ -1,0 +1,143 @@
+.fluxo-assinatura {
+  margin-top: 24px;
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.fluxo-assinatura__title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.fluxo-assinatura__section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fluxo-assinatura__description {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.fluxo-assinatura__documento-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.fluxo-assinatura__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #3b82f6;
+  color: white;
+  text-decoration: none;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
+  width: fit-content;
+  cursor: pointer;
+}
+
+.fluxo-assinatura__link:hover {
+  background: #2563eb;
+}
+
+.fluxo-assinatura__link--success {
+  background: #10b981;
+}
+
+.fluxo-assinatura__link--success:hover {
+  background: #059669;
+}
+
+.fluxo-assinatura__signature-panel {
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.fluxo-assinatura__success {
+  padding: 16px;
+  background: #d1fae5;
+  border: 1px solid #10b981;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fluxo-assinatura__success-message {
+  font-size: 14px;
+  color: #065f46;
+  font-weight: 500;
+  margin: 0;
+}
+
+.fluxo-assinatura__rejected {
+  padding: 16px;
+  background: #fee2e2;
+  border: 1px solid #ef4444;
+  border-radius: 8px;
+}
+
+.fluxo-assinatura__rejected-message {
+  font-size: 14px;
+  color: #991b1b;
+  font-weight: 500;
+  margin: 0 0 12px 0;
+}
+
+.fluxo-assinatura__info {
+  padding: 16px;
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  border-radius: 8px;
+  color: #92400e;
+  font-size: 14px;
+}
+
+.fluxo-assinatura__loading {
+  padding: 20px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.fluxo-assinatura__error {
+  padding: 16px;
+  background: #fee2e2;
+  border: 1px solid #ef4444;
+  border-radius: 8px;
+  color: #991b1b;
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .fluxo-assinatura {
+    padding: 16px;
+  }
+
+  .fluxo-assinatura__link {
+    width: 100%;
+    justify-content: center;
+  }
+}
+

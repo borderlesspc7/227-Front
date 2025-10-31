@@ -30,7 +30,19 @@ export const GerarDocumento: React.FC<GerarDocumentoProps> = ({ contrato, aditiv
       setDocumentoUrl(record.documentoOriginalUrl);
       onGerado?.(record.id);
     } catch (e: any) {
-      setError(e?.message || "Falha ao gerar documento");
+      console.error("Erro ao gerar documento:", e);
+      let errorMessage = e?.message || "Falha ao gerar documento";
+      
+      // Mensagens mais específicas para problemas comuns
+      if (errorMessage.includes("CORS") || errorMessage.includes("preflight")) {
+        errorMessage = "Erro de CORS: Verifique as regras do Firebase Storage no Firebase Console. As regras devem permitir upload para usuários autenticados.";
+      } else if (errorMessage.includes("autenticado")) {
+        errorMessage = "Você precisa estar autenticado para gerar documentos. Por favor, faça login novamente.";
+      } else if (errorMessage.includes("permissão")) {
+        errorMessage = "Permissão negada. Verifique se as regras do Firebase Storage permitem upload.";
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -41,7 +53,24 @@ export const GerarDocumento: React.FC<GerarDocumentoProps> = ({ contrato, aditiv
       <button onClick={handleGerar} disabled={loading}>
         {loading ? "Gerando..." : "Gerar PDF do Aditivo"}
       </button>
-      {error && <div style={{ color: "red", marginTop: 8 }}>{error}</div>}
+      {error && (
+        <div style={{ 
+          color: "#dc2626", 
+          marginTop: 12, 
+          padding: 12, 
+          background: "#fef2f2", 
+          border: "1px solid #fecaca", 
+          borderRadius: 6,
+          fontSize: "14px"
+        }}>
+          <strong>Erro:</strong> {error}
+          {error.includes("CORS") && (
+            <div style={{ marginTop: 8, fontSize: "12px", color: "#991b1b" }}>
+              💡 <strong>Como resolver:</strong> Acesse o Firebase Console → Storage → Rules e configure as regras para permitir upload para usuários autenticados. Veja o arquivo FIREBASE_STORAGE_RULES.md para instruções detalhadas.
+            </div>
+          )}
+        </div>
+      )}
       {documentoUrl && (
         <div style={{ marginTop: 12 }}>
           <a href={documentoUrl} target="_blank" rel="noreferrer">Visualizar Documento</a>
