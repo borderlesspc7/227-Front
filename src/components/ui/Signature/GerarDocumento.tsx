@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import type { Contract } from "../../../types/contracts";
 import type { AdditiveRequest } from "../../../types/additiveRequest";
 import { pdfService } from "../../../services/pdfService";
-import { assinaturaService } from "../../../services/assinaturaService";
+import { assinaturaService, AssinaturaError } from "../../../services/assinaturaService";
 
 interface GerarDocumentoProps {
   contrato: Contract;
@@ -29,20 +29,29 @@ export const GerarDocumento: React.FC<GerarDocumentoProps> = ({ contrato, aditiv
       });
       setDocumentoUrl(record.documentoOriginalUrl);
       onGerado?.(record.id);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error("Erro ao gerar documento:", e);
-      let errorMessage = e?.message || "Falha ao gerar documento";
-      
-      // Mensagens mais específicas para problemas comuns
-      if (errorMessage.includes("CORS") || errorMessage.includes("preflight")) {
-        errorMessage = "Erro de CORS: Verifique as regras do Firebase Storage no Firebase Console. As regras devem permitir upload para usuários autenticados.";
-      } else if (errorMessage.includes("autenticado")) {
-        errorMessage = "Você precisa estar autenticado para gerar documentos. Por favor, faça login novamente.";
-      } else if (errorMessage.includes("permissão")) {
-        errorMessage = "Permissão negada. Verifique se as regras do Firebase Storage permitem upload.";
+
+      // Tratar erros específicos da assinatura
+      if (e instanceof AssinaturaError) {
+        setError(e.userMessage);
+      } else if (e instanceof Error) {
+        // Verificar tipo de erro específico
+        const errorMessage = e.message.toLowerCase();
+        if (errorMessage.includes("cors") || errorMessage.includes("preflight")) {
+          setError("Erro de conexão com o servidor. Verifique as configurações do Firebase Storage e tente novamente.");
+        } else if (errorMessage.includes("auth") || errorMessage.includes("autenticado")) {
+          setError("Você precisa estar autenticado para gerar documentos. Por favor, faça login novamente.");
+        } else if (errorMessage.includes("permissão") || errorMessage.includes("permission")) {
+          setError("Permissão negada. Verifique se as regras do Firebase Storage permitem upload para usuários autenticados.");
+        } else if (errorMessage.includes("network") || errorMessage.includes("fetch")) {
+          setError("Erro de conexão. Verifique sua internet e tente novamente.");
+        } else {
+          setError(`Erro ao gerar documento: ${e.message}`);
+        }
+      } else {
+        setError("Falha ao gerar documento. Tente novamente ou contate o suporte.");
       }
-      
-      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -54,12 +63,12 @@ export const GerarDocumento: React.FC<GerarDocumentoProps> = ({ contrato, aditiv
         {loading ? "Gerando..." : "Gerar PDF do Aditivo"}
       </button>
       {error && (
-        <div style={{ 
-          color: "#dc2626", 
-          marginTop: 12, 
-          padding: 12, 
-          background: "#fef2f2", 
-          border: "1px solid #fecaca", 
+        <div style={{
+          color: "#dc2626",
+          marginTop: 12,
+          padding: 12,
+          background: "#fef2f2",
+          border: "1px solid #fecaca",
           borderRadius: 6,
           fontSize: "14px"
         }}>

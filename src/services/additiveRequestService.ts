@@ -271,6 +271,15 @@ export const additiveRequestService = {
         approvedAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
+
+      // Gerar documento automaticamente quando aditivo é aprovado
+      try {
+        const { autoGenerateSignatureDocument } = await import("./assinaturaService");
+        await autoGenerateSignatureDocument(id);
+      } catch (autoGenError) {
+        console.warn("Erro ao gerar documento automaticamente (será possível gerar manualmente):", autoGenError);
+        // Não falhar a aprovação por erro na geração automática
+      }
     } catch (error) {
       console.error("Error approving request:", error);
       throw error;

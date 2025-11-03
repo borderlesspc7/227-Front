@@ -22,6 +22,7 @@ import type {
 import { ApprovalStatus, Department } from "../types/approvalWorkflow";
 import type { AdditiveRequest } from "../types/additiveRequest";
 
+
 export const workflowService = {
   setupDefaultWorkflow: async (): Promise<void> => {
     try {
@@ -256,6 +257,17 @@ export const workflowService = {
       batch.update(requestRef, updateData);
 
       await batch.commit();
+
+      // Gerar documento automaticamente quando workflow está completo (aditivo aprovado)
+      if (updatedWorkflowStatus.isCompleted) {
+        try {
+          const { autoGenerateSignatureDocument } = await import("./assinaturaService");
+          await autoGenerateSignatureDocument(requestId);
+        } catch (autoGenError) {
+          console.warn("Erro ao gerar documento automaticamente (será possível gerar manualmente):", autoGenError);
+          // Não falhar o workflow por erro na geração automática
+        }
+      }
 
       // Enviar notificações após sucesso
       try {
