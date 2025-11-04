@@ -276,6 +276,40 @@ export const assinaturaService = {
         throw handleAssinaturaError(saveError, "initSignatureFlow - save");
       }
 
+      // Enviar notificação por e-mail de forma não bloqueante
+      try {
+        const { emailService } = await import("./emailService");
+        const { contractService } = await import("./contractService");
+        
+        // Buscar dados do contrato para o e-mail
+        const contract = await contractService.getContractById(contratoId);
+        
+        // Buscar dados do aditivo
+        const additiveRequestRef = doc(collection(db, "additiveRequests"), aditivoId);
+        const requestDoc = await getDoc(additiveRequestRef);
+        const requestData = requestDoc.exists() ? requestDoc.data() : null;
+
+        if (contract && requestData) {
+          const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+          const userEmail = await emailService.getUserEmail(clienteId);
+          
+          if (userEmail) {
+            await emailService.sendEmail({
+              to: userEmail,
+              type: "signature_pending",
+              data: {
+                protocolo: requestData.protocolo || aditivoId,
+                contractNumber: contract.numeroContrato || contratoId,
+                valorTotal: requestData.valorTotal || 0,
+                actionUrl: `${baseUrl}/dashboard/signatures`,
+              },
+            });
+          }
+        }
+      } catch (emailError) {
+        console.warn("Erro ao enviar e-mail de assinatura pendente (não bloqueante):", emailError);
+      }
+
       return record;
     } catch (error) {
       if (error instanceof AssinaturaError) {
@@ -337,6 +371,46 @@ export const assinaturaService = {
           "NOT_FOUND",
           "Erro ao salvar assinatura. O registro não foi encontrado."
         );
+      }
+
+      // Enviar notificação por e-mail de forma não bloqueante
+      try {
+        const { emailService } = await import("./emailService");
+        const { contractService } = await import("./contractService");
+        
+        // Buscar dados do contrato para o e-mail
+        const contract = await contractService.getContractById(contratoId);
+        
+        // Buscar dados do aditivo
+        const additiveRequestRef = doc(collection(db, "additiveRequests"), aditivoId);
+        const requestDoc = await getDoc(additiveRequestRef);
+        const requestData = requestDoc.exists() ? requestDoc.data() : null;
+
+        if (contract && requestData) {
+          // Buscar o clienteId do registro de assinatura
+          const recordData = updated.data() as AssinaturaRecord;
+          const clienteId = recordData.clienteId;
+          
+          if (clienteId) {
+            const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+            const userEmail = await emailService.getUserEmail(clienteId);
+            
+            if (userEmail) {
+              await emailService.sendEmail({
+                to: userEmail,
+                type: "signature_completed",
+                data: {
+                  protocolo: requestData.protocolo || aditivoId,
+                  contractNumber: contract.numeroContrato || contratoId,
+                  signatureDate: new Date().toLocaleDateString("pt-BR"),
+                  actionUrl: `${baseUrl}/dashboard/signatures`,
+                },
+              });
+            }
+          }
+        }
+      } catch (emailError) {
+        console.warn("Erro ao enviar e-mail de assinatura concluída (não bloqueante):", emailError);
       }
 
       return updated.data() as AssinaturaRecord;

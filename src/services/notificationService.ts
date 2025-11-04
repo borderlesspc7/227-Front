@@ -20,6 +20,42 @@ import type {
 import type { AdditiveRequest } from "../types/additiveRequest";
 import type { OSAGroup } from "../types/formalization";
 import { subscriptionService } from "./subscriptionService";
+import { emailService } from "./emailService";
+
+// Helper para enviar e-mail de forma não bloqueante
+async function sendEmailNotification(
+  userId: string,
+  emailType: Parameters<typeof emailService.sendEmail>[0]["type"],
+  emailData: Record<string, any>,
+  actionUrl?: string
+): Promise<void> {
+  try {
+    // Buscar e-mail do usuário
+    const userEmail = await emailService.getUserEmail(userId);
+    
+    if (!userEmail) {
+      console.warn(`E-mail não encontrado para usuário ${userId}`);
+      return;
+    }
+
+    // Construir URL completa se necessário
+    const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+    const fullActionUrl = actionUrl ? `${baseUrl}${actionUrl}` : undefined;
+
+    // Enviar e-mail
+    await emailService.sendEmail({
+      to: userEmail,
+      type: emailType,
+      data: {
+        ...emailData,
+        actionUrl: fullActionUrl,
+      },
+    });
+  } catch (error) {
+    // Não falhar a notificação se o e-mail falhar
+    console.error("Erro ao enviar e-mail (não bloqueante):", error);
+  }
+}
 
 export const notificationService = {
   // Criar notificação
@@ -32,6 +68,23 @@ export const notificationService = {
         ...notification,
         createdAt: serverTimestamp(),
       });
+
+      // Enviar e-mail de forma não bloqueante
+      try {
+        await sendEmailNotification(
+          notification.userId,
+          notification.type as Parameters<typeof emailService.sendEmail>[0]["type"],
+          {
+            protocolo: notification.requestProtocol,
+            senderName: notification.senderName,
+            message: notification.message,
+            title: notification.title,
+          },
+          notification.actionUrl
+        );
+      } catch (emailError) {
+        console.warn("Erro ao enviar e-mail (não bloqueante):", emailError);
+      }
     } catch (error) {
       console.error("Erro ao criar notificação:", error);
       throw error;
@@ -115,6 +168,39 @@ export const notificationService = {
         department: firstStep.department,
         senderName: "Sistema",
       });
+
+      // Enviar e-mails adicionais com dados específicos
+      try {
+        // E-mail para aprovadores
+        const approverEmailPromises = approvers.map(async (approverId: string) => {
+          await sendEmailNotification(
+            approverId,
+            "new_request",
+            {
+              protocolo: request.protocolo,
+              valorTotal: request.valorTotal,
+              senderName: senderName,
+              department: firstStep.department,
+            },
+            `/admin/approvals`
+          );
+        });
+
+        // E-mail para criador
+        await sendEmailNotification(
+          request.createdBy,
+          "request_submitted",
+          {
+            protocolo: request.protocolo,
+            stepName: firstStep.name,
+          },
+          `/additive-requests`
+        );
+
+        await Promise.all(approverEmailPromises);
+      } catch (emailError) {
+        console.warn("Erro ao enviar e-mails adicionais (não bloqueante):", emailError);
+      }
     } catch (error) {
       console.error("Erro ao notificar envio da solicitação:", error);
       throw error;
@@ -142,6 +228,17 @@ export const notificationService = {
         priority: "high",
         senderName: senderName,
       });
+
+      // Enviar e-mail adicional
+      await sendEmailNotification(
+        approverId,
+        "approval_required",
+        {
+          protocolo: requestProtocol,
+          senderName: senderName,
+        },
+        `/admin/approvals`
+      );
     } catch (error) {
       console.error("Erro ao notificar aprovador:", error);
       throw error;
@@ -201,6 +298,18 @@ export const notificationService = {
         priority,
         senderName,
       });
+
+      // Enviar e-mail adicional com dados específicos
+      await sendEmailNotification(
+        userId,
+        type as Parameters<typeof emailService.sendEmail>[0]["type"],
+        {
+          protocolo: requestProtocol,
+          senderName: senderName,
+          comments: comments,
+        },
+        `/additive-requests`
+      );
     } catch (error) {
       console.error("Erro ao notificar mudança de status:", error);
       throw error;
