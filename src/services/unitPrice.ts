@@ -9,12 +9,17 @@ import {
   doc,
   serverTimestamp,
 } from "firebase/firestore";
+import type { UserRole } from "../utils/rolePermissions";
+import { requirePermission } from "../utils/servicePermissions";
 
 export const unitPriceService = {
   async createUnitPrice(
-    unitPriceData: Omit<UnitPrice, "id">
+    unitPriceData: Omit<UnitPrice, "id">,
+    userRole?: UserRole
   ): Promise<UnitPrice> {
     try {
+      requirePermission(userRole, "create_prices");
+      
       const unitPriceRef = collection(db, "unitPrices");
       const unitPriceDoc = await addDoc(unitPriceRef, unitPriceData);
       const unitPrice = { id: unitPriceDoc.id, ...unitPriceData };
@@ -46,9 +51,12 @@ export const unitPriceService = {
 
   async updateUnitPrice(
     id: string,
-    updateData: Omit<UnitPrice, "id">
+    updateData: Omit<UnitPrice, "id">,
+    userRole?: UserRole
   ): Promise<void> {
     try {
+      requirePermission(userRole, "edit_prices");
+      
       const unitPriceRef = doc(db, "unitPrices", id);
       await updateDoc(unitPriceRef, {
         ...updateData,
@@ -60,8 +68,10 @@ export const unitPriceService = {
     }
   },
 
-  async deleteUnitPrice(id: string): Promise<void> {
+  async deleteUnitPrice(id: string, userRole?: UserRole): Promise<void> {
     try {
+      requirePermission(userRole, "delete_prices");
+      
       const unitPriceRef = doc(db, "unitPrices", id);
       await deleteDoc(unitPriceRef);
     } catch (error) {

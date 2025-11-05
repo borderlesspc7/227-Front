@@ -1,5 +1,7 @@
 import { db } from "../lib/firebaseconfig";
 import { collection, getDocs, doc, deleteDoc, updateDoc, query, orderBy, getDoc } from "firebase/firestore";
+import type { UserRole } from "../utils/rolePermissions";
+import { requirePermission } from "../utils/servicePermissions";
 
 export interface User {
     id: string;
@@ -52,8 +54,10 @@ export const userService = {
         }
     },
 
-    async deleteUser(userId: string): Promise<void> {
+    async deleteUser(userId: string, userRole?: UserRole): Promise<void> {
         try {
+            requirePermission(userRole, "delete_users");
+            
             await deleteDoc(doc(db, "users", userId));
         } catch (error) {
             console.error("Erro ao deletar usuário:", error);
@@ -61,8 +65,10 @@ export const userService = {
         }
     },
 
-    async updateUser(userId: string, userData: Partial<User>): Promise<void> {
+    async updateUser(userId: string, userData: Partial<User>, userRole?: UserRole): Promise<void> {
         try {
+            requirePermission(userRole, "edit_users");
+            
             const userRef = doc(db, "users", userId);
             await updateDoc(userRef, {
                 ...userData,

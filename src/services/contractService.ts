@@ -20,12 +20,17 @@ import {
   type Unsubscribe,
 } from "firebase/firestore";
 import { subscriptionService } from "./subscriptionService";
+import type { UserRole } from "../utils/rolePermissions";
+import { requirePermission } from "../utils/servicePermissions";
 
 export const contractService = {
   async createContract(
-    contractData: Omit<ContractFormData, "id" | "createdAt" | "updatedAt">
+    contractData: Omit<ContractFormData, "id" | "createdAt" | "updatedAt">,
+    userRole?: UserRole
   ): Promise<Contract> {
     try {
+      requirePermission(userRole, "create_contracts");
+      
       // Verificar limites da empresa antes de criar
       const canCreate = await subscriptionService.canExecuteAction(
         contractData.companyId,
@@ -156,9 +161,12 @@ export const contractService = {
 
   async updateContract(
     id: string,
-    updateData: UpdateContractData
+    updateData: UpdateContractData,
+    userRole?: UserRole
   ): Promise<void> {
     try {
+      requirePermission(userRole, "edit_contracts");
+      
       // Se estiver alterando o status, verificar limites
       if (updateData.status === "ativo") {
         const contract = await this.getContractById(id);
@@ -202,8 +210,10 @@ export const contractService = {
     }
   },
 
-  async deleteContract(id: string): Promise<void> {
+  async deleteContract(id: string, userRole?: UserRole): Promise<void> {
     try {
+      requirePermission(userRole, "delete_contracts");
+      
       // Verificar se o contrato está ativo para atualizar contadores
       const contract = await this.getContractById(id);
 

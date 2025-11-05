@@ -1,11 +1,15 @@
 import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, where, orderBy } from "firebase/firestore";
 import { db } from "../lib/firebaseconfig";
 import type { Item, ItemFormData, UpdateItemData } from "../types/item";
+import type { UserRole } from "../utils/rolePermissions";
+import { requirePermission } from "../utils/servicePermissions";
 
 export const itemService = {
     // Criar novo item
-    async createItem(itemData: ItemFormData, userId: string): Promise<string> {
+    async createItem(itemData: ItemFormData, userId: string, userRole?: UserRole): Promise<string> {
         try {
+            requirePermission(userRole, "create_items");
+            
             const docRef = await addDoc(collection(db, "items"), {
                 ...itemData,
                 ativo: true,
@@ -16,7 +20,7 @@ export const itemService = {
             return docRef.id;
         } catch (error) {
             console.error("Erro ao criar item:", error);
-            throw new Error("Erro ao criar item");
+            throw error;
         }
     },
 
@@ -121,8 +125,10 @@ export const itemService = {
     },
 
     // Atualizar item
-    async updateItem(id: string, updateData: UpdateItemData): Promise<void> {
+    async updateItem(id: string, updateData: UpdateItemData, userRole?: UserRole): Promise<void> {
         try {
+            requirePermission(userRole, "edit_items");
+            
             const itemRef = doc(db, "items", id);
             await updateDoc(itemRef, {
                 ...updateData,
@@ -130,17 +136,18 @@ export const itemService = {
             });
         } catch (error) {
             console.error("Erro ao atualizar item:", error);
-            throw new Error("Erro ao atualizar item");
+            throw error;
         }
     },
 
     // Deletar item (soft delete - marcar como inativo)
-    async deleteItem(id: string): Promise<void> {
+    async deleteItem(id: string, userRole?: UserRole): Promise<void> {
         try {
-            await this.updateItem(id, { ativo: false });
+            requirePermission(userRole, "delete_items");
+            await this.updateItem(id, { ativo: false }, userRole);
         } catch (error) {
             console.error("Erro ao deletar item:", error);
-            throw new Error("Erro ao deletar item");
+            throw error;
         }
     },
 
@@ -168,8 +175,10 @@ export const itemService = {
     },
 
     // Limpar dados de teste/mockados
-    async clearTestData(): Promise<void> {
+    async clearTestData(userRole?: UserRole): Promise<void> {
         try {
+            requirePermission(userRole, "delete_items");
+            
             console.log("Limpando dados de teste...");
 
             // Buscar todos os itens
@@ -200,7 +209,7 @@ export const itemService = {
             console.log("Limpeza de dados de teste concluída");
         } catch (error) {
             console.error("Erro ao limpar dados de teste:", error);
-            throw new Error("Erro ao limpar dados de teste");
+            throw error;
         }
     },
 };

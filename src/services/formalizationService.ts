@@ -18,6 +18,8 @@ import {
     orderBy,
     serverTimestamp,
 } from "firebase/firestore";
+import type { UserRole } from "../utils/rolePermissions";
+import { requirePermission } from "../utils/servicePermissions";
 
 // Função para converter dados do Firebase para o formato esperado
 const convertFirestoreData = (
@@ -52,9 +54,12 @@ export const formalizationService = {
     createOSAGroup: async (
         groupData: OSAFormalizationFormData,
         userId?: string,
-        companyId?: string
+        companyId?: string,
+        userRole?: UserRole
     ): Promise<OSAGroup> => {
         try {
+            requirePermission(userRole, "create_formalization");
+            
             // Buscar as OSAs selecionadas
             const { additiveRequestService } = await import("./additiveRequestService");
             const allOSAs = await additiveRequestService.getAdditiveRequests(companyId || "");
@@ -142,9 +147,12 @@ export const formalizationService = {
     // Atualizar agrupamento
     updateOSAGroup: async (
         id: string,
-        updateData: UpdateOSAGroupData
+        updateData: UpdateOSAGroupData,
+        userRole?: UserRole
     ): Promise<void> => {
         try {
+            requirePermission(userRole, "edit_formalization");
+            
             const groupRef = doc(db, "osaGroups", id);
             await updateDoc(groupRef, {
                 ...updateData,
@@ -157,8 +165,10 @@ export const formalizationService = {
     },
 
     // Deletar agrupamento
-    deleteOSAGroup: async (id: string): Promise<void> => {
+    deleteOSAGroup: async (id: string, userRole?: UserRole): Promise<void> => {
         try {
+            requirePermission(userRole, "edit_formalization");
+            
             const groupRef = doc(db, "osaGroups", id);
             await deleteDoc(groupRef);
         } catch (error) {

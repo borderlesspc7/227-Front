@@ -4,6 +4,9 @@ import React, { useState } from "react";
 import type { Item } from "../../../types/item";
 import { itemService } from "../../../services/itemService";
 import { useToast } from "../../../hooks/useToast";
+import { usePermissions } from "../../../hooks/usePermissions";
+import { useAuth } from "../../../hooks/useAuth";
+import { PermissionDeniedError } from "../../../utils/servicePermissions";
 import { useConfirmModal } from "../../../hooks/useConfirmModal";
 import { ConfirmModal } from "../../../components/ui/ConfirmModal/ConfirmModal";
 import "./ItemList.css";
@@ -21,6 +24,8 @@ export const ItemList: React.FC<ItemListProps> = ({
     onDelete,
 }) => {
     const { showToast } = useToast();
+    const { user } = useAuth();
+    const { hasPermission } = usePermissions();
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const { modalState, showConfirm, hideConfirm, handleConfirm } = useConfirmModal();
 
@@ -33,11 +38,19 @@ export const ItemList: React.FC<ItemListProps> = ({
             async () => {
                 try {
                     setDeletingId(itemId);
-                    await itemService.deleteItem(itemId);
+                    await itemService.deleteItem(itemId, user?.role);
                     onDelete(itemId);
                     showToast({ type: "success", title: "Item excluído com sucesso!" });
                 } catch (error) {
-                    showToast({ type: "error", title: "Erro ao excluir item" });
+                    if (error instanceof PermissionDeniedError) {
+                        showToast({ 
+                            type: "error", 
+                            title: "Permissão negada", 
+                            message: "Você não tem permissão para deletar itens." 
+                        });
+                    } else {
+                        showToast({ type: "error", title: "Erro ao excluir item" });
+                    }
                 } finally {
                     setDeletingId(null);
                 }
@@ -164,22 +177,25 @@ export const ItemList: React.FC<ItemListProps> = ({
                             </div>
 
                             <div className="item-list__card-actions">
-                                <button
-                                    onClick={() => onEdit(item)}
-                                    className="item-list__card-btn item-list__card-btn--edit"
-                                    disabled={!item.ativo}
-                                >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                                    </svg>
-                                    Editar
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(item.id)}
-                                    className="item-list__card-btn item-list__card-btn--delete"
-                                    disabled={deletingId === item.id}
-                                >
+                                {hasPermission("edit_items") && (
+                                    <button
+                                        onClick={() => onEdit(item)}
+                                        className="item-list__card-btn item-list__card-btn--edit"
+                                        disabled={!item.ativo}
+                                    >
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                        </svg>
+                                        Editar
+                                    </button>
+                                )}
+                                {hasPermission("delete_items") && (
+                                    <button
+                                        onClick={() => handleDelete(item.id)}
+                                        className="item-list__card-btn item-list__card-btn--delete"
+                                        disabled={deletingId === item.id}
+                                    >
                                     {deletingId === item.id ? (
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                             <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
@@ -195,7 +211,8 @@ export const ItemList: React.FC<ItemListProps> = ({
                                         </svg>
                                     )}
                                     Excluir
-                                </button>
+                                    </button>
+                                )}
                             </div>
                         </div>
                     ))}

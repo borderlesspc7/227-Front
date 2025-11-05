@@ -20,6 +20,8 @@ import {
   where,
   serverTimestamp,
 } from "firebase/firestore";
+import type { UserRole } from "../utils/rolePermissions";
+import { requirePermission } from "../utils/servicePermissions";
 
 // Função para converter dados do Firebase para o formato esperado
 const convertFirestoreData = (
@@ -98,9 +100,12 @@ export const additiveRequestService = {
   createAdditiveRequest: async (
     requestData: AdditiveRequestFormData,
     userId?: string,
-    companyId?: string
+    companyId?: string,
+    userRole?: UserRole
   ): Promise<AdditiveRequest> => {
     try {
+      requirePermission(userRole, "create_additive_requests");
+      
       const protocolo = await additiveRequestService.generateProtocol();
       const requestsRef = collection(db, "additiveRequests");
 
@@ -233,9 +238,12 @@ export const additiveRequestService = {
 
   updateAdditiveRequest: async (
     id: string,
-    updateData: UpdateAdditiveRequestData
+    updateData: UpdateAdditiveRequestData,
+    userRole?: UserRole
   ): Promise<void> => {
     try {
+      requirePermission(userRole, "edit_additive_requests");
+      
       const requestRef = doc(db, "additiveRequests", id);
       await updateDoc(requestRef, {
         ...updateData,
@@ -307,8 +315,11 @@ export const additiveRequestService = {
   },
 
   // Deletar solicitação
-  deleteAdditiveRequest: async (id: string): Promise<void> => {
+  deleteAdditiveRequest: async (id: string, userRole?: UserRole): Promise<void> => {
     try {
+      // Apenas admin e diretor podem deletar solicitações
+      requirePermission(userRole, "edit_additive_requests");
+      
       const requestRef = doc(db, "additiveRequests", id);
       await deleteDoc(requestRef);
     } catch (error) {

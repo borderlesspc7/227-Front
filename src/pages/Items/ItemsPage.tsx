@@ -4,7 +4,9 @@ import React, { useState, useEffect, useContext } from "react";
 import type { Item, ItemFormData } from "../../types/item";
 import { itemService } from "../../services/itemService";
 import { useToast } from "../../hooks/useToast";
+import { usePermissions } from "../../hooks/usePermissions";
 import { AuthContext } from "../../contexts/authContext";
+import { PermissionDeniedError } from "../../utils/servicePermissions";
 import Modal from "../../components/ui/Modal/Modal";
 import { ItemForm } from "./Form/ItemForm";
 import { ItemList } from "./List/ItemList";
@@ -14,6 +16,7 @@ export const ItemsPage: React.FC = () => {
     const authContext = useContext(AuthContext);
     const user = authContext?.user;
     const { showToast } = useToast();
+    const { hasPermission } = usePermissions();
 
     const [items, setItems] = useState<Item[]>([]);
     const [loading, setLoading] = useState(true);
@@ -53,12 +56,20 @@ export const ItemsPage: React.FC = () => {
                 return;
             }
 
-            await itemService.createItem(itemData, user.uid);
+            await itemService.createItem(itemData, user.uid, user.role);
             showToast({ type: "success", title: "Item criado com sucesso!" });
             setShowForm(false);
             loadItems();
         } catch (error) {
-            showToast({ type: "error", title: "Erro ao criar item" });
+            if (error instanceof PermissionDeniedError) {
+                showToast({ 
+                    type: "error", 
+                    title: "Permissão negada", 
+                    message: "Você não tem permissão para criar itens." 
+                });
+            } else {
+                showToast({ type: "error", title: "Erro ao criar item" });
+            }
         }
     };
 
@@ -66,13 +77,21 @@ export const ItemsPage: React.FC = () => {
         try {
             if (!editingItem) return;
 
-            await itemService.updateItem(editingItem.id, itemData);
+            await itemService.updateItem(editingItem.id, itemData, user?.role);
             showToast({ type: "success", title: "Item atualizado com sucesso!" });
             setShowForm(false);
             setEditingItem(null);
             loadItems();
         } catch (error) {
-            showToast({ type: "error", title: "Erro ao atualizar item" });
+            if (error instanceof PermissionDeniedError) {
+                showToast({ 
+                    type: "error", 
+                    title: "Permissão negada", 
+                    message: "Você não tem permissão para editar itens." 
+                });
+            } else {
+                showToast({ type: "error", title: "Erro ao atualizar item" });
+            }
         }
     };
 
@@ -81,17 +100,39 @@ export const ItemsPage: React.FC = () => {
         setShowForm(true);
     };
 
-    const handleDeleteItem = (itemId: string) => {
-        setItems(prev => prev.filter(item => item.id !== itemId));
+    const handleDeleteItem = async (itemId: string) => {
+        try {
+            await itemService.deleteItem(itemId, user?.role);
+            setItems(prev => prev.filter(item => item.id !== itemId));
+            showToast({ type: "success", title: "Item deletado com sucesso!" });
+        } catch (error) {
+            if (error instanceof PermissionDeniedError) {
+                showToast({ 
+                    type: "error", 
+                    title: "Permissão negada", 
+                    message: "Você não tem permissão para deletar itens." 
+                });
+            } else {
+                showToast({ type: "error", title: "Erro ao deletar item" });
+            }
+        }
     };
 
     const handleClearTestData = async () => {
         try {
-            await itemService.clearTestData();
+            await itemService.clearTestData(user?.role);
             showToast({ type: "success", title: "Dados de teste removidos com sucesso!" });
             loadItems();
         } catch (error) {
-            showToast({ type: "error", title: "Erro ao limpar dados de teste" });
+            if (error instanceof PermissionDeniedError) {
+                showToast({ 
+                    type: "error", 
+                    title: "Permissão negada", 
+                    message: "Você não tem permissão para deletar itens." 
+                });
+            } else {
+                showToast({ type: "error", title: "Erro ao limpar dados de teste" });
+            }
         }
     };
 
@@ -129,26 +170,30 @@ export const ItemsPage: React.FC = () => {
                 </div>
 
                 <div className="items-page__buttons">
-                    <button
-                        onClick={() => setShowForm(true)}
-                        className="items-page__add-btn"
-                    >
-                        <span className="items-page__add-icon">+</span>
-                        Novo Item
-                    </button>
+                    {hasPermission("create_items") && (
+                        <button
+                            onClick={() => setShowForm(true)}
+                            className="items-page__add-btn"
+                        >
+                            <span className="items-page__add-icon">+</span>
+                            Novo Item
+                        </button>
+                    )}
 
-                    <button
-                        onClick={handleClearTestData}
-                        className="items-page__clear-btn"
-                        title="Remover dados de teste/mockados"
-                    >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 6h18" />
-                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                        </svg>
-                        Limpar Testes
-                    </button>
+                    {hasPermission("delete_items") && (
+                        <button
+                            onClick={handleClearTestData}
+                            className="items-page__clear-btn"
+                            title="Remover dados de teste/mockados"
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M3 6h18" />
+                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                            </svg>
+                            Limpar Testes
+                        </button>
+                    )}
                 </div>
             </div>
 
