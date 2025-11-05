@@ -366,7 +366,8 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
         // Atualizar
         await additiveRequestService.updateAdditiveRequest(
           request.id!,
-          requestData
+          requestData,
+          user?.role
         );
         showSuccess(
           "Solicitação atualizada!",
@@ -378,7 +379,8 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
           await additiveRequestService.createAdditiveRequest(
             requestData,
             user?.uid,
-            user?.companyId
+            user?.companyId,
+            user?.role
           );
         setGeneratedProtocol(createdRequest.protocolo);
         setShowProtocol(true);
@@ -421,7 +423,8 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
         // Atualizar e enviar para aprovação
         await additiveRequestService.updateAdditiveRequest(
           request.id!,
-          requestData
+          requestData,
+          user?.role
         );
         await additiveRequestService.submitForApproval(request.id!);
         showSuccess(
@@ -434,7 +437,8 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
           await additiveRequestService.createAdditiveRequest(
             requestData,
             user?.uid,
-            user?.companyId
+            user?.companyId,
+            user?.role
           );
         await additiveRequestService.submitForApproval(createdRequest.id!);
         setGeneratedProtocol(createdRequest.protocolo);

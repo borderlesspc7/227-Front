@@ -164,7 +164,7 @@ const AdditiveRequestPage: React.FC = () => {
       `Tem certeza que deseja excluir a solicitação ${protocolo}? Esta ação não pode ser desfeita.`,
       () =>
         executeWithLoading(async () => {
-          await additiveRequestService.deleteAdditiveRequest(id);
+          await additiveRequestService.deleteAdditiveRequest(id, user?.role);
           if (user?.companyId) {
             const requestsFromDB =
               await additiveRequestService.getAdditiveRequests(user.companyId);
@@ -243,7 +243,7 @@ const AdditiveRequestPage: React.FC = () => {
         currentApprovalStep: null,
         isWorkflowActive: false,
         workflowStatus: null,
-      });
+      }, user?.role);
 
       await additiveRequestService.submitForApproval(request.id);
 
