@@ -1,5 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import type { AssinaturaRecord } from "../../../services/assinaturaService";
+import { contractService } from "../../../services/contractService";
+import { additiveRequestService } from "../../../services/additiveRequestService";
+import type { Contract } from "../../../types/contracts";
+import type { AdditiveRequest } from "../../../types/additiveRequest";
 import "./SignatureCard.css";
 
 interface SignatureCardProps {
@@ -13,9 +17,39 @@ const SignatureCard: React.FC<SignatureCardProps> = ({
   statusColor,
   statusLabel,
 }) => {
+  const [contract, setContract] = useState<Contract | null>(null);
+  const [additiveRequest, setAdditiveRequest] = useState<AdditiveRequest | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+
+        // Buscar contrato
+        if (signature.contratoId) {
+          const contractData = await contractService.getContractById(signature.contratoId);
+          setContract(contractData);
+        }
+
+        // Buscar aditivo
+        if (signature.aditivoId) {
+          const additiveData = await additiveRequestService.getAdditiveRequestById(signature.aditivoId);
+          setAdditiveRequest(additiveData);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar dados do contrato/aditivo:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [signature.contratoId, signature.aditivoId]);
+
   const formatDate = (timestamp: any) => {
     if (!timestamp) return "N/A";
-    
+
     try {
       let date: Date;
       if (timestamp.toDate) {
@@ -25,11 +59,11 @@ const SignatureCard: React.FC<SignatureCardProps> = ({
       } else {
         date = new Date(timestamp);
       }
-      
+
       if (isNaN(date.getTime())) {
         return "Data inválida";
       }
-      
+
       return date.toLocaleDateString("pt-BR", {
         day: "2-digit",
         month: "2-digit",
@@ -58,14 +92,40 @@ const SignatureCard: React.FC<SignatureCardProps> = ({
 
       <div className="signature-card__content">
         <div className="signature-card__info">
-          <div className="signature-card__info-item">
-            <span className="signature-card__info-label">ID do Contrato:</span>
-            <span className="signature-card__info-value">{signature.contratoId}</span>
-          </div>
-          <div className="signature-card__info-item">
-            <span className="signature-card__info-label">ID do Aditivo:</span>
-            <span className="signature-card__info-value">{signature.aditivoId}</span>
-          </div>
+          {contract && (
+            <>
+              <div className="signature-card__info-item">
+                <span className="signature-card__info-label">Contrato:</span>
+                <span className="signature-card__info-value">{contract.numeroContrato}</span>
+              </div>
+              <div className="signature-card__info-item">
+                <span className="signature-card__info-label">Cliente:</span>
+                <span className="signature-card__info-value">{contract.cliente}</span>
+              </div>
+              <div className="signature-card__info-item">
+                <span className="signature-card__info-label">Obra:</span>
+                <span className="signature-card__info-value">{contract.obra}</span>
+              </div>
+            </>
+          )}
+          {!contract && (
+            <div className="signature-card__info-item">
+              <span className="signature-card__info-label">ID do Contrato:</span>
+              <span className="signature-card__info-value">{signature.contratoId}</span>
+            </div>
+          )}
+          {additiveRequest && (
+            <div className="signature-card__info-item">
+              <span className="signature-card__info-label">Protocolo do Aditivo:</span>
+              <span className="signature-card__info-value">{additiveRequest.protocolo}</span>
+            </div>
+          )}
+          {!additiveRequest && (
+            <div className="signature-card__info-item">
+              <span className="signature-card__info-label">ID do Aditivo:</span>
+              <span className="signature-card__info-value">{signature.aditivoId}</span>
+            </div>
+          )}
           <div className="signature-card__info-item">
             <span className="signature-card__info-label">Data de Envio:</span>
             <span className="signature-card__info-value">{formatDate(signature.dataEnvio)}</span>

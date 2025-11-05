@@ -66,7 +66,18 @@ class EmailService {
             // Usar Cloud Function ou API REST (recomendado)
             return await this.sendViaAPI(params);
         } catch (error) {
-            console.error("Erro ao enviar e-mail:", error);
+            // Erros de CORS são esperados em desenvolvimento e não devem ser tratados como erros críticos
+            const isCorsError = error instanceof TypeError && 
+                (error.message.includes("CORS") || 
+                 error.message.includes("Failed to fetch") ||
+                 error.message.includes("network"));
+            
+            if (isCorsError) {
+                console.warn("Erro de CORS ao enviar e-mail (não crítico):", error);
+            } else {
+                console.error("Erro ao enviar e-mail:", error);
+            }
+            
             return {
                 success: false,
                 error: error instanceof Error ? error.message : "Erro desconhecido",
@@ -107,7 +118,18 @@ class EmailService {
                 messageId: result.messageId,
             };
         } catch (error) {
-            console.error("Erro ao enviar e-mail via API:", error);
+            // Erros de CORS são esperados em desenvolvimento e não devem ser tratados como erros críticos
+            const isCorsError = error instanceof TypeError && 
+                (error.message.includes("CORS") || 
+                 error.message.includes("Failed to fetch") ||
+                 error.message.includes("network"));
+            
+            if (isCorsError) {
+                console.warn("Erro de CORS ao enviar e-mail (não crítico - verifique configuração do backend):", error);
+            } else {
+                console.error("Erro ao enviar e-mail via API:", error);
+            }
+            
             return {
                 success: false,
                 error: error instanceof Error ? error.message : "Erro ao enviar e-mail",

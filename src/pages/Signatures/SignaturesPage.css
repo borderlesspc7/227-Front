@@ -20,6 +20,41 @@
   margin: 0;
 }
 
+.signatures-page__actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.signatures-page__generate-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.signatures-page__generate-btn:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.signatures-page__generate-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.signatures-page__generate-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
 .signatures-page__refresh-btn {
   display: flex;
   align-items: center;
@@ -145,8 +180,15 @@
     text-align: center;
   }
   
+  .signatures-page__actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .signatures-page__generate-btn,
   .signatures-page__refresh-btn {
     justify-content: center;
+    width: 100%;
   }
 
   .signatures-page__filters {

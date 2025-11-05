@@ -307,7 +307,15 @@ export const assinaturaService = {
           }
         }
       } catch (emailError) {
-        console.warn("Erro ao enviar e-mail de assinatura pendente (não bloqueante):", emailError);
+        // Erros de e-mail são não bloqueantes - o documento foi criado com sucesso
+        const errorMessage = emailError instanceof Error ? emailError.message : String(emailError);
+        const isCorsError = errorMessage.includes("CORS") || errorMessage.includes("Failed to fetch");
+        
+        if (isCorsError) {
+          console.warn("⚠️ Erro de CORS ao enviar e-mail (não crítico - documento criado com sucesso):", errorMessage);
+        } else {
+          console.warn("⚠️ Erro ao enviar e-mail de assinatura pendente (não bloqueante - documento criado com sucesso):", emailError);
+        }
       }
 
       return record;
@@ -410,7 +418,15 @@ export const assinaturaService = {
           }
         }
       } catch (emailError) {
-        console.warn("Erro ao enviar e-mail de assinatura concluída (não bloqueante):", emailError);
+        // Erros de e-mail são não bloqueantes - a assinatura foi concluída com sucesso
+        const errorMessage = emailError instanceof Error ? emailError.message : String(emailError);
+        const isCorsError = errorMessage.includes("CORS") || errorMessage.includes("Failed to fetch");
+        
+        if (isCorsError) {
+          console.warn("⚠️ Erro de CORS ao enviar e-mail (não crítico - assinatura concluída com sucesso):", errorMessage);
+        } else {
+          console.warn("⚠️ Erro ao enviar e-mail de assinatura concluída (não bloqueante - assinatura concluída com sucesso):", emailError);
+        }
       }
 
       return updated.data() as AssinaturaRecord;
@@ -555,6 +571,51 @@ export const assinaturaService = {
       console.error("Erro ao atualizar URLs:", error);
       // Retorna o record original se falhar
       return record;
+    }
+  },
+
+  // Gerar documentos de assinatura para solicitações aprovadas que não têm documento
+  async generateMissingDocuments(companyId?: string): Promise<{ generated: number; errors: number }> {
+    try {
+      const { additiveRequestService } = await import("./additiveRequestService");
+      
+      // Buscar todas as solicitações aprovadas
+      const allRequests = companyId 
+        ? await additiveRequestService.getAdditiveRequests(companyId)
+        : await additiveRequestService.getAllAdditiveRequests();
+      
+      const approvedRequests = allRequests.filter(r => r.status === "aprovado");
+      
+      let generated = 0;
+      let errors = 0;
+
+      // Para cada solicitação aprovada, verificar se já tem documento de assinatura
+      for (const request of approvedRequests) {
+        if (!request.id || !request.contratoId) continue;
+
+        try {
+          // Verificar se já existe documento de assinatura
+          const existingSignature = await this.getSignature({
+            contratoId: request.contratoId,
+            aditivoId: request.id,
+          });
+
+          // Se não existe, gerar documento
+          if (!existingSignature) {
+            await autoGenerateSignatureDocument(request.id);
+            generated++;
+            console.log(`Documento gerado para solicitação: ${request.protocolo || request.id}`);
+          }
+        } catch (error) {
+          console.error(`Erro ao gerar documento para solicitação ${request.id}:`, error);
+          errors++;
+        }
+      }
+
+      return { generated, errors };
+    } catch (error) {
+      console.error("Erro ao gerar documentos faltantes:", error);
+      throw handleAssinaturaError(error, "generateMissingDocuments");
     }
   },
 };
