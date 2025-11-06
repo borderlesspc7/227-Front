@@ -9,7 +9,7 @@ import {
   doc,
   serverTimestamp,
 } from "firebase/firestore";
-import type { UserRole } from "../utils/rolePermissions";
+import type { UserRole } from "../types/auth";
 import { requirePermission } from "../utils/servicePermissions";
 
 export const unitPriceService = {

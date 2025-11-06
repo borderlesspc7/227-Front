@@ -19,13 +19,10 @@ const SignatureCard: React.FC<SignatureCardProps> = ({
 }) => {
   const [contract, setContract] = useState<Contract | null>(null);
   const [additiveRequest, setAdditiveRequest] = useState<AdditiveRequest | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        setLoading(true);
-
         // Buscar contrato
         if (signature.contratoId) {
           const contractData = await contractService.getContractById(signature.contratoId);
@@ -39,25 +36,25 @@ const SignatureCard: React.FC<SignatureCardProps> = ({
         }
       } catch (error) {
         console.error("Erro ao carregar dados do contrato/aditivo:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
     loadData();
   }, [signature.contratoId, signature.aditivoId]);
 
-  const formatDate = (timestamp: any) => {
+  const formatDate = (timestamp: unknown) => {
     if (!timestamp) return "N/A";
 
     try {
       let date: Date;
-      if (timestamp.toDate) {
+      if (timestamp && typeof timestamp === 'object' && 'toDate' in timestamp && typeof timestamp.toDate === 'function') {
         date = timestamp.toDate();
       } else if (timestamp instanceof Date) {
         date = timestamp;
-      } else {
+      } else if (typeof timestamp === 'string' || typeof timestamp === 'number') {
         date = new Date(timestamp);
+      } else {
+        return "Data inválida";
       }
 
       if (isNaN(date.getTime())) {

@@ -1,6 +1,6 @@
 import { db } from "../lib/firebaseconfig";
 import { collection, getDocs, doc, deleteDoc, updateDoc, query, orderBy, getDoc } from "firebase/firestore";
-import type { UserRole } from "../utils/rolePermissions";
+import type { UserRole } from "../types/auth";
 import { requirePermission } from "../utils/servicePermissions";
 
 export interface User {

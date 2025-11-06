@@ -46,7 +46,6 @@ const ApprovalCard: React.FC<ApprovalCardProps> = ({
   const [modalAction, setModalAction] = useState<
     "approve" | "reject" | "return"
   >("approve");
-  const [showCommentModal, setShowCommentModal] = useState(false);
   const [creatorName, setCreatorName] = useState<string>("");
 
   useEffect(() => {
@@ -137,9 +136,6 @@ const ApprovalCard: React.FC<ApprovalCardProps> = ({
     return request.currentApprovalStep.includes(currentUserDepartment);
   };
 
-  const canComment = () => {
-    return hasPermission("comment_on_approvals");
-  };
 
   const handleActionClick = (action: "approve" | "reject" | "return") => {
     setModalAction(action);
@@ -312,7 +308,10 @@ const ApprovalCard: React.FC<ApprovalCardProps> = ({
           <HasPermission permission="comment_on_approvals">
             <button
               className="approval-card__action-btn approval-card__action-btn--comment"
-              onClick={() => setShowCommentModal(true)}
+              onClick={() => {
+                // TODO: Implementar modal de comentário
+                console.log("Comentar clicado");
+              }}
               disabled={loading}
             >
               <FiMessageSquare />

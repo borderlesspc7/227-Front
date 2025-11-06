@@ -207,6 +207,11 @@ export const pdfService = {
 
       const request = requestDoc.data() as AdditiveRequest;
 
+      // Buscar configuração do workflow para obter nomes das etapas
+      const configRef = doc(db, "workflowConfigs", "default-workflow");
+      const configDoc = await getDoc(configRef);
+      const steps = configDoc.exists() ? (configDoc.data() as any)?.steps || [] : [];
+      
       // Buscar status do workflow
       const workflowRef = doc(db, "workflowStatuses", requestId);
       const workflowDoc = await getDoc(workflowRef);
@@ -226,13 +231,9 @@ export const pdfService = {
             timestamp: action.timestamp?.toDate?.() || new Date(action.timestamp),
           })),
           startedAt: workflowData.startedAt?.toDate?.() || new Date(),
+          totalSteps: workflowData.totalSteps || steps.length || 0,
         };
       }
-
-      // Buscar configuração do workflow para obter nomes das etapas
-      const configRef = doc(db, "workflowConfigs", "default-workflow");
-      const configDoc = await getDoc(configRef);
-      const steps = configDoc.exists() ? (configDoc.data() as any)?.steps || [] : [];
 
       // Gerar PDF usando jsPDF
       const docPdf = new jsPDF({ unit: "pt", format: "a4" });

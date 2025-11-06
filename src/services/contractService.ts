@@ -20,7 +20,7 @@ import {
   type Unsubscribe,
 } from "firebase/firestore";
 import { subscriptionService } from "./subscriptionService";
-import type { UserRole } from "../utils/rolePermissions";
+import type { UserRole } from "../types/auth";
 import { requirePermission } from "../utils/servicePermissions";
 
 export const contractService = {

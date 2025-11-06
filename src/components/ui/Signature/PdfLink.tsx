@@ -13,8 +13,6 @@ interface PdfLinkProps {
 const PdfLink: React.FC<PdfLinkProps> = ({
   url,
   path,
-  contratoId,
-  aditivoId,
   label,
   className = "",
 }) => {

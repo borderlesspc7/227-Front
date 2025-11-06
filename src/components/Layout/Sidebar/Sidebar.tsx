@@ -22,7 +22,7 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ className = "" }) => {
-  const { canAccessRoute, hasPermission } = usePermissions();
+  const { hasPermission } = usePermissions();
   const location = useLocation();
 
   // Determinar o prefixo baseado na rota atual

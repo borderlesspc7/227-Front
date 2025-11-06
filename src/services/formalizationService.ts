@@ -18,7 +18,7 @@ import {
     orderBy,
     serverTimestamp,
 } from "firebase/firestore";
-import type { UserRole } from "../utils/rolePermissions";
+import type { UserRole } from "../types/auth";
 import { requirePermission } from "../utils/servicePermissions";
 
 // Função para converter dados do Firebase para o formato esperado

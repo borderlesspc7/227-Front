@@ -1,7 +1,7 @@
 import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, where, orderBy } from "firebase/firestore";
 import { db } from "../lib/firebaseconfig";
 import type { Item, ItemFormData, UpdateItemData } from "../types/item";
-import type { UserRole } from "../utils/rolePermissions";
+import type { UserRole } from "../types/auth";
 import { requirePermission } from "../utils/servicePermissions";
 
 export const itemService = {

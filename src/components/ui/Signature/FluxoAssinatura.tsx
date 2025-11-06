@@ -65,12 +65,12 @@ const FluxoAssinatura: React.FC<FluxoAssinaturaProps> = ({ aditivo }) => {
     }
   };
 
-  const handleDocumentoGerado = async (recordId: string) => {
+  const handleDocumentoGerado = async () => {
     showSuccess("Documento gerado com sucesso! Agora você pode assinar.");
     await loadData(); // Recarregar para mostrar o painel de assinatura
   };
 
-  const handleAssinaturaConcluida = (url: string) => {
+  const handleAssinaturaConcluida = () => {
     showSuccess("Documento assinado com sucesso!");
     loadData(); // Recarregar para mostrar status atualizado
   };

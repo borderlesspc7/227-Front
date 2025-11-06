@@ -16,7 +16,6 @@ import { CompanyRegisterPage } from "../pages/CompanyRegister/CompanyRegisterPag
 import { ProfilePage } from "../pages/Profile/ProfilePage";
 import { ErrorBoundary } from "../components/ui/ErrorBoundary/ErrorBoundary";
 import { ToastProvider } from "../contexts/toastContext";
-import type { UserRole } from "../types/auth";
 
 export default function AppRoutes() {
   return (
