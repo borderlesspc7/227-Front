@@ -138,11 +138,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = "" }) => {
         <ul className="sidebar__menu">
           {menuItems.map((item) => {
             const Icon = item.icon;
+            // Dashboard deve ser ativo apenas na rota exata, não em sub-rotas
+            const isExactMatch = item.id === "dashboard";
 
             return (
               <li key={item.id} className="sidebar__menu-item">
                 <NavLink
                   to={item.path}
+                  end={isExactMatch}
                   className={({ isActive }) =>
                     `sidebar__menu-link ${isActive ? "sidebar__menu-link--active" : ""
                     }`
