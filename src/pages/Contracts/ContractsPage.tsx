@@ -57,7 +57,7 @@ export const ContractsPage: React.FC = () => {
 
   const handleContractDeleted = async (contractId: string) => {
     try {
-      await contractService.deleteContract(contractId);
+      await contractService.deleteContract(contractId, user?.role);
     } catch (error) {
       console.error("Erro ao deletar contrato:", error);
       throw error;

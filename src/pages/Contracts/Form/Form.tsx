@@ -197,7 +197,8 @@ export const Form: React.FC<FormProps> = ({ onContractSaved, onCancel, contract,
       };
 
       const newContract = await contractService.createContract(
-        contractDataForFirebse
+        contractDataForFirebse,
+        user.role
       );
 
       onContractSaved(newContract);

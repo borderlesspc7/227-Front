@@ -14,9 +14,11 @@
 }
 
 .item-modal__container {
+  padding: 30px;
   background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
   max-width: 500px;
   width: 100%;
   max-height: 90vh;
@@ -120,6 +122,14 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  margin-bottom: 20px;
+}
+
+.item-modal__textarea {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
 }
 
 .item-modal__row {
@@ -134,6 +144,7 @@
   color: #374151;
   text-transform: uppercase;
   letter-spacing: 0.025em;
+  margin-bottom: 10px;
 }
 
 .item-modal__input,
