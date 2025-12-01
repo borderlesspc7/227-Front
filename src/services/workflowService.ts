@@ -71,7 +71,6 @@ export const workflowService = {
       const configRef = doc(db, "workflowConfigs", workflowConfig.id);
       await setDoc(configRef, workflowConfig, { merge: true });
     } catch (error) {
-      console.error("Erro ao configurar workflow padrão:", error);
       throw error;
     }
   },
@@ -147,11 +146,9 @@ export const workflowService = {
           );
         }
       } catch (notificationError) {
-        console.error("Erro ao enviar notificações:", notificationError);
         // Não falhar o workflow por erro de notificação
       }
     } catch (error) {
-      console.error("Erro ao iniciar workflow:", error);
       throw error;
     }
   },
@@ -264,7 +261,6 @@ export const workflowService = {
           const { autoGenerateSignatureDocument } = await import("./assinaturaService");
           await autoGenerateSignatureDocument(requestId);
         } catch (autoGenError) {
-          console.warn("Erro ao gerar documento automaticamente (será possível gerar manualmente):", autoGenError);
           // Não falhar o workflow por erro na geração automática
         }
       }
@@ -303,11 +299,9 @@ export const workflowService = {
           }
         }
       } catch (notificationError) {
-        console.error("Erro ao enviar notificações:", notificationError);
         // Não falhar o workflow por erro de notificação
       }
     } catch (error) {
-      console.error("Erro ao aprovar etapa:", error);
       throw error;
     }
   },
@@ -410,11 +404,9 @@ export const workflowService = {
           );
         }
       } catch (notificationError) {
-        console.error("Erro ao enviar notificações:", notificationError);
         // Não falhar o workflow por erro de notificação
       }
     } catch (error) {
-      console.error("Erro ao rejeitar solicitação:", error);
       throw error;
     }
   },
@@ -544,7 +536,6 @@ export const workflowService = {
             );
           }
         } catch (notificationError) {
-          console.error("Erro ao enviar notificações:", notificationError);
           // Não falhar o workflow por erro de notificação
         }
 
@@ -627,11 +618,9 @@ export const workflowService = {
           );
         }
       } catch (notificationError) {
-        console.error("Erro ao enviar notificações:", notificationError);
         // Não falhar o workflow por erro de notificação
       }
     } catch (error) {
-      console.error("Erro ao devolver para etapa anterior:", error);
       throw error;
     }
   },
@@ -650,7 +639,6 @@ export const workflowService = {
 
       return workflowDoc.data() as WorkflowStatus;
     } catch (error) {
-      console.error("Erro ao obter status do workflow:", error);
       throw error;
     }
   },
@@ -690,7 +678,6 @@ export const workflowService = {
         return currentStep?.department === department;
       });
     } catch (error) {
-      console.error("Erro ao obter solicitações pendentes:", error);
       throw error;
     }
   },
@@ -804,7 +791,6 @@ export const workflowService = {
 
       return stats;
     } catch (error) {
-      console.error("Erro ao obter estatísticas:", error);
       throw error;
     }
   },

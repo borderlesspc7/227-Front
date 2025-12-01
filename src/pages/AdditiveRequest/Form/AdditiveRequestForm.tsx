@@ -52,8 +52,12 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
   const [contracts, setContracts] = useState<
     Array<{ id: string; numeroContrato: string; cliente: string; obra: string }>
   >([]);
-  const [priorityOptions, setPriorityOptions] = useState<Array<{ value: string; label: string }>>([]);
-  const [unitOptions, setUnitOptions] = useState<Array<{ value: string; label: string }>>([]);
+  const [priorityOptions, setPriorityOptions] = useState<
+    Array<{ value: string; label: string }>
+  >([]);
+  const [unitOptions, setUnitOptions] = useState<
+    Array<{ value: string; label: string }>
+  >([]);
   const [availableItems, setAvailableItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -69,7 +73,7 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
     isOpen: false,
     title: "",
     message: "",
-    onConfirm: () => { },
+    onConfirm: () => {},
     loading: false,
   });
 
@@ -90,27 +94,29 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
   useEffect(() => {
     const loadData = async () => {
       try {
-        console.log("Carregando dados...");
-
-        const [contractsFromDB, priorityOpts, unitOpts, itemsFromDB] = await Promise.all([
-          user?.companyId ? contractService.getContracts(user.companyId) : Promise.resolve([]),
-          optionsService.getPriorityOptions(),
-          optionsService.getUnitOptions(),
-          itemService.getActiveItems(),
-        ]);
-
-        console.log("Contratos carregados:", contractsFromDB.length);
-        console.log("Opções de prioridade:", priorityOpts.length);
-        console.log("Opções de unidade:", unitOpts.length);
-        console.log("Itens carregados:", itemsFromDB.length, itemsFromDB);
+        const [contractsFromDB, priorityOpts, unitOpts, itemsFromDB] =
+          await Promise.all([
+            user?.companyId
+              ? contractService.getContracts(user.companyId)
+              : Promise.resolve([]),
+            optionsService.getPriorityOptions(),
+            optionsService.getUnitOptions(),
+            itemService.getActiveItems(),
+          ]);
 
         setContracts(contractsFromDB);
-        setPriorityOptions(priorityOpts.map(opt => ({ value: opt.value, label: opt.label })));
-        setUnitOptions(unitOpts.map(opt => ({ value: opt.value, label: opt.label })));
+        setPriorityOptions(
+          priorityOpts.map((opt) => ({ value: opt.value, label: opt.label }))
+        );
+        setUnitOptions(
+          unitOpts.map((opt) => ({ value: opt.value, label: opt.label }))
+        );
         setAvailableItems(itemsFromDB);
       } catch (error) {
-        console.error("Erro ao carregar dados:", error);
-        showError("Erro ao carregar", "Erro ao carregar dados do formulário. Tente recarregar a página.");
+        showError(
+          "Erro ao carregar",
+          "Erro ao carregar dados do formulário. Tente recarregar a página."
+        );
       }
     };
     // Evita buscar contratos sem companyId; reexecuta quando companyId estiver disponível
@@ -122,11 +128,23 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
   // Observa contratos em tempo real para refletir criações recentes
   useEffect(() => {
     if (!user?.companyId) return;
-    const unsubscribe = contractService.observeContracts(user.companyId, (list) => {
-      setContracts(list.map(c => ({ id: c.id, numeroContrato: c.numeroContrato, cliente: c.cliente, obra: c.obra })));
-    });
+    const unsubscribe = contractService.observeContracts(
+      user.companyId,
+      (list) => {
+        setContracts(
+          list.map((c) => ({
+            id: c.id,
+            numeroContrato: c.numeroContrato,
+            cliente: c.cliente,
+            obra: c.obra,
+          }))
+        );
+      }
+    );
     return () => {
-      try { unsubscribe(); } catch {}
+      try {
+        unsubscribe();
+      } catch {}
     };
   }, [user?.companyId]);
 
@@ -235,7 +253,7 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
   };
 
   const selectItem = (itemId: string) => {
-    const selectedItem = availableItems.find(item => item.id === itemId);
+    const selectedItem = availableItems.find((item) => item.id === itemId);
     if (selectedItem) {
       setFormData((prev) => ({
         ...prev,
@@ -259,8 +277,8 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
   };
 
   const handleItemCreated = (newItem: Item) => {
-    setAvailableItems(prev => [newItem, ...prev]);
-    setFormData(prev => ({
+    setAvailableItems((prev) => [newItem, ...prev]);
+    setFormData((prev) => ({
       ...prev,
       itens: [
         ...prev.itens,
@@ -278,14 +296,17 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
 
   const reloadItems = async () => {
     try {
-      console.log("Recarregando itens...");
       const itemsFromDB = await itemService.getActiveItems();
-      console.log("Itens recarregados:", itemsFromDB);
       setAvailableItems(itemsFromDB);
-      showSuccess("Itens recarregados", `${itemsFromDB.length} item(s) carregado(s) com sucesso.`);
+      showSuccess(
+        "Itens recarregados",
+        `${itemsFromDB.length} item(s) carregado(s) com sucesso.`
+      );
     } catch (error) {
-      console.error("Erro ao recarregar itens:", error);
-      showError("Erro ao recarregar", "Erro ao recarregar itens. Tente novamente.");
+      showError(
+        "Erro ao recarregar",
+        "Erro ao recarregar itens. Tente novamente."
+      );
     }
   };
 
@@ -297,20 +318,20 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
     const newPreviewUrls: string[] = [];
 
     Array.from(files).forEach((file) => {
-      if (file.type.startsWith('image/')) {
+      if (file.type.startsWith("image/")) {
         newImages.push(file);
         const previewUrl = URL.createObjectURL(file);
         newPreviewUrls.push(previewUrl);
       }
     });
 
-    setSelectedImages(prev => [...prev, ...newImages]);
-    setImagePreviewUrls(prev => [...prev, ...newPreviewUrls]);
+    setSelectedImages((prev) => [...prev, ...newImages]);
+    setImagePreviewUrls((prev) => [...prev, ...newPreviewUrls]);
   };
 
   const removeImage = (index: number) => {
-    setSelectedImages(prev => prev.filter((_, i) => i !== index));
-    setImagePreviewUrls(prev => {
+    setSelectedImages((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviewUrls((prev) => {
       URL.revokeObjectURL(prev[index]);
       return prev.filter((_, i) => i !== index);
     });
@@ -341,7 +362,7 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
         isOpen: false,
         title: "",
         message: "",
-        onConfirm: () => { },
+        onConfirm: () => {},
         loading: false,
       });
     }
@@ -398,9 +419,142 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
         "Erro ao salvar",
         errorMessage + ". Tente novamente ou verifique os dados."
       );
-      console.error("Erro ao salvar solicitação:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Função para enviar e-mail via FormSubmit
+  const sendEmailViaFormSubmit = (
+    requestData: AdditiveRequestFormData,
+    protocolo: string
+  ): void => {
+    if (!user?.email) {
+      return;
+    }
+
+    try {
+      // Buscar informações do contrato selecionado
+      const selectedContract = contracts.find(
+        (c) => c.id === formData.contratoId
+      );
+
+      // Formatar dados dos itens
+      const itensText = requestData.itens
+        .map((item, index) => {
+          const valorTotal = item.quantidade * item.precoUnitario;
+          return `
+Item ${index + 1}:
+- Descrição: ${item.descricao || "Não informado"}
+- Quantidade: ${item.quantidade} ${item.unidade || "unid"}
+- Preço Unitário: R$ ${item.precoUnitario.toFixed(2)}
+- Valor Total: R$ ${valorTotal.toFixed(2)}
+${item.observacoes ? `- Observações: ${item.observacoes}` : ""}
+`;
+        })
+        .join("\n");
+
+      // Calcular valor total
+      const valorTotal = requestData.itens.reduce(
+        (total, item) => total + item.quantidade * item.precoUnitario,
+        0
+      );
+
+      // Formatar mensagem do e-mail
+      const emailBody = `
+Nova Solicitação de Aditivo Enviada para Aprovação
+
+Protocolo: ${protocolo}
+Data: ${new Date().toLocaleString("pt-BR")}
+
+INFORMAÇÕES DA SOLICITAÇÃO:
+${
+  selectedContract
+    ? `Contrato: ${selectedContract.numeroContrato} - ${selectedContract.cliente} - ${selectedContract.obra}`
+    : "Contrato não selecionado"
+}
+Prioridade: ${formData.prioridade || "média"}
+
+DESCRIÇÃO:
+${formData.descricao || "Não informado"}
+
+JUSTIFICATIVA:
+${formData.justificativa || "Não informado"}
+
+ITENS DA SOLICITAÇÃO:
+${itensText || "Nenhum item adicionado"}
+
+VALOR TOTAL: R$ ${valorTotal.toFixed(2)}
+
+${
+  requestData.evidencias && requestData.evidencias.length > 0
+    ? `\nEvidências: ${requestData.evidencias.length} arquivo(s) anexado(s)`
+    : ""
+}
+
+---
+Este e-mail foi gerado automaticamente pelo sistema AddControl.
+`;
+
+      // Criar iframe oculto para enviar ao FormSubmit sem redirecionar
+      const iframe = document.createElement("iframe");
+      iframe.name = `formsubmit-${Date.now()}`;
+      iframe.style.display = "none";
+      iframe.style.width = "0";
+      iframe.style.height = "0";
+      iframe.style.border = "none";
+      document.body.appendChild(iframe);
+
+      // Criar formulário oculto para enviar ao FormSubmit
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = `https://formsubmit.co/${user.email}`;
+      form.target = iframe.name; // Enviar para o iframe oculto
+
+      // Adicionar campos ao formulário
+      const subjectInput = document.createElement("input");
+      subjectInput.type = "hidden";
+      subjectInput.name = "_subject";
+      subjectInput.value = `Nova Solicitação de Aditivo - Protocolo: ${protocolo}`;
+      form.appendChild(subjectInput);
+
+      const templateInput = document.createElement("input");
+      templateInput.type = "hidden";
+      templateInput.name = "_template";
+      templateInput.value = "box";
+      form.appendChild(templateInput);
+
+      const messageInput = document.createElement("textarea");
+      messageInput.name = "message";
+      messageInput.value = emailBody;
+      messageInput.style.display = "none";
+      form.appendChild(messageInput);
+
+      const captchaInput = document.createElement("input");
+      captchaInput.type = "hidden";
+      captchaInput.name = "_captcha";
+      captchaInput.value = "false";
+      form.appendChild(captchaInput);
+
+      // Adicionar formulário ao body e submeter
+      document.body.appendChild(form);
+      form.submit();
+
+      // Remover formulário e iframe após um tempo
+      setTimeout(() => {
+        try {
+          if (document.body.contains(form)) {
+            document.body.removeChild(form);
+          }
+          if (document.body.contains(iframe)) {
+            document.body.removeChild(iframe);
+          }
+        } catch (error) {
+          // Silencioso
+        }
+      }, 2000);
+    } catch (error) {
+      // Não bloquear o fluxo se o e-mail falhar
     }
   };
 
@@ -419,6 +573,8 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
         imagens: selectedImages,
       };
 
+      let protocolo = "";
+
       if (request) {
         // Atualizar e enviar para aprovação
         await additiveRequestService.updateAdditiveRequest(
@@ -427,6 +583,7 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
           user?.role
         );
         await additiveRequestService.submitForApproval(request.id!);
+        protocolo = request.protocolo || request.id || "";
         showSuccess(
           "Enviado para aprovação!",
           "A solicitação foi enviada para aprovação com sucesso."
@@ -441,12 +598,18 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
             user?.role
           );
         await additiveRequestService.submitForApproval(createdRequest.id!);
+        protocolo = createdRequest.protocolo;
         setGeneratedProtocol(createdRequest.protocolo);
         setShowProtocol(true);
         showSuccess(
           "Enviado para aprovação!",
           `Solicitação enviada para aprovação! Protocolo: ${createdRequest.protocolo}`
         );
+      }
+
+      // Enviar e-mail via FormSubmit (não bloqueante)
+      if (protocolo) {
+        sendEmailViaFormSubmit(requestData, protocolo);
       }
 
       onSubmit(requestData);
@@ -457,7 +620,6 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
         "Erro ao enviar",
         errorMessage + ". Tente novamente ou verifique os dados."
       );
-      console.error("Erro ao enviar para aprovação:", err);
     } finally {
       setLoading(false);
     }
@@ -518,7 +680,8 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
             </label>
             {contracts.length === 0 && (
               <small className="additive-request-form__hint">
-                Nenhum contrato encontrado para sua empresa. Cadastre um contrato em Contratos.
+                Nenhum contrato encontrado para sua empresa. Cadastre um
+                contrato em Contratos.
               </small>
             )}
             <div style={{ marginTop: 8 }}>
@@ -586,7 +749,9 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
         {/* Seção de Imagens */}
         <div className="additive-request-form__images-section">
           <div className="additive-request-form__images-header">
-            <h3 className="additive-request-form__section-title">Imagens de Evidência</h3>
+            <h3 className="additive-request-form__section-title">
+              Imagens de Evidência
+            </h3>
             <p className="additive-request-form__section-description">
               Adicione imagens que comprovem a necessidade do aditivo
             </p>
@@ -601,8 +766,20 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
               onChange={handleImageUpload}
               className="additive-request-form__file-input"
             />
-            <label htmlFor="image-upload" className="additive-request-form__upload-btn">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <label
+              htmlFor="image-upload"
+              className="additive-request-form__upload-btn"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
                 <circle cx="12" cy="13" r="3" />
               </svg>
@@ -617,7 +794,10 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
               </h4>
               <div className="additive-request-form__image-grid">
                 {imagePreviewUrls.map((url, index) => (
-                  <div key={index} className="additive-request-form__image-item">
+                  <div
+                    key={index}
+                    className="additive-request-form__image-item"
+                  >
                     <img
                       src={url}
                       alt={`Preview ${index + 1}`}
@@ -629,7 +809,16 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
                       className="additive-request-form__remove-image-btn"
                       title="Remover imagem"
                     >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <path d="M18 6L6 18" />
                         <path d="M6 6l12 12" />
                       </svg>
@@ -660,7 +849,8 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
                 </option>
                 {availableItems.map((item) => (
                   <option key={item.id} value={item.id}>
-                    {item.descricao} - R$ {item.precoUnitario.toFixed(2)}/{item.unidade}
+                    {item.descricao} - R$ {item.precoUnitario.toFixed(2)}/
+                    {item.unidade}
                   </option>
                 ))}
               </select>
@@ -676,7 +866,16 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
                   className="additive-request-form__reload-btn"
                   title="Recarregar itens"
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
                     <path d="M21 3v5h-5" />
                     <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
@@ -860,8 +1059,8 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
               {loading
                 ? "Enviando..."
                 : request
-                  ? "Atualizar e Enviar para Aprovação"
-                  : "Criar e Enviar para Aprovação"}
+                ? "Atualizar e Enviar para Aprovação"
+                : "Criar e Enviar para Aprovação"}
             </button>
 
             <button
@@ -872,8 +1071,8 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
               {loading
                 ? "Salvando..."
                 : request
-                  ? "Salvar Rascunho"
-                  : "Salvar como Rascunho"}
+                ? "Salvar Rascunho"
+                : "Salvar como Rascunho"}
             </button>
           </div>
         </div>
@@ -931,9 +1130,17 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
                 status: newContract.status,
               });
               setShowCreateContract(false);
-              setNewContract({ numeroContrato: "", cliente: "", obra: "", status: "ativo" });
+              setNewContract({
+                numeroContrato: "",
+                cliente: "",
+                obra: "",
+                status: "ativo",
+              });
               setFormData((prev) => ({ ...prev, contratoId: created.id }));
-              showSuccess("Contrato criado", `Contrato ${created.numeroContrato} criado.`);
+              showSuccess(
+                "Contrato criado",
+                `Contrato ${created.numeroContrato} criado.`
+              );
             } catch (err: any) {
               setCreateContractError(err?.message || "Falha ao criar contrato");
             } finally {
@@ -948,7 +1155,12 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
                 type="text"
                 className="additive-request-form__input"
                 value={newContract.numeroContrato}
-                onChange={(e) => setNewContract({ ...newContract, numeroContrato: e.target.value })}
+                onChange={(e) =>
+                  setNewContract({
+                    ...newContract,
+                    numeroContrato: e.target.value,
+                  })
+                }
                 required
               />
             </label>
@@ -960,7 +1172,9 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
                 type="text"
                 className="additive-request-form__input"
                 value={newContract.cliente}
-                onChange={(e) => setNewContract({ ...newContract, cliente: e.target.value })}
+                onChange={(e) =>
+                  setNewContract({ ...newContract, cliente: e.target.value })
+                }
                 required
               />
             </label>
@@ -972,7 +1186,9 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
                 type="text"
                 className="additive-request-form__input"
                 value={newContract.obra}
-                onChange={(e) => setNewContract({ ...newContract, obra: e.target.value })}
+                onChange={(e) =>
+                  setNewContract({ ...newContract, obra: e.target.value })
+                }
                 required
               />
             </label>
@@ -983,7 +1199,12 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
               <select
                 className="additive-request-form__select"
                 value={newContract.status}
-                onChange={(e) => setNewContract({ ...newContract, status: e.target.value as any })}
+                onChange={(e) =>
+                  setNewContract({
+                    ...newContract,
+                    status: e.target.value as any,
+                  })
+                }
               >
                 <option value="ativo">Ativo</option>
                 <option value="pendente">Pendente</option>
@@ -992,13 +1213,23 @@ const AdditiveRequestForm: React.FC<AdditiveRequestFormProps> = ({
             </label>
           </div>
           {createContractError && (
-            <div className="additive-request-form__error">{createContractError}</div>
+            <div className="additive-request-form__error">
+              {createContractError}
+            </div>
           )}
           <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-            <button type="button" className="additive-request-form__cancel-btn" onClick={() => setShowCreateContract(false)}>
+            <button
+              type="button"
+              className="additive-request-form__cancel-btn"
+              onClick={() => setShowCreateContract(false)}
+            >
               Cancelar
             </button>
-            <button type="submit" className="additive-request-form__submit-btn" disabled={creatingContract}>
+            <button
+              type="submit"
+              className="additive-request-form__submit-btn"
+              disabled={creatingContract}
+            >
               {creatingContract ? "Criando..." : "Criar"}
             </button>
           </div>

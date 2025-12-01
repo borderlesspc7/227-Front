@@ -35,7 +35,6 @@ export const ContractsPage: React.FC = () => {
   }, [user?.companyId]);
 
   const handleContractSaved = (newContract: Contract) => {
-    console.log("Contrato salvo:", newContract);
     setIsModalOpen(false);
     setEditingContract(null);
   };
@@ -59,7 +58,6 @@ export const ContractsPage: React.FC = () => {
     try {
       await contractService.deleteContract(contractId, user?.role);
     } catch (error) {
-      console.error("Erro ao deletar contrato:", error);
       throw error;
     }
   };

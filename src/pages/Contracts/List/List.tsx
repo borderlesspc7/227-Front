@@ -69,7 +69,6 @@ export const List: React.FC<ListProps> = ({
     try {
       await onContractDeleted(contractId);
     } catch (error) {
-      console.error("Erro ao deletar contrato:", error);
       alert("Erro ao deletar contrato. Tente novamente.");
     } finally {
       setDeletingContractId(null);

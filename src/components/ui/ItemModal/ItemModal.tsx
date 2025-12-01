@@ -138,7 +138,6 @@ const ItemModal: React.FC<ItemModalProps> = ({
         "Erro ao criar item",
         "Erro ao criar o novo item. Tente novamente."
       );
-      console.error("Erro ao criar item:", error);
     } finally {
       setLoading(false);
     }
@@ -161,8 +160,6 @@ const ItemModal: React.FC<ItemModalProps> = ({
 
   if (!isOpen) return null;
 
-  console.log("🖼️ CAMPO DE IMAGEM RENDERIZADO - selectedImage:", selectedImage);
-  console.log("🖼️ imagePreview:", imagePreview);
 
   return (
     <div className="item-modal__backdrop" onClick={handleClose}>
@@ -243,7 +240,6 @@ const ItemModal: React.FC<ItemModalProps> = ({
                   type="file"
                   accept="image/*"
                   onChange={(e) => {
-                    console.log("📸 ARQUIVO SELECIONADO:", e.target.files?.[0]);
                     handleImageChange(e);
                   }}
                   className="item-modal__image-input"

@@ -24,7 +24,7 @@ export default function LoginForm() {
     try {
       await login({ email, password, cnpj: cnpj || undefined });
     } catch (error) {
-      console.error("Login failed:", error);
+      // Silencioso
     } finally {
       setIsLoading(false);
     }

@@ -224,9 +224,7 @@ export const Form: React.FC<FormProps> = ({ onContractSaved, onCancel, contract,
         status: "ativo",
       } as ContractFormData);
 
-      console.log("Contrato salvo com sucesso:", newContract);
     } catch (error) {
-      console.error("Erro ao salvar contrato:", error);
       setSubmitMessage({
         type: "error",
         text: "Erro ao salvar contrato",

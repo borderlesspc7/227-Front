@@ -60,7 +60,6 @@ function handleAssinaturaError(error: unknown, context: string): AssinaturaError
       }
   }
 
-  console.error(`[AssinaturaService] Erro em ${context}:`, error);
   return new AssinaturaError(
     errorObj?.message || "Erro desconhecido",
     errorCode,
@@ -128,7 +127,6 @@ async function getCachedDownloadUrl(path: string): Promise<string> {
   } catch (error) {
     // Se falhar mas tiver cache antigo, tenta usar (mesmo que possa estar expirado)
     if (cached) {
-      console.warn("Erro ao buscar nova URL, tentando usar cache:", error);
       return cached.url;
     }
     throw error;
@@ -159,7 +157,6 @@ export async function autoGenerateSignatureDocument(requestId: string): Promise<
     const requestDoc = await getDoc(additiveRequestRef);
 
     if (!requestDoc.exists()) {
-      console.warn("Aditivo não encontrado para geração automática:", requestId);
       return;
     }
 
@@ -175,7 +172,6 @@ export async function autoGenerateSignatureDocument(requestId: string): Promise<
 
     // Se já existe, não gerar novamente
     if (existingSignature) {
-      console.log("Documento de assinatura já existe para este aditivo:", requestId);
       return;
     }
 
@@ -183,12 +179,10 @@ export async function autoGenerateSignatureDocument(requestId: string): Promise<
     const contract = await contractService.getContractById(contratoId);
 
     if (!contract) {
-      console.warn("Contrato não encontrado para geração automática:", contratoId);
       return;
     }
 
     if (!clienteId) {
-      console.warn("clienteId não encontrado para geração automática:", requestId);
       return;
     }
 
@@ -221,10 +215,7 @@ export async function autoGenerateSignatureDocument(requestId: string): Promise<
       clienteId,
       originalPdfBlob: blob,
     });
-
-    console.log("Documento gerado automaticamente para aditivo aprovado:", requestId);
   } catch (error) {
-    console.error("Erro na geração automática de documento:", error);
     throw error;
   }
 }
@@ -274,48 +265,6 @@ export const assinaturaService = {
         await setDoc(ref, record, { merge: true });
       } catch (saveError) {
         throw handleAssinaturaError(saveError, "initSignatureFlow - save");
-      }
-
-      // Enviar notificação por e-mail de forma não bloqueante
-      try {
-        const { emailService } = await import("./emailService");
-        const { contractService } = await import("./contractService");
-        
-        // Buscar dados do contrato para o e-mail
-        const contract = await contractService.getContractById(contratoId);
-        
-        // Buscar dados do aditivo
-        const additiveRequestRef = doc(collection(db, "additiveRequests"), aditivoId);
-        const requestDoc = await getDoc(additiveRequestRef);
-        const requestData = requestDoc.exists() ? requestDoc.data() : null;
-
-        if (contract && requestData) {
-          const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
-          const userEmail = await emailService.getUserEmail(clienteId);
-          
-          if (userEmail) {
-            await emailService.sendEmail({
-              to: userEmail,
-              type: "signature_pending",
-              data: {
-                protocolo: requestData.protocolo || aditivoId,
-                contractNumber: contract.numeroContrato || contratoId,
-                valorTotal: requestData.valorTotal || 0,
-                actionUrl: `${baseUrl}/dashboard/signatures`,
-              },
-            });
-          }
-        }
-      } catch (emailError) {
-        // Erros de e-mail são não bloqueantes - o documento foi criado com sucesso
-        const errorMessage = emailError instanceof Error ? emailError.message : String(emailError);
-        const isCorsError = errorMessage.includes("CORS") || errorMessage.includes("Failed to fetch");
-        
-        if (isCorsError) {
-          console.warn("⚠️ Erro de CORS ao enviar e-mail (não crítico - documento criado com sucesso):", errorMessage);
-        } else {
-          console.warn("⚠️ Erro ao enviar e-mail de assinatura pendente (não bloqueante - documento criado com sucesso):", emailError);
-        }
       }
 
       return record;
@@ -379,54 +328,6 @@ export const assinaturaService = {
           "NOT_FOUND",
           "Erro ao salvar assinatura. O registro não foi encontrado."
         );
-      }
-
-      // Enviar notificação por e-mail de forma não bloqueante
-      try {
-        const { emailService } = await import("./emailService");
-        const { contractService } = await import("./contractService");
-        
-        // Buscar dados do contrato para o e-mail
-        const contract = await contractService.getContractById(contratoId);
-        
-        // Buscar dados do aditivo
-        const additiveRequestRef = doc(collection(db, "additiveRequests"), aditivoId);
-        const requestDoc = await getDoc(additiveRequestRef);
-        const requestData = requestDoc.exists() ? requestDoc.data() : null;
-
-        if (contract && requestData) {
-          // Buscar o clienteId do registro de assinatura
-          const recordData = updated.data() as AssinaturaRecord;
-          const clienteId = recordData.clienteId;
-          
-          if (clienteId) {
-            const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
-            const userEmail = await emailService.getUserEmail(clienteId);
-            
-            if (userEmail) {
-              await emailService.sendEmail({
-                to: userEmail,
-                type: "signature_completed",
-                data: {
-                  protocolo: requestData.protocolo || aditivoId,
-                  contractNumber: contract.numeroContrato || contratoId,
-                  signatureDate: new Date().toLocaleDateString("pt-BR"),
-                  actionUrl: `${baseUrl}/dashboard/signatures`,
-                },
-              });
-            }
-          }
-        }
-      } catch (emailError) {
-        // Erros de e-mail são não bloqueantes - a assinatura foi concluída com sucesso
-        const errorMessage = emailError instanceof Error ? emailError.message : String(emailError);
-        const isCorsError = errorMessage.includes("CORS") || errorMessage.includes("Failed to fetch");
-        
-        if (isCorsError) {
-          console.warn("⚠️ Erro de CORS ao enviar e-mail (não crítico - assinatura concluída com sucesso):", errorMessage);
-        } else {
-          console.warn("⚠️ Erro ao enviar e-mail de assinatura concluída (não bloqueante - assinatura concluída com sucesso):", emailError);
-        }
       }
 
       return updated.data() as AssinaturaRecord;
@@ -535,7 +436,6 @@ export const assinaturaService = {
       // Tenta recuperar a URL válida do Firebase Storage (com cache)
       return await getCachedDownloadUrl(cleanPath);
     } catch (error) {
-      console.error("Erro ao recuperar URL de download:", error);
       throw new Error("Erro ao recuperar URL do documento");
     }
   },
@@ -568,7 +468,6 @@ export const assinaturaService = {
         ...updatedRecord,
       } as AssinaturaRecord;
     } catch (error) {
-      console.error("Erro ao atualizar URLs:", error);
       // Retorna o record original se falhar
       return record;
     }
@@ -604,17 +503,14 @@ export const assinaturaService = {
           if (!existingSignature) {
             await autoGenerateSignatureDocument(request.id);
             generated++;
-            console.log(`Documento gerado para solicitação: ${request.protocolo || request.id}`);
           }
         } catch (error) {
-          console.error(`Erro ao gerar documento para solicitação ${request.id}:`, error);
           errors++;
         }
       }
 
       return { generated, errors };
     } catch (error) {
-      console.error("Erro ao gerar documentos faltantes:", error);
       throw handleAssinaturaError(error, "generateMissingDocuments");
     }
   },
