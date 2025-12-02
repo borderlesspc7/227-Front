@@ -6,10 +6,12 @@ import PriceModal from "../../components/ui/PriceModal/PriceModal";
 import type { UnitPrice } from "../../types/unitPrice";
 import { unitPriceService } from "../../services/unitPrice";
 import { useToast } from "../../hooks/useToast";
+import { usePermissions } from "../../hooks/usePermissions";
 import "./PricePage.css";
 
 const PricesPage: React.FC = () => {
   const { showError } = useToast();
+  const { hasPermission } = usePermissions();
   const [prices, setPrices] = useState<UnitPrice[]>([]);
   const [editingPrice, setEditingPrice] = useState<UnitPrice | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -107,13 +109,15 @@ const PricesPage: React.FC = () => {
     <div className="prices-page">
       <div className="prices-page__header">
         <h1 className="prices-page__title">Cadastro de Preços Unitários</h1>
-        <button
-          className="prices-page__add-btn"
-          onClick={handleNewPrice}
-          type="button"
-        >
-          Novo Preço Unitário
-        </button>
+        {hasPermission("create_prices") && (
+          <button
+            className="prices-page__add-btn"
+            onClick={handleNewPrice}
+            type="button"
+          >
+            Novo Preço Unitário
+          </button>
+        )}
       </div>
 
       {loading && (

@@ -65,94 +65,78 @@ export const rolePermissions: Record<UserRole, Permission[]> = {
     "view_profile",
     "edit_profile",
   ],
-  diretor: [
-    // Diretor tem acesso quase total, exceto gerenciamento de usuários
+  assistente_obra: [
+    // Assistente Obra: apenas visualização
+    "view_dashboard",
+    "view_additive_requests",
+    "view_contracts",
+    "view_prices",
+    "view_items",
+    "view_formalization",
+    "view_profile",
+    "edit_profile",
+  ],
+  engenheiro_obra: [
+    // Engenheiro Obra: visualizar = sim, lançar = não, aprovar = sim
     "view_dashboard",
     "view_approvals",
-    "view_users",
     "view_contracts",
-    "create_contracts",
-    "edit_contracts",
-    "delete_contracts",
     "view_prices",
-    "create_prices",
-    "edit_prices",
-    "delete_prices",
     "view_additive_requests",
-    "create_additive_requests",
-    "edit_additive_requests",
+    "view_items",
+    "view_formalization",
     "approve_additive_requests",
-    "view_items",
-    "create_items",
-    "edit_items",
-    "delete_items",
-    "view_formalization",
-    "create_formalization",
-    "edit_formalization",
     "comment_on_approvals",
-    "sign_documents",
     "view_profile",
     "edit_profile",
   ],
-  engenheiro: [
-    // Engenheiro pode criar e editar, mas não aprovar ou deletar contratos principais
+  gestor_obra: [
+    // Gestor Obra: visualizar = sim, lançar = não, aprovar = sim
     "view_dashboard",
     "view_approvals",
     "view_contracts",
     "view_prices",
     "view_additive_requests",
-    "create_additive_requests",
-    "edit_additive_requests",
     "view_items",
-    "create_items",
-    "edit_items",
     "view_formalization",
-    "create_formalization",
-    "edit_formalization",
+    "approve_additive_requests",
     "comment_on_approvals",
     "view_profile",
     "edit_profile",
   ],
-  solicitante: [
-    // Solicitante (usuário comum) tem acesso normal a todas funcionalidades principais
+  suprimento_obra: [
+    // Permissões serão definidas
     "view_dashboard",
-    "view_approvals",
-    "view_additive_requests",
-    "create_additive_requests",
-    "edit_additive_requests",
-    "view_contracts",
-    "view_prices",
-    "view_items",
-    "view_formalization",
-    "create_formalization",
-    "comment_on_approvals",
     "view_profile",
     "edit_profile",
   ],
-  suprimento: [
-    // Suprimento gerencia preços e itens
+  supervisor_masterwall: [
+    // Permissões serão definidas
     "view_dashboard",
-    "view_prices",
-    "create_prices",
-    "edit_prices",
-    "delete_prices",
-    "view_items",
-    "create_items",
-    "edit_items",
-    "delete_items",
-    "view_contracts",
-    "view_additive_requests",
-    "view_formalization",
     "view_profile",
     "edit_profile",
   ],
-  cliente: [
-    // Cliente tem dashboard simplificado, aprovações e assinaturas
+  assistente_masterwall: [
+    // Permissões serão definidas
     "view_dashboard",
-    "view_approvals",
-    "view_formalization",
-    "comment_on_approvals",
-    "sign_documents",
+    "view_profile",
+    "edit_profile",
+  ],
+  diretoria_masterwall: [
+    // Permissões serão definidas
+    "view_dashboard",
+    "view_profile",
+    "edit_profile",
+  ],
+  orcamentista_masterwall: [
+    // Permissões serão definidas
+    "view_dashboard",
+    "view_profile",
+    "edit_profile",
+  ],
+  gestor_contratos_masterwall: [
+    // Permissões serão definidas
+    "view_dashboard",
     "view_profile",
     "edit_profile",
   ],

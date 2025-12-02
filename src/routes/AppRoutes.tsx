@@ -25,7 +25,10 @@ export default function AppRoutes() {
           <Routes>
             <Route path={paths.home} element={<LoginPage />} />
             <Route path={paths.login} element={<LoginPage />} />
-            <Route path={paths.registerCompany} element={<CompanyRegisterPage />} />
+            <Route
+              path={paths.registerCompany}
+              element={<CompanyRegisterPage />}
+            />
             <Route
               path={paths.dashboard}
               element={
@@ -34,93 +37,223 @@ export default function AppRoutes() {
                 </ProtectedRoute>
               }
             >
-              <Route 
-                index 
+              <Route
+                index
                 element={
-                  <ProtectedRoute roles={["admin", "diretor", "engenheiro", "solicitante", "suprimento", "cliente"]}>
+                  <ProtectedRoute
+                    roles={[
+                      "admin",
+                      "assistente_obra",
+                      "engenheiro_obra",
+                      "gestor_obra",
+                      "suprimento_obra",
+                      "supervisor_masterwall",
+                      "assistente_masterwall",
+                      "diretoria_masterwall",
+                      "orcamentista_masterwall",
+                      "gestor_contratos_masterwall",
+                    ]}
+                  >
                     <DashboardPage />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="dashboard" 
+              <Route
+                path="dashboard"
                 element={
-                  <ProtectedRoute roles={["admin", "diretor", "engenheiro", "solicitante", "suprimento", "cliente"]}>
+                  <ProtectedRoute
+                    roles={[
+                      "admin",
+                      "assistente_obra",
+                      "engenheiro_obra",
+                      "gestor_obra",
+                      "suprimento_obra",
+                      "supervisor_masterwall",
+                      "assistente_masterwall",
+                      "diretoria_masterwall",
+                      "orcamentista_masterwall",
+                      "gestor_contratos_masterwall",
+                    ]}
+                  >
                     <DashboardPage />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="register-user" 
+              <Route
+                path="register-user"
                 element={
                   <ProtectedRoute roles={["admin"]}>
                     <RegisterPage />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="contracts" 
+              <Route
+                path="contracts"
                 element={
-                  <ProtectedRoute roles={["admin", "diretor", "engenheiro", "solicitante", "suprimento"]}>
+                  <ProtectedRoute
+                    roles={[
+                      "admin",
+                      "assistente_obra",
+                      "engenheiro_obra",
+                      "gestor_obra",
+                      "suprimento_obra",
+                      "supervisor_masterwall",
+                      "assistente_masterwall",
+                      "diretoria_masterwall",
+                      "orcamentista_masterwall",
+                      "gestor_contratos_masterwall",
+                    ]}
+                  >
                     <ContractsPage />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="prices" 
+              <Route
+                path="prices"
                 element={
-                  <ProtectedRoute roles={["admin", "diretor", "engenheiro", "solicitante", "suprimento"]}>
+                  <ProtectedRoute
+                    roles={[
+                      "admin",
+                      "assistente_obra",
+                      "engenheiro_obra",
+                      "gestor_obra",
+                      "suprimento_obra",
+                      "supervisor_masterwall",
+                      "assistente_masterwall",
+                      "diretoria_masterwall",
+                      "orcamentista_masterwall",
+                      "gestor_contratos_masterwall",
+                    ]}
+                  >
                     <PricesPage />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="additive-requests" 
+              <Route
+                path="additive-requests"
                 element={
-                  <ProtectedRoute roles={["admin", "diretor", "engenheiro", "solicitante"]}>
+                  <ProtectedRoute
+                    roles={[
+                      "admin",
+                      "assistente_obra",
+                      "engenheiro_obra",
+                      "gestor_obra",
+                      "suprimento_obra",
+                      "supervisor_masterwall",
+                      "assistente_masterwall",
+                      "diretoria_masterwall",
+                      "orcamentista_masterwall",
+                      "gestor_contratos_masterwall",
+                    ]}
+                  >
                     <AdditiveRequestPage />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="items" 
+              <Route
+                path="items"
                 element={
-                  <ProtectedRoute roles={["admin", "diretor", "engenheiro", "solicitante", "suprimento"]}>
+                  <ProtectedRoute
+                    roles={[
+                      "admin",
+                      "assistente_obra",
+                      "engenheiro_obra",
+                      "gestor_obra",
+                      "suprimento_obra",
+                      "supervisor_masterwall",
+                      "assistente_masterwall",
+                      "diretoria_masterwall",
+                      "orcamentista_masterwall",
+                      "gestor_contratos_masterwall",
+                    ]}
+                  >
                     <ItemsPage />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="approvals" 
+              <Route
+                path="approvals"
                 element={
-                  <ProtectedRoute roles={["admin", "diretor", "solicitante", "cliente"]}>
+                  <ProtectedRoute
+                    roles={[
+                      "admin",
+                      "assistente_obra",
+                      "engenheiro_obra",
+                      "gestor_obra",
+                      "suprimento_obra",
+                      "supervisor_masterwall",
+                      "assistente_masterwall",
+                      "diretoria_masterwall",
+                      "orcamentista_masterwall",
+                      "gestor_contratos_masterwall",
+                    ]}
+                  >
                     <ApprovalsPage />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="formalization" 
+              <Route
+                path="formalization"
                 element={
-                  <ProtectedRoute roles={["admin", "diretor", "engenheiro", "solicitante", "cliente"]}>
+                  <ProtectedRoute
+                    roles={[
+                      "admin",
+                      "assistente_obra",
+                      "engenheiro_obra",
+                      "gestor_obra",
+                      "suprimento_obra",
+                      "supervisor_masterwall",
+                      "assistente_masterwall",
+                      "diretoria_masterwall",
+                      "orcamentista_masterwall",
+                      "gestor_contratos_masterwall",
+                    ]}
+                  >
                     <FormalizationPage />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="signatures" 
+              <Route
+                path="signatures"
                 element={
-                  <ProtectedRoute roles={["admin", "diretor", "engenheiro", "solicitante", "cliente"]}>
+                  <ProtectedRoute
+                    roles={[
+                      "admin",
+                      "assistente_obra",
+                      "engenheiro_obra",
+                      "gestor_obra",
+                      "suprimento_obra",
+                      "supervisor_masterwall",
+                      "assistente_masterwall",
+                      "diretoria_masterwall",
+                      "orcamentista_masterwall",
+                      "gestor_contratos_masterwall",
+                    ]}
+                  >
                     <SignaturesPage />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="profile" 
+              <Route
+                path="profile"
                 element={
-                  <ProtectedRoute roles={["admin", "diretor", "engenheiro", "solicitante", "suprimento", "cliente"]}>
+                  <ProtectedRoute
+                    roles={[
+                      "admin",
+                      "assistente_obra",
+                      "engenheiro_obra",
+                      "gestor_obra",
+                      "suprimento_obra",
+                      "supervisor_masterwall",
+                      "assistente_masterwall",
+                      "diretoria_masterwall",
+                      "orcamentista_masterwall",
+                      "gestor_contratos_masterwall",
+                    ]}
+                  >
                     <ProfilePage />
                   </ProtectedRoute>
-                } 
+                }
               />
             </Route>
             <Route
@@ -133,7 +266,10 @@ export default function AppRoutes() {
             >
               <Route index element={<DashboardPage />} />
               <Route path="dashboard" element={<DashboardPage />} />
-              <Route path={paths.adminRegisterUser} element={<RegisterPage />} />
+              <Route
+                path={paths.adminRegisterUser}
+                element={<RegisterPage />}
+              />
               <Route path="register-user" element={<RegisterPage />} />
               <Route path={paths.adminContracts} element={<ContractsPage />} />
               <Route path={paths.adminPrices} element={<PricesPage />} />
@@ -143,8 +279,14 @@ export default function AppRoutes() {
               />
               <Route path="items" element={<ItemsPage />} />
               <Route path={paths.adminApprovals} element={<ApprovalsPage />} />
-              <Route path={paths.adminFormalization} element={<FormalizationPage />} />
-              <Route path={paths.adminSignatures} element={<SignaturesPage />} />
+              <Route
+                path={paths.adminFormalization}
+                element={<FormalizationPage />}
+              />
+              <Route
+                path={paths.adminSignatures}
+                element={<SignaturesPage />}
+              />
               <Route path={paths.adminProfile} element={<ProfilePage />} />
             </Route>
           </Routes>

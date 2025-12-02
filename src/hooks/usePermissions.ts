@@ -20,11 +20,15 @@ export function usePermissions() {
     canAccessRoute: (routePath: string) => canAccessRoute(role, routePath),
     role,
     isAdmin: role === "admin",
-    isDiretor: role === "diretor",
-    isEngenheiro: role === "engenheiro",
-    isSolicitante: role === "solicitante",
-    isSuprimento: role === "suprimento",
-    isCliente: role === "cliente",
+    isAssistenteObra: role === "assistente_obra",
+    isEngenheiroObra: role === "engenheiro_obra",
+    isGestorObra: role === "gestor_obra",
+    isSuprimentoObra: role === "suprimento_obra",
+    isSupervisorMasterwall: role === "supervisor_masterwall",
+    isAssistenteMasterwall: role === "assistente_masterwall",
+    isDiretoriaMasterwall: role === "diretoria_masterwall",
+    isOrcamentistaMasterwall: role === "orcamentista_masterwall",
+    isGestorContratosMasterwall: role === "gestor_contratos_masterwall",
   };
 }
 

@@ -167,30 +167,40 @@ export const authService = {
 
   async registerForAdmin(credentials: UserRegisterCredentials): Promise<User> {
     try {
-      const firebaseUser = await createUserWithEmailAndPassword(
-        auth,
-        credentials.email,
-        credentials.password
-      );
+      // Criação via app secundário para não afetar a sessão do admin atual
+      const secondaryApp = initializeApp(app.options, "secondary-admin");
+      const secondaryAuth = getAuthFromApp(secondaryApp);
 
-      // Criar usuário sem empresa (para administradores)
-      const userData: User = {
-        uid: firebaseUser.user.uid,
-        email: firebaseUser.user.email ?? credentials.email,
-        displayName: credentials.displayName,
-        createdAt: new Date(),
-        lastLoginAt: new Date(),
-        role: credentials.role,
-        isActive: true,
-      };
+      try {
+        const firebaseUser = await createUserWithEmailAndPassword(
+          secondaryAuth,
+          credentials.email,
+          credentials.password
+        );
 
-      await setDoc(doc(db, "users", firebaseUser.user.uid), {
-        ...userData,
-        createdAt: Timestamp.fromDate(userData.createdAt),
-        lastLoginAt: Timestamp.fromDate(userData.lastLoginAt),
-      });
+        // Criar usuário sem empresa (para administradores)
+        const userData: User = {
+          uid: firebaseUser.user.uid,
+          email: firebaseUser.user.email ?? credentials.email,
+          displayName: credentials.displayName,
+          createdAt: new Date(),
+          lastLoginAt: new Date(),
+          role: credentials.role,
+          isActive: true,
+        };
 
-      return userData;
+        await setDoc(doc(db, "users", firebaseUser.user.uid), {
+          ...userData,
+          createdAt: Timestamp.fromDate(userData.createdAt),
+          lastLoginAt: Timestamp.fromDate(userData.lastLoginAt),
+        });
+
+        return userData;
+      } finally {
+        // Garante que o app secundário seja limpo
+        await secondaryAuth.signOut().catch(() => undefined);
+        await deleteApp(secondaryApp).catch(() => undefined);
+      }
     } catch (error) {
       throw new Error(getFirebaseErrorMessage(error));
     }

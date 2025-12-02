@@ -1,6 +1,7 @@
 import React from "react";
 import type { OSAGroup } from "../../../types/formalization";
 import "./FormalizationList.css";
+import { usePermissions } from "../../../hooks/usePermissions";
 
 interface FormalizationListProps {
     loading: boolean;
@@ -23,6 +24,7 @@ const FormalizationList: React.FC<FormalizationListProps> = ({
     onGenerateDocument,
     onMarkAsFormalized,
 }) => {
+    const { hasPermission } = usePermissions();
     const getStatusColor = (status: OSAGroup["status"]) => {
         switch (status) {
             case "draft":
@@ -127,27 +129,31 @@ const FormalizationList: React.FC<FormalizationListProps> = ({
                                         <circle cx="12" cy="12" r="3" />
                                     </svg>
                                 </button>
-                                <button
-                                    onClick={() => onEdit(group)}
-                                    className="formalization-list__action-btn formalization-list__action-btn--edit"
-                                    title="Editar"
-                                >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                                    </svg>
-                                </button>
-                                <button
-                                    onClick={() => onDelete(group.id)}
-                                    className="formalization-list__action-btn formalization-list__action-btn--delete"
-                                    title="Excluir"
-                                >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M3 6h18" />
-                                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                    </svg>
-                                </button>
+                                {hasPermission("edit_formalization") && (
+                                  <button
+                                      onClick={() => onEdit(group)}
+                                      className="formalization-list__action-btn formalization-list__action-btn--edit"
+                                      title="Editar"
+                                  >
+                                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                      </svg>
+                                  </button>
+                                )}
+                                {hasPermission("edit_formalization") && (
+                                  <button
+                                      onClick={() => onDelete(group.id)}
+                                      className="formalization-list__action-btn formalization-list__action-btn--delete"
+                                      title="Excluir"
+                                  >
+                                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                          <path d="M3 6h18" />
+                                          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                      </svg>
+                                  </button>
+                                )}
                             </div>
                         </div>
 

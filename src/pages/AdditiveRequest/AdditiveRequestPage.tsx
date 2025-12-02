@@ -13,12 +13,14 @@ import { additiveRequestService } from "../../services/additiveRequestService";
 import { workflowService } from "../../services/workflowService";
 import { useToast } from "../../hooks/useToast";
 import { useAuth } from "../../hooks/useAuth";
+import { usePermissions } from "../../hooks/usePermissions";
 import "./AdditiveRequestPage.css";
 import { PlusIcon } from "lucide-react";
 
 const AdditiveRequestPage: React.FC = () => {
   const { showError, showSuccess } = useToast();
   const { user } = useAuth();
+  const { hasPermission } = usePermissions();
 
   const [requests, setRequests] = useState<AdditiveRequest[]>([]);
   const [editingRequest, setEditingRequest] = useState<AdditiveRequest | null>(
@@ -273,14 +275,16 @@ const AdditiveRequestPage: React.FC = () => {
         <h1 className="additive-request-page__title">
           Solicitações de Aditivos / OSAs
         </h1>
-        <button
-          className="additive-request-page__add-btn"
-          onClick={() => setShowForm(true)}
-          type="button"
-        >
-          <PlusIcon className="additive-request-page__add-icon" />
-          Nova Solicitação
-        </button>
+        {hasPermission("create_additive_requests") && (
+          <button
+            className="additive-request-page__add-btn"
+            onClick={() => setShowForm(true)}
+            type="button"
+          >
+            <PlusIcon className="additive-request-page__add-icon" />
+            Nova Solicitação
+          </button>
+        )}
       </div>
 
       {loading && (

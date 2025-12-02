@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "../../../components/ui/Button/Button";
 import { FiPlus, FiEdit, FiTrash2, FiEye } from "react-icons/fi";
 import "./UserList.css";
+import { usePermissions } from "../../../hooks/usePermissions";
 
 interface User {
     id: string;
@@ -16,7 +17,7 @@ interface User {
 interface UserListProps {
     users: User[];
     onUserEdit?: (user: User) => void;
-    onUserDelete?: (userId: string) => void;
+    onUserDelete?: (user: User) => void;
     onNewUser?: () => void;
 }
 
@@ -26,18 +27,11 @@ const UserList: React.FC<UserListProps> = ({
     onUserDelete,
     onNewUser,
 }) => {
-    const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
+    const { hasPermission } = usePermissions();
 
-    const handleDelete = async (userId: string) => {
+    const handleDelete = (user: User) => {
         if (onUserDelete) {
-            setDeletingUserId(userId);
-            try {
-                await onUserDelete(userId);
-            } catch (error) {
-                console.error("Erro ao deletar usuário:", error);
-            } finally {
-                setDeletingUserId(null);
-            }
+            onUserDelete(user);
         }
     };
 
@@ -67,7 +61,7 @@ const UserList: React.FC<UserListProps> = ({
                             Lista de todos os usuários do sistema
                         </p>
                     </div>
-                    {onNewUser && (
+                    {onNewUser && hasPermission("create_users") && (
                         <Button
                             variant="primary"
                             onClick={onNewUser}
@@ -109,7 +103,7 @@ const UserList: React.FC<UserListProps> = ({
                         {users.length} usuário{users.length !== 1 ? 's' : ''} registrado{users.length !== 1 ? 's' : ''}
                     </p>
                 </div>
-                {onNewUser && (
+                {onNewUser && hasPermission("create_users") && (
                     <Button
                         variant="primary"
                         onClick={onNewUser}
@@ -166,7 +160,7 @@ const UserList: React.FC<UserListProps> = ({
                                 <td className="user-list__cell user-list__cell--actions">
                                     <div className="user-list__actions">
                                         <div className="user-list__crud-actions">
-                                            {onUserEdit && (
+                                            {onUserEdit && hasPermission("edit_users") && (
                                                 <button
                                                     type="button"
                                                     onClick={() => onUserEdit(user)}
@@ -176,19 +170,14 @@ const UserList: React.FC<UserListProps> = ({
                                                     <FiEdit />
                                                 </button>
                                             )}
-                                            {onUserDelete && (
+                                            {onUserDelete && hasPermission("delete_users") && (
                                                 <button
                                                     type="button"
-                                                    onClick={() => handleDelete(user.id)}
+                                                    onClick={() => handleDelete(user)}
                                                     className="user-list__action-btn user-list__action-btn--delete"
                                                     title="Excluir usuário"
-                                                    disabled={deletingUserId === user.id}
                                                 >
-                                                    {deletingUserId === user.id ? (
-                                                        <div className="user-list__spinner" />
-                                                    ) : (
-                                                        <FiTrash2 />
-                                                    )}
+                                                    <FiTrash2 />
                                                 </button>
                                             )}
                                         </div>

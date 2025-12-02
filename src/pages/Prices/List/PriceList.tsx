@@ -6,6 +6,7 @@ import type { UnitPrice } from "../../../types/unitPrice";
 import "./PriceList.css";
 import { unitPriceService } from "../../../services/unitPrice";
 import { useToast } from "../../../hooks/useToast";
+import { usePermissions } from "../../../hooks/usePermissions";
 
 interface PriceListProps {
   prices: UnitPrice[];
@@ -15,6 +16,7 @@ interface PriceListProps {
 
 const PriceList: React.FC<PriceListProps> = ({ prices, onEdit, onDelete }) => {
   const { showSuccess, showError } = useToast();
+  const { hasPermission } = usePermissions();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
 
@@ -145,30 +147,34 @@ const PriceList: React.FC<PriceListProps> = ({ prices, onEdit, onDelete }) => {
                 </td>
                 <td className="price-list__cell price-list__cell--actions">
                   <div className="price-list__actions">
-                    <button
-                      onClick={() => handleEdit(price)}
-                      className="price-list__action-btn price-list__action-btn--edit"
-                      title="Editar preço unitário"
-                      disabled={deletingId === price.id}
-                    >
-                      <FiEdit2 size={16} />
-                      <span className="price-list__action-text">Editar</span>
-                    </button>
-                    <button
-                      onClick={() => handleDelete(price.id ?? "", price.codigo)}
-                      className="price-list__action-btn price-list__action-btn--delete"
-                      title="Excluir preço unitário"
-                      disabled={deletingId === price.id}
-                    >
-                      {deletingId === price.id ? (
-                        <div className="price-list__loading-spinner"></div>
-                      ) : (
-                        <FiTrash2 size={16} />
-                      )}
-                      <span className="price-list__action-text">
-                        {deletingId === price.id ? "Excluindo..." : "Excluir"}
-                      </span>
-                    </button>
+                    {hasPermission("edit_prices") && (
+                      <button
+                        onClick={() => handleEdit(price)}
+                        className="price-list__action-btn price-list__action-btn--edit"
+                        title="Editar preço unitário"
+                        disabled={deletingId === price.id}
+                      >
+                        <FiEdit2 size={16} />
+                        <span className="price-list__action-text">Editar</span>
+                      </button>
+                    )}
+                    {hasPermission("delete_prices") && (
+                      <button
+                        onClick={() => handleDelete(price.id ?? "", price.codigo)}
+                        className="price-list__action-btn price-list__action-btn--delete"
+                        title="Excluir preço unitário"
+                        disabled={deletingId === price.id}
+                      >
+                        {deletingId === price.id ? (
+                          <div className="price-list__loading-spinner"></div>
+                        ) : (
+                          <FiTrash2 size={16} />
+                        )}
+                        <span className="price-list__action-text">
+                          {deletingId === price.id ? "Excluindo..." : "Excluir"}
+                        </span>
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>

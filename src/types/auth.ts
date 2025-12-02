@@ -1,10 +1,14 @@
 export type UserRole =
   | "admin"
-  | "solicitante"
-  | "engenheiro"
-  | "suprimento"
-  | "diretor"
-  | "cliente";
+  | "assistente_obra"
+  | "engenheiro_obra"
+  | "gestor_obra"
+  | "suprimento_obra"
+  | "supervisor_masterwall"
+  | "assistente_masterwall"
+  | "diretoria_masterwall"
+  | "orcamentista_masterwall"
+  | "gestor_contratos_masterwall";
 
 export interface User {
   uid: string;

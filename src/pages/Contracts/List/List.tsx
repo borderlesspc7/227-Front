@@ -5,6 +5,7 @@ import "./List.css";
 import type { Contract } from "../../../types/contracts";
 import { Button } from "../../../components/ui/Button/Button";
 import { FiPlus } from "react-icons/fi";
+import { usePermissions } from "../../../hooks/usePermissions";
 
 interface ListProps {
   contracts: Contract[];
@@ -19,6 +20,7 @@ export const List: React.FC<ListProps> = ({
   onContractEdit,
   onNewContract,
 }) => {
+  const { hasPermission } = usePermissions();
   const [deletingContractId, setDeletingContractId] = useState<string | null>(
     null
   );
@@ -134,14 +136,16 @@ export const List: React.FC<ListProps> = ({
             registrado{contracts.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <Button
-          variant="primary"
-          onClick={onNewContract}
-          className="contract-list__add-button"
-        >
-          <FiPlus className="contract-list__add-icon" />
+        {hasPermission("create_contracts") && (
+          <Button
+            variant="primary"
+            onClick={onNewContract}
+            className="contract-list__add-button"
+          >
+            <FiPlus className="contract-list__add-icon" />
           Novo Contrato
         </Button>
+        )}
       </div>
 
       {/* Desktop Table View */}
@@ -207,23 +211,27 @@ export const List: React.FC<ListProps> = ({
                   <div className="contract-list__actions">
                     {/* CRUD Actions */}
                     <div className="contract-list__crud-actions">
-                      <button
-                        type="button"
-                        onClick={() => onContractEdit(contract)}
-                        className="contract-list__action-btn contract-list__action-btn--edit"
-                        title="Editar contrato"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => openDeleteModal(contract)}
-                        className="contract-list__action-btn contract-list__action-btn--delete"
-                        title="Excluir contrato"
-                        disabled={deletingContractId === contract.id}
-                      >
-                        Excluir
-                      </button>
+                      {hasPermission("edit_contracts") && (
+                        <button
+                          type="button"
+                          onClick={() => onContractEdit(contract)}
+                          className="contract-list__action-btn contract-list__action-btn--edit"
+                          title="Editar contrato"
+                        >
+                          Editar
+                        </button>
+                      )}
+                      {hasPermission("delete_contracts") && (
+                        <button
+                          type="button"
+                          onClick={() => openDeleteModal(contract)}
+                          className="contract-list__action-btn contract-list__action-btn--delete"
+                          title="Excluir contrato"
+                          disabled={deletingContractId === contract.id}
+                        >
+                          Excluir
+                        </button>
+                      )}
                     </div>
                   </div>
                 </td>
@@ -299,16 +307,19 @@ export const List: React.FC<ListProps> = ({
                 </svg>
                 Baixar PDF
               </button>
-              <button
-                type="button"
-                onClick={() => onContractEdit(contract)}
-                className="contract-list__card-btn contract-list__card-btn--edit"
-              >
-                Editar
-              </button>
-              <button
-                type="button"
-                onClick={() => openDeleteModal(contract)}
+              {hasPermission("edit_contracts") && (
+                <button
+                  type="button"
+                  onClick={() => onContractEdit(contract)}
+                  className="contract-list__card-btn contract-list__card-btn--edit"
+                >
+                  Editar
+                </button>
+              )}
+              {hasPermission("delete_contracts") && (
+                <button
+                  type="button"
+                  onClick={() => openDeleteModal(contract)}
                 className="contract-list__card-btn contract-list__card-btn--delete"
                 disabled={deletingContractId === contract.id}
               >
@@ -316,6 +327,7 @@ export const List: React.FC<ListProps> = ({
                   ? "Excluindo..."
                   : "Excluir"}
               </button>
+              )}
             </div>
           </div>
         ))}
