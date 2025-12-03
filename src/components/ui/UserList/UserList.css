@@ -218,24 +218,49 @@
   color: #92400e;
 }
 
-.user-list__role-badge--solicitante {
+.user-list__role-badge--assistente_obra {
   background: #dbeafe;
   color: #1e40af;
 }
 
-.user-list__role-badge--engenheiro {
+.user-list__role-badge--engenheiro_obra {
   background: #d1fae5;
   color: #065f46;
 }
 
-.user-list__role-badge--suprimento {
+.user-list__role-badge--gestor_obra {
+  background: #dbeafe;
+  color: #1e3a8a;
+}
+
+.user-list__role-badge--suprimento_obra {
   background: #f3e8ff;
   color: #7c3aed;
 }
 
-.user-list__role-badge--diretor {
+.user-list__role-badge--supervisor_masterwall {
+  background: #fef3c7;
+  color: #78350f;
+}
+
+.user-list__role-badge--assistente_masterwall {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.user-list__role-badge--diretoria_masterwall {
   background: #fce7f3;
   color: #be185d;
+}
+
+.user-list__role-badge--orcamentista_masterwall {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.user-list__role-badge--gestor_contratos_masterwall {
+  background: #fef3c7;
+  color: #92400e;
 }
 
 .user-list__cell--cpf,

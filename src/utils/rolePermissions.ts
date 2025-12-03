@@ -66,9 +66,8 @@ export const rolePermissions: Record<UserRole, Permission[]> = {
     "edit_profile",
   ],
   assistente_obra: [
-    // Assistente Obra: apenas visualização
+    // Assistente Obra: visualizar = sim, lançar = não, aprovar = não
     "view_dashboard",
-    "view_additive_requests",
     "view_contracts",
     "view_prices",
     "view_items",
@@ -79,20 +78,28 @@ export const rolePermissions: Record<UserRole, Permission[]> = {
   engenheiro_obra: [
     // Engenheiro Obra: visualizar = sim, lançar = não, aprovar = sim
     "view_dashboard",
-    "view_approvals",
     "view_contracts",
     "view_prices",
-    "view_additive_requests",
     "view_items",
     "view_formalization",
     "approve_additive_requests",
-    "comment_on_approvals",
     "view_profile",
     "edit_profile",
   ],
   gestor_obra: [
     // Gestor Obra: visualizar = sim, lançar = não, aprovar = sim
     "view_dashboard",
+    "view_contracts",
+    "view_prices",
+    "view_items",
+    "view_formalization",
+    "approve_additive_requests",
+    "view_profile",
+    "edit_profile",
+  ],
+  suprimento_obra: [
+    // Suprimento Obra: visualizar = sim, lançar = não, aprovar = sim
+    "view_dashboard",
     "view_approvals",
     "view_contracts",
     "view_prices",
@@ -104,21 +111,27 @@ export const rolePermissions: Record<UserRole, Permission[]> = {
     "view_profile",
     "edit_profile",
   ],
-  suprimento_obra: [
-    // Permissões serão definidas
-    "view_dashboard",
-    "view_profile",
-    "edit_profile",
-  ],
   supervisor_masterwall: [
-    // Permissões serão definidas
+    // Supervisor Masterwall: visualizar = sim, lançar = sim, aprovar = não
     "view_dashboard",
+    "view_contracts",
+    "view_prices",
+    "view_additive_requests",
+    "create_additive_requests",
+    "edit_additive_requests",
+    "view_items",
+    "view_formalization",
     "view_profile",
     "edit_profile",
   ],
   assistente_masterwall: [
-    // Permissões serão definidas
+    // Assistente Masterwall: visualizar = sim, lançar = não, aprovar = não
     "view_dashboard",
+    "view_contracts",
+    "view_prices",
+    "view_additive_requests",
+    "view_items",
+    "view_formalization",
     "view_profile",
     "edit_profile",
   ],
@@ -156,7 +169,10 @@ export const routePermissions: Record<string, Permission[]> = {
 };
 
 // Função para verificar se um role tem uma permissão específica
-export function hasPermission(role: UserRole | undefined, permission: Permission): boolean {
+export function hasPermission(
+  role: UserRole | undefined,
+  permission: Permission
+): boolean {
   if (!role) return false;
   return rolePermissions[role]?.includes(permission) ?? false;
 }
@@ -180,12 +196,17 @@ export function hasAllPermissions(
 }
 
 // Função para verificar se um role pode acessar uma rota
-export function canAccessRoute(role: UserRole | undefined, routePath: string): boolean {
+export function canAccessRoute(
+  role: UserRole | undefined,
+  routePath: string
+): boolean {
   if (!role) return false;
 
   // Remover prefixo /dashboard ou /admin e normalizar
-  let cleanPath = routePath.replace(/^\/(dashboard|admin)/, "").replace(/^\//, "");
-  
+  let cleanPath = routePath
+    .replace(/^\/(dashboard|admin)/, "")
+    .replace(/^\//, "");
+
   // Se o caminho estiver vazio ou for só "/", considerar como dashboard
   if (!cleanPath || cleanPath === "" || cleanPath === "/") {
     cleanPath = "dashboard";
@@ -205,4 +226,3 @@ export function canAccessRoute(role: UserRole | undefined, routePath: string): b
 
   return hasAnyPermission(role, requiredPermissions);
 }
-

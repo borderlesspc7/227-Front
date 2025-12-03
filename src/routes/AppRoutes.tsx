@@ -135,15 +135,7 @@ export default function AppRoutes() {
                   <ProtectedRoute
                     roles={[
                       "admin",
-                      "assistente_obra",
-                      "engenheiro_obra",
-                      "gestor_obra",
-                      "suprimento_obra",
                       "supervisor_masterwall",
-                      "assistente_masterwall",
-                      "diretoria_masterwall",
-                      "orcamentista_masterwall",
-                      "gestor_contratos_masterwall",
                     ]}
                   >
                     <AdditiveRequestPage />
@@ -177,15 +169,9 @@ export default function AppRoutes() {
                   <ProtectedRoute
                     roles={[
                       "admin",
-                      "assistente_obra",
                       "engenheiro_obra",
                       "gestor_obra",
                       "suprimento_obra",
-                      "supervisor_masterwall",
-                      "assistente_masterwall",
-                      "diretoria_masterwall",
-                      "orcamentista_masterwall",
-                      "gestor_contratos_masterwall",
                     ]}
                   >
                     <ApprovalsPage />
@@ -219,15 +205,9 @@ export default function AppRoutes() {
                   <ProtectedRoute
                     roles={[
                       "admin",
-                      "assistente_obra",
                       "engenheiro_obra",
                       "gestor_obra",
                       "suprimento_obra",
-                      "supervisor_masterwall",
-                      "assistente_masterwall",
-                      "diretoria_masterwall",
-                      "orcamentista_masterwall",
-                      "gestor_contratos_masterwall",
                     ]}
                   >
                     <SignaturesPage />

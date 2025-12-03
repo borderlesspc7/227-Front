@@ -42,7 +42,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = "" }) => {
       label: "Aprovações",
       icon: FiCheck,
       path: `${basePath}/approvals`,
-      requiredPermission: "view_approvals" as const,
+      requiredPermission: "approve_additive_requests" as const,
     },
     {
       id: "register-user",
@@ -70,7 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = "" }) => {
       path: `${basePath}/additive-requests`,
       label: "Solicitações de Aditivos",
       icon: FiPlusCircle,
-      requiredPermission: "view_additive_requests" as const,
+      requiredPermission: "create_additive_requests" as const,
     },
     {
       id: "items",
@@ -91,7 +91,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = "" }) => {
       path: `${basePath}/signatures`,
       label: "Documentos Assinados",
       icon: FiEdit3,
-      requiredPermission: "view_approvals" as const,
+      requiredPermission: "approve_additive_requests" as const,
     },
     {
       id: "profile",

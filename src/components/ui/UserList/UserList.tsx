@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "../../../components/ui/Button/Button";
 import { FiPlus, FiEdit, FiTrash2, FiEye } from "react-icons/fi";
 import "./UserList.css";
 import { usePermissions } from "../../../hooks/usePermissions";
+import { optionsService } from "../../../services/optionsService";
 
 interface User {
     id: string;
@@ -28,6 +29,36 @@ const UserList: React.FC<UserListProps> = ({
     onNewUser,
 }) => {
     const { hasPermission } = usePermissions();
+    const [roleLabels, setRoleLabels] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        const loadRoleLabels = async () => {
+            try {
+                const options = await optionsService.getUserRoleOptions();
+                const labels: Record<string, string> = {};
+                options.forEach(opt => {
+                    labels[opt.value] = opt.label;
+                });
+                setRoleLabels(labels);
+            } catch (error) {
+                console.error("Erro ao carregar labels de roles:", error);
+                // Fallback para labels hardcoded
+                setRoleLabels({
+                    admin: "Administrador",
+                    assistente_obra: "Assistente Obra",
+                    engenheiro_obra: "Engenheiro Obra",
+                    gestor_obra: "Gestor Obra",
+                    suprimento_obra: "Suprimento Obra",
+                    supervisor_masterwall: "Supervisor Masterwall",
+                    assistente_masterwall: "Assistente Masterwall",
+                    diretoria_masterwall: "Diretoria Masterwall",
+                    orcamentista_masterwall: "Orçamentista Masterwall",
+                    gestor_contratos_masterwall: "Gestor Contratos Masterwall",
+                });
+            }
+        };
+        loadRoleLabels();
+    }, []);
 
     const handleDelete = (user: User) => {
         if (onUserDelete) {
@@ -41,14 +72,9 @@ const UserList: React.FC<UserListProps> = ({
     };
 
     const getRoleLabel = (role: string): string => {
-        const roleLabels: Record<string, string> = {
-            admin: "Administrador",
-            solicitante: "Solicitante",
-            engenheiro: "Engenheiro",
-            suprimento: "Suprimentos",
-            diretor: "Diretor",
-        };
-        return roleLabels[role] || role;
+        return roleLabels[role] || role.split('_').map(word => 
+            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        ).join(' ');
     };
 
     if (users.length === 0) {
@@ -123,8 +149,6 @@ const UserList: React.FC<UserListProps> = ({
                             <th>Nome</th>
                             <th>Email</th>
                             <th>Função</th>
-                            <th>CPF</th>
-                            <th>Telefone</th>
                             <th>Cadastrado em</th>
                             <th>Ações</th>
                         </tr>
@@ -147,12 +171,6 @@ const UserList: React.FC<UserListProps> = ({
                                     <span className={`user-list__role-badge user-list__role-badge--${user.role}`}>
                                         {getRoleLabel(user.role)}
                                     </span>
-                                </td>
-                                <td className="user-list__cell user-list__cell--cpf">
-                                    {user.cpf}
-                                </td>
-                                <td className="user-list__cell user-list__cell--phone">
-                                    {user.phone || '-'}
                                 </td>
                                 <td className="user-list__cell user-list__cell--date">
                                     {formatDate(user.createdAt)}
