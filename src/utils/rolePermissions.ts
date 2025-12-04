@@ -136,20 +136,34 @@ export const rolePermissions: Record<UserRole, Permission[]> = {
     "edit_profile",
   ],
   diretoria_masterwall: [
-    // Permissões serão definidas
+    // Diretoria Masterwall: visualizar = sim, lançar = não, aprovar = sim
     "view_dashboard",
+    "view_contracts",
+    "view_prices",
+    "view_items",
+    "view_formalization",
+    "approve_additive_requests",
     "view_profile",
     "edit_profile",
   ],
   orcamentista_masterwall: [
-    // Permissões serão definidas
+    // Orçamentista Masterwall: visualizar = sim, lançar = não, aprovar = sim
     "view_dashboard",
+    "view_contracts",
+    "view_prices",
+    "view_items",
+    "view_formalization",
+    "approve_additive_requests",
     "view_profile",
     "edit_profile",
   ],
   gestor_contratos_masterwall: [
-    // Permissões serão definidas
+    // Gestor Contratos Masterwall: visualizar = sim, lançar = não, aprovar = não
     "view_dashboard",
+    "view_contracts",
+    "view_prices",
+    "view_items",
+    "view_formalization",
     "view_profile",
     "edit_profile",
   ],

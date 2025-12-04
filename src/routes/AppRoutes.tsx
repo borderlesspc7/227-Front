@@ -132,12 +132,7 @@ export default function AppRoutes() {
               <Route
                 path="additive-requests"
                 element={
-                  <ProtectedRoute
-                    roles={[
-                      "admin",
-                      "supervisor_masterwall",
-                    ]}
-                  >
+                  <ProtectedRoute roles={["admin", "supervisor_masterwall"]}>
                     <AdditiveRequestPage />
                   </ProtectedRoute>
                 }
@@ -172,6 +167,8 @@ export default function AppRoutes() {
                       "engenheiro_obra",
                       "gestor_obra",
                       "suprimento_obra",
+                      "diretoria_masterwall",
+                      "orcamentista_masterwall",
                     ]}
                   >
                     <ApprovalsPage />
@@ -208,6 +205,8 @@ export default function AppRoutes() {
                       "engenheiro_obra",
                       "gestor_obra",
                       "suprimento_obra",
+                      "diretoria_masterwall",
+                      "orcamentista_masterwall",
                     ]}
                   >
                     <SignaturesPage />
