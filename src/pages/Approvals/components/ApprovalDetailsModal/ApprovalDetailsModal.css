@@ -1,0 +1,321 @@
+/* ===== MODAL DE DETALHES DA OSA ===== */
+.approval-details-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ===== INFORMAÇÕES PRINCIPAIS ===== */
+.approval-details-modal__main-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.approval-details-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.approval-details-modal__field-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.approval-details-modal__field-label svg {
+  font-size: 1rem;
+  color: #9ca3af;
+}
+
+.approval-details-modal__field-value {
+  font-size: 0.9375rem;
+  color: #1f2937;
+  line-height: 1.6;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+  word-break: break-word;
+}
+
+.approval-details-modal__field-value--empty {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* ===== BADGE DE STATUS ===== */
+.approval-details-modal__status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  width: fit-content;
+}
+
+.approval-details-modal__status-badge--rascunho {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  border: 1px solid #fbbf24;
+}
+
+.approval-details-modal__status-badge--pendente {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e40af;
+  border: 1px solid #3b82f6;
+}
+
+.approval-details-modal__status-badge--aprovado {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #065f46;
+  border: 1px solid #10b981;
+}
+
+.approval-details-modal__status-badge--rejeitado {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #991b1b;
+  border: 1px solid #ef4444;
+}
+
+.approval-details-modal__status-badge--devolvido {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  border: 1px solid #fbbf24;
+}
+
+/* ===== BADGE DE PRIORIDADE ===== */
+.approval-details-modal__priority-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  width: fit-content;
+}
+
+.approval-details-modal__priority-badge--baixa {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #065f46;
+  border: 1px solid #10b981;
+}
+
+.approval-details-modal__priority-badge--media {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  border: 1px solid #fbbf24;
+}
+
+.approval-details-modal__priority-badge--alta {
+  background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+  color: #9a3412;
+  border: 1px solid #f97316;
+}
+
+.approval-details-modal__priority-badge--urgente {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #991b1b;
+  border: 1px solid #ef4444;
+}
+
+/* ===== VALOR TOTAL DESTACADO ===== */
+.approval-details-modal__field-value--total {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 2px solid #86efac;
+  color: #166534;
+  font-weight: 700;
+  font-size: 1.125rem;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  justify-content: center;
+}
+
+/* ===== SEÇÃO DE ITENS ===== */
+.approval-details-modal__items-section {
+  margin-top: 1rem;
+}
+
+.approval-details-modal__items-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.approval-details-modal__items-title svg {
+  color: #667eea;
+}
+
+.approval-details-modal__items-count {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-left: 0.5rem;
+}
+
+.approval-details-modal__items-table {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  background: white;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.approval-details-modal__items-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.5fr;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-bottom: 2px solid #e5e7eb;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #475569;
+}
+
+.approval-details-modal__items-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.5fr;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.2s ease;
+}
+
+.approval-details-modal__items-row:last-child {
+  border-bottom: none;
+}
+
+.approval-details-modal__items-row:hover {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.approval-details-modal__item-cell {
+  color: #1f2937;
+  font-size: 0.9375rem;
+  display: flex;
+  align-items: center;
+}
+
+.approval-details-modal__item-cell--desc {
+  font-weight: 500;
+  color: #374151;
+}
+
+.approval-details-modal__item-cell--qty {
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.approval-details-modal__item-cell--unit {
+  color: #9ca3af;
+  text-transform: lowercase;
+}
+
+.approval-details-modal__item-cell--total {
+  font-weight: 700;
+  color: #059669;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+}
+
+/* ===== AÇÕES DO MODAL ===== */
+.approval-details-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #f1f5f9;
+  margin-top: auto;
+}
+
+.approval-details-modal__close-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(102, 126, 234, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.approval-details-modal__close-btn:hover {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 12px -2px rgba(102, 126, 234, 0.4);
+}
+
+.approval-details-modal__close-btn:active {
+  transform: translateY(0);
+}
+
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 768px) {
+  .approval-details-modal__main-info {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .approval-details-modal__items-header,
+  .approval-details-modal__items-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .approval-details-modal__items-header {
+    display: none;
+  }
+
+  .approval-details-modal__items-row {
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+  }
+
+  .approval-details-modal__item-cell {
+    padding: 0.25rem 0;
+  }
+
+  .approval-details-modal__field-value {
+    min-height: auto;
+  }
+
+  .approval-details-modal__actions {
+    flex-direction: column;
+  }
+
+  .approval-details-modal__close-btn {
+    width: 100%;
+  }
+}
+

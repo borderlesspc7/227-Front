@@ -44,34 +44,58 @@
 /* ===== FILTROS ===== */
 .additive-request-list__filters {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
   margin-bottom: 2rem;
   flex-wrap: wrap;
   align-items: center;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%);
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
 }
 
 .additive-request-list__filter {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  flex-shrink: 0;
 }
 
 .additive-request-list__filter-label {
-  color: #666;
+  color: #495057;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.additive-request-list__filter-label svg {
+  color: #6c757d;
+  font-size: 1rem;
+  flex-shrink: 0;
 }
 
 .additive-request-list__filter-select {
-  padding: 0.5rem 1rem;
-  border: 2px solid #e0e0e0;
+  padding: 0.625rem 1rem;
+  padding-right: 2.5rem;
+  border: 2px solid #dee2e6;
   border-radius: 8px;
   background: white;
   color: #333;
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-width: 120px;
+  min-width: 180px;
+  height: 2.75rem;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 12px;
+  display: flex;
+  align-items: center;
 }
 
 .additive-request-list__filter-select:focus {
@@ -80,20 +104,30 @@
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
+.additive-request-list__filter-select:hover {
+  border-color: #adb5bd;
+}
+
 .additive-request-list__search {
   flex: 1;
-  min-width: 200px;
+  min-width: 280px;
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .additive-request-list__search-input {
   width: 100%;
-  padding: 0.5rem 1rem;
-  border: 2px solid #e0e0e0;
+  padding: 0.625rem 1rem;
+  padding-left: 2.75rem;
+  border: 2px solid #dee2e6;
   border-radius: 8px;
   background: white;
   color: #333;
   font-size: 0.9rem;
   transition: all 0.3s ease;
+  height: 2.75rem;
+  box-sizing: border-box;
 }
 
 .additive-request-list__search-input:focus {
@@ -103,7 +137,22 @@
 }
 
 .additive-request-list__search-input::placeholder {
-  color: #999;
+  color: #adb5bd;
+}
+
+.additive-request-list__search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  font-size: 1.125rem;
+  pointer-events: none;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 /* ===== ESTADOS DE LOADING E ERRO ===== */
@@ -505,15 +554,28 @@
   .additive-request-list__filters {
     flex-direction: column;
     align-items: stretch;
+    gap: 1rem;
+    padding: 1rem;
   }
 
   .additive-request-list__filter {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+  }
+
+  .additive-request-list__filter-label {
+    min-width: 100px;
   }
 
   .additive-request-list__filter-select {
     min-width: auto;
+    flex: 1;
+  }
+
+  .additive-request-list__search {
+    min-width: auto;
+    width: 100%;
   }
 
   .additive-request-list__grid {
