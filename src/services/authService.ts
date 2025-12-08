@@ -17,6 +17,7 @@ import type {
 } from "../types/auth";
 import { subscriptionService } from "./subscriptionService";
 import type { Company } from "../types/subscription";
+import { sendPasswordResetEmail } from "firebase/auth";
 import getFirebaseErrorMessage from "../components/ui/ErrorMessages";
 
 export const authService = {
@@ -31,7 +32,10 @@ export const authService = {
   async login(credentials: LoginCredentials): Promise<User> {
     try {
       // Validação de CNPJ se fornecido
-      if (credentials.cnpj && !subscriptionService.validateCNPJ(credentials.cnpj)) {
+      if (
+        credentials.cnpj &&
+        !subscriptionService.validateCNPJ(credentials.cnpj)
+      ) {
         throw new Error("CNPJ inválido");
       }
 
@@ -53,7 +57,9 @@ export const authService = {
 
       // Verificar se o CNPJ fornecido corresponde ao da empresa do usuário
       if (credentials.cnpj && userData.companyId) {
-        const company = await subscriptionService.getCompanyById(userData.companyId);
+        const company = await subscriptionService.getCompanyById(
+          userData.companyId
+        );
         if (!company || company.cnpj !== credentials.cnpj) {
           throw new Error("CNPJ não corresponde à empresa do usuário");
         }
@@ -81,7 +87,9 @@ export const authService = {
       }
 
       // Verificar se empresa já existe
-      const existingCompany = await subscriptionService.getCompanyByCNPJ(credentials.companyCnpj);
+      const existingCompany = await subscriptionService.getCompanyByCNPJ(
+        credentials.companyCnpj
+      );
       if (existingCompany) {
         throw new Error("Empresa com este CNPJ já está cadastrada");
       }
@@ -221,11 +229,19 @@ export const authService = {
             }
           } catch (error: any) {
             console.error("Erro ao buscar dados do usuário:", error);
-            if (error.code === 'permission-denied') {
-              console.error("⚠️ PERMISSÃO NEGADA: Verifique as regras do Firestore!");
-              console.error("A coleção 'users' precisa permitir leitura para o próprio usuário.");
-              console.error("Configure as regras em: Firebase Console → Firestore Database → Rules");
-              console.error("Veja o arquivo FIREBASE_STORAGE_RULES.md para instruções detalhadas.");
+            if (error.code === "permission-denied") {
+              console.error(
+                "⚠️ PERMISSÃO NEGADA: Verifique as regras do Firestore!"
+              );
+              console.error(
+                "A coleção 'users' precisa permitir leitura para o próprio usuário."
+              );
+              console.error(
+                "Configure as regras em: Firebase Console → Firestore Database → Rules"
+              );
+              console.error(
+                "Veja o arquivo FIREBASE_STORAGE_RULES.md para instruções detalhadas."
+              );
             }
             callback(null);
           }
@@ -246,10 +262,24 @@ export const authService = {
         companyId: companyId,
         updatedAt: Timestamp.now(),
       });
-      console.log("CompanyId atualizado para o usuário:", userId, "CompanyId:", companyId);
+      console.log(
+        "CompanyId atualizado para o usuário:",
+        userId,
+        "CompanyId:",
+        companyId
+      );
     } catch (error) {
       console.error("Erro ao atualizar companyId do usuário:", error);
       throw new Error("Erro ao atualizar companyId do usuário");
+    }
+  },
+
+  async sendPasswordResetEmail(email: string): Promise<void> {
+    try {
+      await sendPasswordResetEmail(auth, email);
+    } catch (error) {
+      const message = getFirebaseErrorMessage(error);
+      throw new Error(message);
     }
   },
 };

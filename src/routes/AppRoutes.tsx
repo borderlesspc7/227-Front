@@ -16,6 +16,7 @@ import { CompanyRegisterPage } from "../pages/CompanyRegister/CompanyRegisterPag
 import { ProfilePage } from "../pages/Profile/ProfilePage";
 import { ErrorBoundary } from "../components/ui/ErrorBoundary/ErrorBoundary";
 import { ToastProvider } from "../contexts/toastContext";
+import ForgotPasswordPage from "../pages/ForgotPassword/ForgotPasswordPage";
 
 export default function AppRoutes() {
   return (
@@ -28,6 +29,10 @@ export default function AppRoutes() {
             <Route
               path={paths.registerCompany}
               element={<CompanyRegisterPage />}
+            />
+            <Route
+              path={paths.forgotPassword}
+              element={<ForgotPasswordPage />}
             />
             <Route
               path={paths.dashboard}

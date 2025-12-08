@@ -7,6 +7,7 @@ import "./LoginForm.css";
 import { useAuth } from "../../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { paths } from "../../../routes/paths";
+import { Link } from "react-router-dom";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -24,7 +25,7 @@ export default function LoginForm() {
     try {
       await login({ email, password, cnpj: cnpj || undefined });
     } catch (error) {
-      // Silencioso
+      console.error("Login error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -33,7 +34,7 @@ export default function LoginForm() {
   useEffect(() => {
     if (user) {
       // Navigate based on user role
-      if (user.role === 'admin') {
+      if (user.role === "admin") {
         navigate(paths.adminRoot, { replace: true });
       } else {
         navigate(paths.dashboard, { replace: true });
@@ -102,9 +103,9 @@ export default function LoginForm() {
           {isLoading ? "Entrando..." : "Entrar"}
         </Button>
 
-        <a href="#" className="login-form__forgot-password">
+        <Link to={paths.forgotPassword} className="login-form__forgot-password">
           Esqueceu sua senha?
-        </a>
+        </Link>
       </form>
     </div>
   );
