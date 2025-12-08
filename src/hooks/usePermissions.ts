@@ -11,6 +11,20 @@ export function usePermissions() {
   const { user } = useAuth();
   const role = user?.role;
 
+  // Cliente é alguém que não tem nenhum dos roles específicos do sistema
+  const isCliente = !role || (
+    role !== "admin" &&
+    role !== "assistente_obra" &&
+    role !== "engenheiro_obra" &&
+    role !== "gestor_obra" &&
+    role !== "suprimento_obra" &&
+    role !== "supervisor_masterwall" &&
+    role !== "assistente_masterwall" &&
+    role !== "diretoria_masterwall" &&
+    role !== "orcamentista_masterwall" &&
+    role !== "gestor_contratos_masterwall"
+  );
+
   return {
     hasPermission: (permission: Permission) => hasPermission(role, permission),
     hasAnyPermission: (permissions: Permission[]) =>
@@ -29,6 +43,7 @@ export function usePermissions() {
     isDiretoriaMasterwall: role === "diretoria_masterwall",
     isOrcamentistaMasterwall: role === "orcamentista_masterwall",
     isGestorContratosMasterwall: role === "gestor_contratos_masterwall",
+    isCliente,
   };
 }
 

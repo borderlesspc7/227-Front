@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
-import { assinaturaService, type AssinaturaRecord } from "../../services/assinaturaService";
+import {
+  assinaturaService,
+  type AssinaturaRecord,
+} from "../../services/assinaturaService";
 import { useToast } from "../../hooks/useToast";
 import { AuthContext } from "../../contexts/authContext";
 import SignaturesList from "./List/SignaturesList";
@@ -10,7 +13,9 @@ const SignaturesPage: React.FC = () => {
   const { user } = useContext(AuthContext) || {};
 
   const [signatures, setSignatures] = useState<AssinaturaRecord[]>([]);
-  const [filteredSignatures, setFilteredSignatures] = useState<AssinaturaRecord[]>([]);
+  const [filteredSignatures, setFilteredSignatures] = useState<
+    AssinaturaRecord[]
+  >([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("todos");
@@ -28,9 +33,12 @@ const SignaturesPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      
-      const params: { clienteId?: string; status?: "Pendente" | "Assinado" | "Recusado" } = {};
-      
+
+      const params: {
+        clienteId?: string;
+        status?: "Pendente" | "Assinado" | "Recusado";
+      } = {};
+
       // Cliente só vê suas próprias assinaturas
       if (user?.uid) {
         params.clienteId = user.uid;
@@ -52,9 +60,7 @@ const SignaturesPage: React.FC = () => {
     let filtered = [...signatures];
 
     if (statusFilter !== "todos") {
-      filtered = filtered.filter(
-        (sig) => sig.status === statusFilter
-      );
+      filtered = filtered.filter((sig) => sig.status === statusFilter);
     }
 
     setFilteredSignatures(filtered);
@@ -72,13 +78,19 @@ const SignaturesPage: React.FC = () => {
     try {
       setGeneratingDocuments(true);
       setError(null);
-      
-      const result = await assinaturaService.generateMissingDocuments(user?.companyId);
-      
+
+      const result = await assinaturaService.generateMissingDocuments(
+        user?.companyId
+      );
+
       if (result.generated > 0) {
         showSuccess(
           "Documentos gerados!",
-          `${result.generated} documento(s) de assinatura foram gerados com sucesso.${result.errors > 0 ? ` ${result.errors} erro(s) ocorreram.` : ""}`
+          `${
+            result.generated
+          } documento(s) de assinatura foram gerados com sucesso.${
+            result.errors > 0 ? ` ${result.errors} erro(s) ocorreram.` : ""
+          }`
         );
         // Recarregar lista após gerar documentos
         await loadSignatures();
@@ -103,7 +115,8 @@ const SignaturesPage: React.FC = () => {
       <div className="signatures-page__header">
         <h1 className="signatures-page__title">Documentos Assinados</h1>
         <div className="signatures-page__actions">
-          {(user?.role === "admin" || user?.role === "diretor") && (
+          {(user?.role === "admin" ||
+            user?.role === "diretoria_masterwall") && (
             <button
               className="signatures-page__generate-btn"
               onClick={handleGenerateMissingDocuments}
@@ -111,14 +124,25 @@ const SignaturesPage: React.FC = () => {
               type="button"
               title="Gerar documentos de assinatura para solicitações aprovadas que ainda não têm documento"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                 <polyline points="14,2 14,8 20,8"></polyline>
                 <line x1="16" y1="13" x2="8" y2="13"></line>
                 <line x1="16" y1="17" x2="8" y2="17"></line>
                 <polyline points="10,9 9,9 8,9"></polyline>
               </svg>
-              {generatingDocuments ? "Gerando..." : "Gerar Documentos Faltantes"}
+              {generatingDocuments
+                ? "Gerando..."
+                : "Gerar Documentos Faltantes"}
             </button>
           )}
           <button
@@ -127,7 +151,16 @@ const SignaturesPage: React.FC = () => {
             disabled={loading}
             type="button"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <polyline points="23 4 23 10 17 10"></polyline>
               <polyline points="1 20 1 14 7 14"></polyline>
               <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
@@ -151,7 +184,10 @@ const SignaturesPage: React.FC = () => {
 
       <div className="signatures-page__filters">
         <div className="signatures-page__filter-group">
-          <label htmlFor="status-filter" className="signatures-page__filter-label">
+          <label
+            htmlFor="status-filter"
+            className="signatures-page__filter-label"
+          >
             Status:
           </label>
           <select
@@ -171,10 +207,12 @@ const SignaturesPage: React.FC = () => {
             Total: {signatures.length}
           </span>
           <span className="signatures-page__stat">
-            Assinados: {signatures.filter(s => s.status === "Assinado").length}
+            Assinados:{" "}
+            {signatures.filter((s) => s.status === "Assinado").length}
           </span>
           <span className="signatures-page__stat">
-            Pendentes: {signatures.filter(s => s.status === "Pendente").length}
+            Pendentes:{" "}
+            {signatures.filter((s) => s.status === "Pendente").length}
           </span>
         </div>
       </div>
@@ -192,4 +230,3 @@ const SignaturesPage: React.FC = () => {
 };
 
 export default SignaturesPage;
-

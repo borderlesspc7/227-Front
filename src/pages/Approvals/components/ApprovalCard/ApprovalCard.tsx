@@ -53,10 +53,13 @@ const ApprovalCard: React.FC<ApprovalCardProps> = ({
     const loadCreator = async () => {
       if (!request?.createdBy) return;
       const user = await userService.getUserById(request.createdBy);
-      if (mounted) setCreatorName(user?.displayName || user?.email || request.createdBy);
+      if (mounted)
+        setCreatorName(user?.displayName || user?.email || request.createdBy);
     };
     void loadCreator();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [request?.createdBy]);
 
   const getPriorityColor = (priority: string): string => {
@@ -135,7 +138,6 @@ const ApprovalCard: React.FC<ApprovalCardProps> = ({
     if (!hasPermission("approve_additive_requests")) return false;
     return request.currentApprovalStep.includes(currentUserDepartment);
   };
-
 
   const handleActionClick = (action: "approve" | "reject" | "return") => {
     setModalAction(action);
@@ -290,7 +292,9 @@ const ApprovalCard: React.FC<ApprovalCardProps> = ({
                   Rejeitar
                 </button>
 
-                <HasRole roles={["admin", "diretor", "engenheiro"]}>
+                <HasRole
+                  roles={["admin", "diretoria_masterwall", "engenheiro_obra"]}
+                >
                   <button
                     className="approval-card__action-btn approval-card__action-btn--return"
                     onClick={() => handleActionClick("return")}

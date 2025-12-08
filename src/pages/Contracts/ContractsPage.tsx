@@ -34,7 +34,7 @@ export const ContractsPage: React.FC = () => {
     return () => unsubscribe();
   }, [user?.companyId]);
 
-  const handleContractSaved = (newContract: Contract) => {
+  const handleContractSaved = (_newContract: Contract) => {
     setIsModalOpen(false);
     setEditingContract(null);
   };

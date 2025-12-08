@@ -91,20 +91,21 @@ const ApprovalsPage: React.FC = () => {
         // Para não-clientes (admin/engenheiro/etc.), a lista da página deve permitir filtrar por qualquer status.
         // Portanto, carregamos TODAS as solicitações da empresa do usuário.
         if (user?.companyId) {
-          const companyRequests = await additiveRequestService.getAdditiveRequests(
-            user.companyId
-          );
+          const companyRequests =
+            await additiveRequestService.getAdditiveRequests(user.companyId);
           listForPage = companyRequests; // inclui aprovadas/rejeitadas/pendentes
           // Se por algum motivo vier vazio (índices/regras), tenta carregar todas
           if (!listForPage || listForPage.length === 0) {
             try {
-              const allRequests = await additiveRequestService.getAllAdditiveRequests();
+              const allRequests =
+                await additiveRequestService.getAllAdditiveRequests();
               if (allRequests.length > 0) listForPage = allRequests;
             } catch {}
           }
         } else {
           // Admin sem companyId: carregar todas as solicitações
-          const allRequests = await additiveRequestService.getAllAdditiveRequests();
+          const allRequests =
+            await additiveRequestService.getAllAdditiveRequests();
           listForPage = allRequests;
         }
       }
@@ -112,9 +113,10 @@ const ApprovalsPage: React.FC = () => {
       // Fallback: se ainda estiver vazio (regras/erro silencioso), tenta ao menos pendentes por departamento
       if (!listForPage || listForPage.length === 0) {
         try {
-          const deptPendings = await workflowService.getPendingRequestsByDepartmentOptimized(
-            currentUserDepartment
-          );
+          const deptPendings =
+            await workflowService.getPendingRequestsByDepartmentOptimized(
+              currentUserDepartment
+            );
           if (deptPendings && deptPendings.length > 0) {
             listForPage = deptPendings;
           }
@@ -317,57 +319,65 @@ const ApprovalsPage: React.FC = () => {
       </div>
 
       {/* Estatísticas - Cliente não vê estatísticas detalhadas */}
-      <HasRole roles={["admin", "diretor", "engenheiro", "solicitante", "suprimento"]}>
+      <HasRole
+        roles={[
+          "admin",
+          "diretoria_masterwall",
+          "engenheiro_obra",
+          "assistente_obra",
+          "suprimento_obra",
+        ]}
+      >
         {departmentStats && (
           <div className="approvals-page__stats">
-          <div className="approvals-page__stat-card">
-            <div className="approvals-page__stat-icon approvals-page__stat-icon--pending">
-              <FiClock />
+            <div className="approvals-page__stat-card">
+              <div className="approvals-page__stat-icon approvals-page__stat-icon--pending">
+                <FiClock />
+              </div>
+              <div className="approvals-page__stat-content">
+                <h3 className="approvals-page__stat-value">
+                  {departmentStats.pending}
+                </h3>
+                <p className="approvals-page__stat-label">Pendentes</p>
+              </div>
             </div>
-            <div className="approvals-page__stat-content">
-              <h3 className="approvals-page__stat-value">
-                {departmentStats.pending}
-              </h3>
-              <p className="approvals-page__stat-label">Pendentes</p>
-            </div>
-          </div>
 
-          <div className="approvals-page__stat-card">
-            <div className="approvals-page__stat-icon approvals-page__stat-icon--approved">
-              <FiCheckCircle />
+            <div className="approvals-page__stat-card">
+              <div className="approvals-page__stat-icon approvals-page__stat-icon--approved">
+                <FiCheckCircle />
+              </div>
+              <div className="approvals-page__stat-content">
+                <h3 className="approvals-page__stat-value">
+                  {departmentStats.approved}
+                </h3>
+                <p className="approvals-page__stat-label">Aprovadas</p>
+              </div>
             </div>
-            <div className="approvals-page__stat-content">
-              <h3 className="approvals-page__stat-value">
-                {departmentStats.approved}
-              </h3>
-              <p className="approvals-page__stat-label">Aprovadas</p>
-            </div>
-          </div>
 
-          <div className="approvals-page__stat-card">
-            <div className="approvals-page__stat-icon approvals-page__stat-icon--rejected">
-              <FiXCircle />
+            <div className="approvals-page__stat-card">
+              <div className="approvals-page__stat-icon approvals-page__stat-icon--rejected">
+                <FiXCircle />
+              </div>
+              <div className="approvals-page__stat-content">
+                <h3 className="approvals-page__stat-value">
+                  {departmentStats.rejected}
+                </h3>
+                <p className="approvals-page__stat-label">Rejeitadas</p>
+              </div>
             </div>
-            <div className="approvals-page__stat-content">
-              <h3 className="approvals-page__stat-value">
-                {departmentStats.rejected}
-              </h3>
-              <p className="approvals-page__stat-label">Rejeitadas</p>
-            </div>
-          </div>
 
-          <div className="approvals-page__stat-card">
-            <div className="approvals-page__stat-icon approvals-page__stat-icon--total">
-              <FiTrendingUp />
-            </div>
-            <div className="approvals-page__stat-content">
-              <h3 className="approvals-page__stat-value">
-                {departmentStats.total}
-              </h3>
-              <p className="approvals-page__stat-label">Total</p>
+            <div className="approvals-page__stat-card">
+              <div className="approvals-page__stat-icon approvals-page__stat-icon--total">
+                <FiTrendingUp />
+              </div>
+              <div className="approvals-page__stat-content">
+                <h3 className="approvals-page__stat-value">
+                  {departmentStats.total}
+                </h3>
+                <p className="approvals-page__stat-label">Total</p>
+              </div>
             </div>
           </div>
-        </div>
         )}
       </HasRole>
 
@@ -385,15 +395,15 @@ const ApprovalsPage: React.FC = () => {
             <FiFileText className="approvals-page__empty-icon" />
             <h3 className="approvals-page__empty-title">
               {filters.search ||
-                filters.status !== "todos" ||
-                filters.priority !== "todos"
+              filters.status !== "todos" ||
+              filters.priority !== "todos"
                 ? "Nenhuma solicitação encontrada"
                 : "Nenhuma solicitação pendente"}
             </h3>
             <p className="approvals-page__empty-text">
               {filters.search ||
-                filters.status !== "todos" ||
-                filters.priority !== "todos"
+              filters.status !== "todos" ||
+              filters.priority !== "todos"
                 ? "Tente ajustar os filtros para encontrar solicitações."
                 : "Não há solicitações aguardando aprovação no momento."}
             </p>

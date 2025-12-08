@@ -1,7 +1,23 @@
 import { db } from "../lib/firebaseconfig";
-import { collection, doc, getDoc, setDoc, updateDoc, serverTimestamp, getDocs, query, where, type Timestamp, type FieldValue } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  serverTimestamp,
+  getDocs,
+  query,
+  where,
+  type Timestamp,
+  type FieldValue,
+} from "firebase/firestore";
 import { firebaseStorageService } from "./firebaseStorage";
-import type { AdditiveItem, AdditiveRequest, Evidence } from "../types/additiveRequest";
+import type {
+  AdditiveItem,
+  AdditiveRequest,
+  Evidence,
+} from "../types/additiveRequest";
 import { getClientAuditInfo, getDocumentVersion } from "../utils/auditUtils";
 
 // Classe de erro customizada para assinaturas
@@ -18,7 +34,10 @@ export class AssinaturaError extends Error {
 }
 
 // Função para tratar erros e retornar mensagens claras
-function handleAssinaturaError(error: unknown, context: string): AssinaturaError {
+function handleAssinaturaError(
+  error: unknown,
+  _context: string
+): AssinaturaError {
   if (error instanceof AssinaturaError) {
     return error;
   }
@@ -30,30 +49,39 @@ function handleAssinaturaError(error: unknown, context: string): AssinaturaError
   // Mensagens específicas por tipo de erro
   switch (errorCode) {
     case "storage/unauthorized":
-      userMessage = "Você não tem permissão para realizar esta operação. Verifique se está autenticado corretamente.";
+      userMessage =
+        "Você não tem permissão para realizar esta operação. Verifique se está autenticado corretamente.";
       break;
     case "storage/canceled":
       userMessage = "Operação cancelada.";
       break;
     case "storage/quota-exceeded":
-      userMessage = "Limite de armazenamento excedido. Contate o administrador.";
+      userMessage =
+        "Limite de armazenamento excedido. Contate o administrador.";
       break;
     case "permission-denied":
       userMessage = "Permissão negada. Verifique suas permissões no sistema.";
       break;
     case "unauthenticated":
-      userMessage = "Você precisa estar autenticado para realizar esta operação.";
+      userMessage =
+        "Você precisa estar autenticado para realizar esta operação.";
       break;
     default:
       if (errorObj?.message) {
         // Verificar se a mensagem contém palavras-chave específicas
         const message = errorObj.message.toLowerCase();
         if (message.includes("cors") || message.includes("preflight")) {
-          userMessage = "Erro de conexão com o servidor. Verifique as configurações do Firebase Storage.";
+          userMessage =
+            "Erro de conexão com o servidor. Verifique as configurações do Firebase Storage.";
         } else if (message.includes("network") || message.includes("fetch")) {
-          userMessage = "Erro de conexão. Verifique sua internet e tente novamente.";
-        } else if (message.includes("auth") || message.includes("autenticado")) {
-          userMessage = "Erro de autenticação. Por favor, faça login novamente.";
+          userMessage =
+            "Erro de conexão. Verifique sua internet e tente novamente.";
+        } else if (
+          message.includes("auth") ||
+          message.includes("autenticado")
+        ) {
+          userMessage =
+            "Erro de autenticação. Por favor, faça login novamente.";
         } else {
           userMessage = `Erro: ${errorObj.message}`;
         }
@@ -146,14 +174,19 @@ if (typeof window !== "undefined") {
 }
 
 // Função auxiliar para gerar documento automaticamente quando aditivo é aprovado
-export async function autoGenerateSignatureDocument(requestId: string): Promise<void> {
+export async function autoGenerateSignatureDocument(
+  requestId: string
+): Promise<void> {
   try {
     // Importações dinâmicas para evitar dependências circulares
     const { contractService } = await import("./contractService");
     const { pdfService } = await import("./pdfService");
 
     // Buscar dados do aditivo
-    const additiveRequestRef = doc(collection(db, "additiveRequests"), requestId);
+    const additiveRequestRef = doc(
+      collection(db, "additiveRequests"),
+      requestId
+    );
     const requestDoc = await getDoc(additiveRequestRef);
 
     if (!requestDoc.exists()) {
@@ -195,7 +228,9 @@ export async function autoGenerateSignatureDocument(requestId: string): Promise<
       descricao: (requestData.descricao as string) || "",
       justificativa: (requestData.justificativa as string) || "",
       status: (requestData.status as AdditiveRequest["status"]) || "aprovado",
-      prioridade: (requestData.prioridade as "baixa" | "media" | "alta" | "urgente") || "media",
+      prioridade:
+        (requestData.prioridade as "baixa" | "media" | "alta" | "urgente") ||
+        "media",
       itens: (requestData.itens as AdditiveItem[]) || [],
       valorTotal: (requestData.valorTotal as number) || 0,
       evidencias: [] as Evidence[],
@@ -243,7 +278,10 @@ export const assinaturaService = {
 
       let originalUpload;
       try {
-        originalUpload = await firebaseStorageService.uploadPdfBlob(`${basePath}/original.pdf`, originalPdfBlob);
+        originalUpload = await firebaseStorageService.uploadPdfBlob(
+          `${basePath}/original.pdf`,
+          originalPdfBlob
+        );
       } catch (uploadError) {
         throw handleAssinaturaError(uploadError, "initSignatureFlow - upload");
       }
@@ -294,7 +332,10 @@ export const assinaturaService = {
 
       let upload;
       try {
-        upload = await firebaseStorageService.uploadPdfBlob(`${basePath}/assinado.pdf`, signedPdfBlob);
+        upload = await firebaseStorageService.uploadPdfBlob(
+          `${basePath}/assinado.pdf`,
+          signedPdfBlob
+        );
       } catch (uploadError) {
         throw handleAssinaturaError(uploadError, "completeSignature - upload");
       }
@@ -318,7 +359,10 @@ export const assinaturaService = {
       try {
         await updateDoc(ref, updateData);
       } catch (updateError) {
-        throw handleAssinaturaError(updateError, "completeSignature - updateDoc");
+        throw handleAssinaturaError(
+          updateError,
+          "completeSignature - updateDoc"
+        );
       }
 
       const updated = await getDoc(ref);
@@ -339,7 +383,10 @@ export const assinaturaService = {
     }
   },
 
-  async rejectSignature(params: { contratoId: string; aditivoId: string }): Promise<void> {
+  async rejectSignature(params: {
+    contratoId: string;
+    aditivoId: string;
+  }): Promise<void> {
     try {
       const { contratoId, aditivoId } = params;
       const id = signatureDocId(contratoId, aditivoId);
@@ -360,7 +407,10 @@ export const assinaturaService = {
     }
   },
 
-  async reopenAsPending(params: { contratoId: string; aditivoId: string }): Promise<void> {
+  async reopenAsPending(params: {
+    contratoId: string;
+    aditivoId: string;
+  }): Promise<void> {
     try {
       const { contratoId, aditivoId } = params;
       const id = signatureDocId(contratoId, aditivoId);
@@ -382,7 +432,10 @@ export const assinaturaService = {
     }
   },
 
-  async getSignature(params: { contratoId: string; aditivoId: string }): Promise<AssinaturaRecord | undefined> {
+  async getSignature(params: {
+    contratoId: string;
+    aditivoId: string;
+  }): Promise<AssinaturaRecord | undefined> {
     try {
       const { contratoId, aditivoId } = params;
       const id = signatureDocId(contratoId, aditivoId);
@@ -402,7 +455,10 @@ export const assinaturaService = {
     }
   },
 
-  async getAllSignatures(params?: { clienteId?: string; status?: AssinaturaStatus }): Promise<AssinaturaRecord[]> {
+  async getAllSignatures(params?: {
+    clienteId?: string;
+    status?: AssinaturaStatus;
+  }): Promise<AssinaturaRecord[]> {
     try {
       const signaturesRef = collection(db, COLLECTION);
       let q = query(signaturesRef);
@@ -417,7 +473,7 @@ export const assinaturaService = {
 
       try {
         const snapshot = await getDocs(q);
-        return snapshot.docs.map(doc => doc.data() as AssinaturaRecord);
+        return snapshot.docs.map((doc) => doc.data() as AssinaturaRecord);
       } catch (readError) {
         throw handleAssinaturaError(readError, "getAllSignatures");
       }
@@ -432,7 +488,7 @@ export const assinaturaService = {
   async getValidDownloadUrl(path: string): Promise<string> {
     try {
       // Remove barra inicial se existir
-      const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+      const cleanPath = path.startsWith("/") ? path.slice(1) : path;
       // Tenta recuperar a URL válida do Firebase Storage (com cache)
       return await getCachedDownloadUrl(cleanPath);
     } catch (error) {
@@ -440,13 +496,17 @@ export const assinaturaService = {
     }
   },
 
-  async refreshSignatureUrls(record: AssinaturaRecord): Promise<AssinaturaRecord> {
+  async refreshSignatureUrls(
+    record: AssinaturaRecord
+  ): Promise<AssinaturaRecord> {
     try {
       // Remover barra inicial - Firebase Storage não precisa dela
       const basePath = `documentos/${record.contratoId}/aditivos/${record.aditivoId}`;
 
       // Atualizar URL do documento original (com cache)
-      const originalUrl = await getCachedDownloadUrl(`${basePath}/original.pdf`);
+      const originalUrl = await getCachedDownloadUrl(
+        `${basePath}/original.pdf`
+      );
 
       const updatedRecord: Partial<AssinaturaRecord> = {
         documentoOriginalUrl: originalUrl,
@@ -454,7 +514,9 @@ export const assinaturaService = {
 
       // Atualizar URL do documento assinado se existir (com cache)
       if (record.status === "Assinado") {
-        const signedUrl = await getCachedDownloadUrl(`${basePath}/assinado.pdf`);
+        const signedUrl = await getCachedDownloadUrl(
+          `${basePath}/assinado.pdf`
+        );
         updatedRecord.documentoUrl = signedUrl;
       }
 
@@ -474,17 +536,23 @@ export const assinaturaService = {
   },
 
   // Gerar documentos de assinatura para solicitações aprovadas que não têm documento
-  async generateMissingDocuments(companyId?: string): Promise<{ generated: number; errors: number }> {
+  async generateMissingDocuments(
+    companyId?: string
+  ): Promise<{ generated: number; errors: number }> {
     try {
-      const { additiveRequestService } = await import("./additiveRequestService");
-      
+      const { additiveRequestService } = await import(
+        "./additiveRequestService"
+      );
+
       // Buscar todas as solicitações aprovadas
-      const allRequests = companyId 
+      const allRequests = companyId
         ? await additiveRequestService.getAdditiveRequests(companyId)
         : await additiveRequestService.getAllAdditiveRequests();
-      
-      const approvedRequests = allRequests.filter(r => r.status === "aprovado");
-      
+
+      const approvedRequests = allRequests.filter(
+        (r) => r.status === "aprovado"
+      );
+
       let generated = 0;
       let errors = 0;
 
@@ -517,5 +585,3 @@ export const assinaturaService = {
 };
 
 export default assinaturaService;
-
-
